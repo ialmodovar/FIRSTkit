@@ -11,15 +11,24 @@ shinyServer(function(input, output, session) {
 	  )
 	})
 
-	output$page1 <- renderUI({
-	  inclRmd("./page1.Rmd")
+	output$home <- renderUI({
+	  inclRmd("./Rmd/home.Rmd")
 	})
 
-	output$page2 <- renderUI({
-	  inclRmd("./page2.Rmd")
+	output$descriptive <- renderUI({
+	  inclRmd("./Rmd/descriptive-stat.Rmd")
 	})
 
-	output$page3 <- renderUI({
-	  inclRmd("./page3.Rmd")
+	output$OneSample <- renderUI({
+	  inclRmd("./Rmd/One_Sample_inference.Rmd")
+	})
+	output$TwoSample <- renderUI({
+	  inclRmd("./Rmd/Two_Sample_Inference.Rmd")
+	})
+	output$kSample <- renderUI({
+	  inclRmd("./Rmd/Three_Sample_or_more_Inference.Rmd")
+	})
+	output$slr <- renderUI({
+	  inclRmd("./Rmd/SLR.Rmd")
 	})
 })

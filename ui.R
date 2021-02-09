@@ -12,8 +12,11 @@ getdeps <- function() {
 
 shinyUI(
   navbarPage("FIRSTkit",
-    tabPanel("Home", uiOutput("Rmd/introduction")),
+    tabPanel("Home", uiOutput("home")),
     tabPanel("Descriptive Statistics", uiOutput("descriptive")),
-    tabPanel("One-Sample Inference", uiOutput("One_Sample_Inference"), getdeps())
+    tabPanel("One-Sample Inference", uiOutput("OneSample"), getdeps()),
+    tabPanel("Two-Sample Inference", uiOutput("TwoSample"), getdeps()),
+    tabPanel("Three or more-Sample Inference", uiOutput("kSample"), getdeps()),
+    tabPanel("Simple Linear Regression", uiOutput("slr"), getdeps())
   )
 )
