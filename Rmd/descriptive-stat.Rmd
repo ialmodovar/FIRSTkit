@@ -1,0 +1,220 @@
+---
+title: "Descriptive statistics"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library("ggplot2")
+library("plotly")
+library("gridExtra")
+library("rmarkdown")
+library("knitr")
+library("pander")
+library("shinythemes")
+
+knitr::opts_chunk$set(echo = TRUE)
+ extract <- function(text) {
+    text <- gsub(" ", "", text)
+    split <- strsplit(text, ",", fixed = FALSE)[[1]]
+    as.numeric(split)
+ }
+ geo.mean <- function(x){
+   if(any(x < 0)){
+     stop("geometric mean defined for positive values only\n")
+   } else{
+     exp(mean(log(x)))
+   }
+ }
+```
+## Introduction
+The first step in looking at data is to describe the data at hand in some concise way. Input is only for one variable. If you want to perform descriptive statistics in several variables you will need to upload the dataset
+
+
+
+```{r descriptive-stats, echo=FALSE}
+
+  sidebarLayout(
+    sidebarPanel(
+     textInput("x", "Data", value = "", placeholder = "Enter values separated by a comma, e.g. 1, 2, 3, etc."),
+      checkboxInput("upload","Upload datafile",TRUE),         
+                        # Input: Select a file ----
+      fileInput("file1", "Choose CSV File",
+                multiple = TRUE,
+                accept = c("text/csv",
+                           "text/comma-separated-values,text/plain",
+                           ".csv")),
+          # Horizontal line ----
+      tags$hr(),
+      
+      # Input: Checkbox if file has header ----
+      checkboxInput("header", "Header", TRUE),
+      
+      # Input: Select separator ----
+      radioButtons("sep", "Separator",
+                   choices = c(Comma = ",",
+                               Semicolon = ";",
+                               Tab = "\t"),
+                   selected = ","),
+      
+        # Input: Select quotes ----
+      radioButtons("quote", "Quote",
+                   choices = c(None = "",
+                               "Double Quote" = '"',
+                               "Single Quote" = "'"),
+                   selected = '"'),
+           # Input: Select number of rows to display ----
+      radioButtons("disp", "Display",
+                   choices = c(Head = "head",
+                               All = "all"),
+                   selected = "head")),
+  
+    
+                  mainPanel(
+                    
+                    tabsetPanel(type = "tabs",
+                                tabPanel("Data", DT::dataTableOutput('tbl')), # Data 
+                                tabPanel("Location Summary",uiOutput("location")),
+                                tabPanel("Dispersion Summary",uiOutput("dispersion")),
+                                tabPanel("Graphical Display", 
+                                selectInput(inputId = "variable",label ="Variable",choices = c("x")),plotlyOutput("plots")))
+                  )
+  )
+                
+
+ output$tbl <- DT::renderDataTable({
+    # input$file1 will be NULL initially. After the user selects
+    # and uploads a file, head of that data file by default,
+    # or all rows if selected, will be shown.
+    if(input$upload){
+    req(input$file1)
+    
+    df <- read.csv(input$file1$datapath,
+                   header = input$header,
+                   sep = input$sep,
+                   quote = input$quote)
+    } else{
+    x <- extract(input$x)
+    df <- data.frame(x)
+    }
+  if(input$disp == "head") {
+      return(head(df))
+    }
+    else {
+      return(df)
+    }
+    df
+
+ })
+ 
+ output$location <- renderTable({
+     if(input$upload){
+    req(input$file1)
+    
+    df <- read.csv(input$file1$datapath,
+                   header = input$header,
+                   sep = input$sep,
+                   quote = input$quote)
+    } else{
+    x <- extract(input$x)
+    df <- data.frame(x)
+    }
+    ## compute means
+   Means <- apply(df,2,mean)
+   Medians <- apply(df,2,median)
+   geo.Means <- apply(df,2,geo.mean)
+  d <- rbind(Means, Medians, geo.Means)
+  rownames(d) <- c("Sample Means ","Sample Median","Sample Geometric Mean")
+  d
+ },rownames = TRUE)
+ 
+ output$dispersion <- renderTable({
+     if(input$upload){
+    req(input$file1)
+    
+    df <- read.csv(input$file1$datapath,
+                   header = input$header,
+                   sep = input$sep,
+                   quote = input$quote)
+    } else{
+    x <- extract(input$x)
+    df <- data.frame(x)
+    }
+    ## compute means
+   sds <- apply(df,2,sd)
+   vars <- apply(df,2,var)
+   IQRs <- apply(df,2,IQR)
+    mads <- apply(df,2,mad)
+  d <- rbind(sds,vars, IQRs, mads)
+  rownames(d) <- c("Sample SD","Sample Variance","IQR","MAD")
+  d
+ },rownames = TRUE)
+ 
+output$plots <- renderPlotly({
+     if(input$upload){
+    req(input$file1)
+    
+    df <- read.csv(input$file1$datapath,
+                   header = input$header,
+                   sep = input$sep,
+                   quote = input$quote)
+    } else{
+    x <- extract(input$x)
+    df <- data.frame(x)
+    }
+    p <-  ggplot(df, aes(x = !!as.symbol(input$variable)))
+    if (input$variable %in% names(df)) {
+      # numeric
+      p <- p + geom_histogram()+
+        theme_minimal()
+    } else {
+      # categorical
+      p <- p + geom_bar()+
+        theme_minimal()
+    }
+    
+    p
+
+    ggplotly(p)
+  })
+ 
+```
+
+### Measures of Location
+
+1- Arithmetic mean
+
+\[
+\bar{x}= \frac{1}{n}\sum^n_{i=1}x_i
+\]
+2- Median
+\[
+M = X_{(0.5 \times n)}
+\]
+3- Geometric Mean
+\[
+g = \left(\prod^n_{i=1}x_i\right)^{1/n}
+\]
+
+### Measures of dispersion
+
+1- Sample standard deviation
+\[
+s = \sqrt{\frac{1}{n}\sum^n_{i=1}(x_i-\bar{x})^2}
+\]
+2- Sample Variance
+\[
+s^2 = \frac{1}{n}\sum^n_{i=1}(x_i-\bar{x})^2
+\]
+
+3- Interquartile Range
+\[
+IQR = X_{(0.75 n)}- X_{0(0.25 n)}
+\]
+
+4- Median absolute deviation (MAD)
+
+\[
+MAD = \mbox{median}_i(|X_i-\mbox{median}(X_i)|)
+\]
+

@@ -1,15 +1,51 @@
-# Shiny-site
+# First-timers Introductory R-based Statistics Toolkit (FIRSTkit)
 
-Dynamic rmarkdown files are great for one page apps. However, if you have multiple pages/tabs you may prefer to use Shiny with `navbarPage`. This is a proof of concept that you can render rmarkdown files using Knitr within a shiny app without having to break up the file into parts. It works by using Shiny's `renderUI` functionality and evaluating the rmarkdown file in the shinyServer environment.
 
-See discussion on Shiny's GitHub page for background: https://github.com/rstudio/shiny/issues/859
 
-I use this approach in a Shiny app that generates interactive quizzes: https://github.com/vnijs/quizr. More generally, it can be used to create multi-page websites that contain text and interactive elements using Shiny and Knitr.
+# Introduction 
 
-## Alternatives
+Sometimes we just want to do some basic statistical analysis without required any previous programming knowledge. [FIRSTkit](https://github.com/ialmodovar/FIRSTkit) was created with this in mind. The goal of *FIRSTkit* is to allow first time [R](https://www.r-project.org/) users, or users who have low interest in *R*  coding to perform basic statistics.
 
-If you prefer `shinydashboard` there is a minimal working example in the `dashboard` branch of this github repository by <a href="https://github.com/1beb" target="_blank">Brandon Bertelsen</a>
+## FIRSTkit capabilities
 
-## Example
+*FIRSTkit* can do the following topics,
 
-To see this example live go to: https://vnijs.shinyapps.io/shiny-site/
+* **Descriptive statistics**
+
+  + Location summary 
+    + Mean 
+    + Median 
+    + Geometric Mean
+  + Dispersion summary 
+    + Standard Deviation
+    + Variance 
+    + Inter-quartile range
+    + MAD
+  + Univariate graphical display 
+    + box-plot 
+    + histograms
+    + bar graphs
+
+* **Inference statistics**
+
+  + One-Sample Inference 
+    + One-Sample *t* test for a mean
+    + Wilcoxon signed-rank test a location
+    + One-Sample $\chi^2$ Test for the Variance 
+  + Two-Sample Inference
+    + Two-Sample *t* test to Compare Two Means
+    + Wilcoxon-Mann-Whitney to test Compare Two Location 
+    + Two-Sample *F* Test to Compare Two Variances
+  + Three-Sample or more Inference
+    + One-Way Analysis of Variance (ANOVA)
+    + Kruskal-Wallis Rank Sum test
+    + Two-Way ANOVA
+    + Friedman rank sum test
+
+* **Linear Regression**
+
+  + Simple linear regression
+  + Multiple linear regression
+
+If you have any question or want to report to *israel.almodovar@upr.edu* or *maitra@iastate.edu*
+

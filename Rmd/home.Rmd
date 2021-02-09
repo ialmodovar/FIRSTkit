@@ -1,0 +1,65 @@
+---
+title: First Impressions R-based Statistics Toolkit (FIRSTkit)
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library("shiny")
+library("ggplot2")
+library("plotly")
+library("rmarkdown")
+library("knitr")
+library("pander")
+library("shinythemes")
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction 
+
+Sometimes we just want to do some basic statistical analysis without required any previous programming knowledge.  [First Impressions R-based Statistics Toolkit(FIRSTkit)](https://github.com/ialmodovar/FIRSTkit) was created with this in mind. The goal of *FIRSTkit* is to allow first time [R](https://www.r-project.org/) users, or users who have low interest in *R*  coding to perform basic statistics.
+
+## FIRSTkit capabilities
+
+*FIRSTkit* can do the following topics,
+
+* **Descriptive statistics**
+
+  + Location summary 
+    + Mean 
+    + Median 
+    + Geometric Mean
+  + Dispersion summary 
+    + Standard Deviation
+    + Variance 
+    + Inter-quartile range
+    + Median Absolute Deviation (MAD)
+  + Univariate graphical display 
+    + box-plot 
+    + histogram
+    + bargraph
+* **Inference statistics**
+
+  + One-Sample Inference 
+    + One-Sample *t* test for a mean
+    + Wilcoxon signed-rank test a location
+    + One-Sample $\chi^2$ Test for the Variance 
+    + One-Sample proportion test
+  + Two-Sample Inference
+    + Two-Sample *t* test to Compare Two Means
+    + Wilcoxon-Mann-Whitney to test Compare Two Location 
+    + Two-Sample *F* Test to Compare Two Variances
+    + Two-Sample proportion test    
+  + Three-Sample Inference
+    + One-Way Analysis of Variance (ANOVA)
+    + Kruskal-Wallis Rank Sum test
+    + Two-Way ANOVA
+    + Friedman rank sum test
+
+* **Linear Regression**
+
+  + Simple linear regression
+  + Multiple linear regression
+
+If you have any question or want to report to *israel.almodovar@upr.edu* or *maitra@iastate.edu*
+
