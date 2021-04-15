@@ -2,7 +2,7 @@
 
 
 
-# Introduction 
+## Introduction 
 
 Sometimes we just want to do some basic statistical analysis without required any previous programming knowledge. [FIRSTkit](https://github.com/ialmodovar/FIRSTkit) was created with this in mind. The goal of *FIRSTkit* is to allow first time [R](https://www.r-project.org/) users, or users who have low interest in *R*  coding to perform basic statistics.
 
@@ -14,16 +14,20 @@ Sometimes we just want to do some basic statistical analysis without required an
 
   + Location summary 
     + Mean 
+    + Trimmed mean
     + Median 
     + Geometric Mean
   + Dispersion summary 
     + Standard Deviation
+    + Minimum
+    + Maximum
     + Variance 
     + Inter-quartile range
     + MAD
   + Univariate graphical display 
     + box-plot 
     + histograms
+    + density plots
     + bar graphs
 
 * **Inference statistics**

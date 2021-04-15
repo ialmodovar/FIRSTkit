@@ -1,0 +1,36 @@
+\subsection{Inference}
+
+
+
+A chi-square test (Snedecor and Cochran, 1983) can be used to test if the variance of a population is equal to a specified value. This test can be either a two-sided test or a one-sided test. The two-sided version tests against the alternative that the true variance is either less than or greater than the specified value. The one-sided version only tests in one direction. The choice of a two-sided or one-sided test is determined by the problem. For example, if we are testing a new process, we may only be concerned if its variability is greater than the variability of the current process. 
+
+
+\subsection{Two Sample $t$-test}
+The two-sample $t$-test (Snedecor and Cochran, 1989) is used to determine if two population means are equal. A common application is to test if a new process or treatment is superior to a current process or treatment.
+
+There are several variations on this test.
+
+- The data may either be paired or not paired. By paired, we mean that there is a one-to-one correspondence between the values in the two samples. That is, if $X_1, X_2, \ldots, X_n$ and $Y_1, Y_2,\ldots, Y_n$ are the two samples, then $X_i$ corresponds to $Y_i$. For paired samples, the difference $X_i-Y_i$ is usually calculated. For unpaired samples, the sample sizes for the two samples may or may not be equal. The formulas for paired data are somewhat simpler than the formulas for unpaired data.
+
+- The variances of the two samples may be assumed to be equal or unequal. Equal variances yields somewhat simpler formulas, although with computers this is no longer a significant issue.
+
+- In some applications, you may want to adopt a new process or treatment only if it exceeds the current treatment by some threshold. In this case, we can state the null hypothesis in the form that the difference between the two populations means is equal to some constant $\mu_1-\mu_2 =\delta_0$ where the constant is the desired threshold.
+
+
+
+\subsection{Variance}
+
+$H_0: \frac{\sigma^2_1}{\sigma^2_2} = 1$ versus $H_1: \frac{\sigma^2_1}{\sigma^2_2} \neq 1$
+
+\subsection{Proportion}
+
+$H_0: p_1 -p_2 = p_0$ versus $H_1: p_1-p_2 \neq p_0$
+
+
+\subsection{Dependent $t$-test for paired samples}
+
+This test is used when the samples are dependent; that is, when there is only one sample that has been tested twice (repeated measures) or when there are two samples that have been matched or ``paired''. This is an example of a paired difference test. The t statistic is calculated as
+\[
+    t = \frac{\bar{X}-\mu_0}{s_D/\sqrt{n}}
+\]
+where $\bar{X}$ are the average and $s_D$ standard deviation of the differences between all pairs. The pairs are e.g. either one person's pre-test and post-test scores or between-pairs of persons matched into meaningful groups (for instance drawn from the same family or age group: see table). The constant μ0 is zero if we want to test whether the average of the difference is significantly different. The degree of freedom used is $n-1$, where $n$ represents the number of pairs. 

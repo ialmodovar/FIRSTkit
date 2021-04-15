@@ -5,9 +5,12 @@ library("DT")
 library("ggplot2")
 library("htmltools")
 library("htmlwidgets")
-# original -- devtools::install_github("timelyportfolio/functionplotR@139a2bcaea6a2f10c181473efb2bd29b7418b4bb")
-# fixed for shinyapps.io -- devtools::install_github("vnijs/functionplotR")
-library("functionplotR")
+library("plotly")
+library("gridExtra")
+library("pander")
+library("shinythemes")
+library("readxl")
+
 
 encoding <- getOption("shiny.site.encoding", default = "UTF-8")
 
@@ -19,6 +22,12 @@ knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE
 )
+
+
+## case names
+cases.inference <- list("1" = "One-Sample Inference",
+                        "2" = "Two-Sample Inference",
+                        "3" = "Three or more-Sample Inference")
 
 ## function to render .md files to html
 inclMD <- function(path) {
@@ -59,3 +68,25 @@ make_table <- function(dat, width = "50%") {
     table.attr = paste0("class='table table-condensed table-hover' style='width:", width, ";'")
   )
 }
+
+
+extract <- function(text) {
+  text <- gsub(" ", "", text)
+  split <- strsplit(text, ",", fixed = FALSE)[[1]]
+  as.numeric(split)
+}
+geo.mean <- function(x,na.rm=TRUE){
+  x <- x[!is.na(x)]
+  if(any(x < 0)){
+    stop("geometric mean defined for positive values only\n")
+  } else{
+    exp(mean(log(x),na.rm=na.rm))
+  }
+}
+#plotting theme for ggplot2
+.theme<- theme(
+  axis.line = element_line(colour = 'gray', size = .75),
+  panel.background = element_blank(),
+  plot.background = element_blank()
+)
+
