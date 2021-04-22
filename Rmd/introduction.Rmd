@@ -1,0 +1,115 @@
+---
+title: First Impressions R-based Statistics Toolkit (FIRSTkit)
+output: html_document
+runtime: shiny
+fontsize: 30pt
+---
+
+```{r setup, include=FALSE}
+library("shiny")
+library("ggplot2")
+library("plotly")
+library("rmarkdown")
+library("knitr")
+library("pander")
+library("shinythemes")
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction 
+
+
+[**FIRSTkit**](https://github.com/ialmodovar/FIRSTkit) was created to be used as a companion for introductory statistics courses. It does not required any previous knowledge of [**R**](https://www.r-project.org/). This will allow first time  users, or users who have low interest in **R** programming to perform statistical analysis and be successful in their courses.
+
+## FIRSTkit capabilities
+
+User can input their own values for a quick analysis, upload their own datasets. **FIRSTkit** allow to upload *.csv, .txt, .xls, xlsx*.
+
+The following topics are cover in **FIRSTkit**
+
+### **Descriptive statistics**
+
+As a descriptive tools, **FIRSTkit** allow to compute location and dispersion summary. It also allow graphical display to be used in descriptive statistics
+
+  + Location measurements
+    + Mean: The sample mean is defined to be,
+\[
+\bar{x}= \frac{1}{n}\sum^n_{i=1}x_i
+\]
+    + Trimmed Mean: This mean is computed after discarding given parts of a probability distribution or sample at the high and low end, and typically discarding an equal amount of both. This number of points to be discarded is usually given as a percentage of the total number of points, but may also be given as a fixed number of points. 
+
+      1- Find the number of observations ($n$).
+      
+      2- Reorder the $X_i$ from the smallest to the largest.
+      
+      3- Find lower case $p$ proportion trimmed.
+      
+      4- Compute $np$. If $np$ is an integer use $k=np$ and trim $k$ observations at both ends. The remaining observations is $n-2k$. The trimmed mean is defined as,
+\[
+\bar{x}_{k} = \frac{X_{k+1}+X_{k+2}+…+X_{n-k}}{n-2k} 
+\]
+    + Median: Middle value separating the greater and lesser halves of a data set. The sample median is defined as,
+\[
+M = X_{(0.5 \times n)}
+\]
+    + Geometric Mean: The geometric mean of a non-empty data set of (positive) numbers is always at most their arithmetic mean. The geometric mean is defined as,
+\[
+g = \left(\prod^n_{i=1}x_i\right)^{1/n}
+\]
+  + Dispersion summary 
+    + Standard Deviation: is a measure of the amount of variation or dispersion of a set of values. The sample standard deviation is defined as,
+\[
+s = \sqrt{\frac{1}{n}\sum^n_{i=1}(x_i-\bar{x})^2}
+\]
+    + Variance: is the expectation of the squared deviation of a random variable from its mean. Informally, it measures how far a set of numbers is spread out from their average value. 
+\[
+s^2 = \frac{1}{n-1}\sum^n_{i=1}(x_i-\bar{x})^2
+\]
+    + Inter-quartile range (IQR): difference between 75th and 25th percentiles. The IQR is defined as
+\[
+IQR = X_{(0.75 n)}- X_{(0.25 n)}
+\]
+    + Median Absolute Deviation (MAD): Compute the median absolute deviation, i.e., the (lo-/hi-) median of the absolute deviations from the median, and (by default) adjust by a factor for asymptotically normal consistency.
+\[
+MAD = \mbox{median}_i(|X_i-\mbox{median}(X_i)|)
+\]
+    + Range:  the difference between minimum and maximum of all the given arguments.
+\[
+R = \max X_i - \min X_i
+\]
+
+  + Univariate graphical display 
+    + Box-plot 
+    + Histogram
+    + Bargraph
+    + Scatter plot (two variables)
+
+### **Inference statistics**
+
+  + One-Sample Inference 
+    + One-Sample *t* test for a mean
+    + Wilcoxon signed-rank test a location
+    + One-Sample $\chi^2$ Test for the Variance 
+    + One-Sample proportion test
+  + Two-Sample Inference
+    + Two-Sample *t* test to compare Two Means
+    + Wilcoxon-Mann-Whitney to compare Two Location 
+    + Two-Sample *F* Test to compare Two Variances
+    + Two-Sample proportion test    
+  + Three or more Sample Inference
+    + One-Way Analysis of Variance (ANOVA)
+    + Kruskal-Wallis Rank Sum test
+  + $\chi^2$ association test
+
+### **Linear Regression**
+
+  + Simple linear regression
+  + Multiple linear regression
+
+## Who are the authors?
+
+- Israel A. Almodovar-Rivera is an assistant professor in the department of Biostatistics and Epidemiology at University of Puerto Rico-Medical Science Campus. 
+- Ranjan Maitra is a full professor in the Department of Statistics at Iowa State University.
+
+If you have any question or want to report something. Send a message to *israel.almodovar@upr.edu* or *maitra@iastate.edu*.
+

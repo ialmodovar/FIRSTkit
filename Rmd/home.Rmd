@@ -15,51 +15,66 @@ library("shinythemes")
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Introduction 
+### Home 
 
-Sometimes we just want to do some basic statistical analysis without required any previous programming knowledge.  [First Impressions R-based Statistics Toolkit(FIRSTkit)](https://github.com/ialmodovar/FIRSTkit) was created with this in mind. The goal of *FIRSTkit* is to allow first time [R](https://www.r-project.org/) users, or users who have low interest in *R*  coding to perform basic statistics.
+Welcome to **FIRSTkit** a modern web-based software system for introductory statistical analysis.
 
-## FIRSTkit capabilities
+```{r inputs-one-sample, echo=FALSE}
 
-*FIRSTkit* can do the following topics,
 
-* **Descriptive statistics**
+  sidebarPanel(
+    selectInput(
+      inputId = "datachoice",
+      label = "Data (Input some data or upload a file)",
+      choices = c("Input data","Upload file","Upload .xls/.xslx file"),
+      multiple = FALSE,
+      selected = NULL##"Input data"
+    ),
+    hr(),
+    conditionalPanel(
+    condition = "input.datachoice == 'Input data'",
+    textInput("x", "Data", value = "",
+    placeholder = "Enter values separated by a comma with decimals as points, e.g. 1.2, 3.14, 3.1417, etc."),
+    hr(),
+    ),
+    conditionalPanel(
+    condition = "input.datachoice == 'Upload file'",
+    fileInput("file1", "Choose CSV File",
+              multiple = TRUE,
+              accept = c("text/csv",
+                         "text/comma-separated-values,text/plain",
+                         ".csv")),
+    hr(),
+        # Input: Checkbox if file has header ----
+    checkboxInput("header", "Header", TRUE),
+        
+    # Input: Select separator ----
+    radioButtons("sep", "Separator",
+                  choices = c(Comma = ",",
+                              Semicolon = ";",
+                              Tab = "\t"),
+                  selected = ","),
+        
+        # Input: Select quotes ----
+    radioButtons("quote", "Quote",
+                 choices = c(None = "",
+                            "Double Quote" = '"',
+                            "Single Quote" = "'"),
+                selected = '"'),
+    ),
+    conditionalPanel(
+    condition = "input.datachoice == 'Upload .xls/.xslx file'",
+    fileInput('file2', 'Choose .xls/.xlsx file',accept = c(".xlsx",".xls"))
+      ),
 
-  + Location summary 
-    + Mean 
-    + Median 
-    + Geometric Mean
-  + Dispersion summary 
-    + Standard Deviation
-    + Variance 
-    + Inter-quartile range
-    + Median Absolute Deviation (MAD)
-  + Univariate graphical display 
-    + box-plot 
-    + histogram
-    + bargraph
-* **Inference statistics**
+    )
+  
+    
 
-  + One-Sample Inference 
-    + One-Sample *t* test for a mean
-    + Wilcoxon signed-rank test a location
-    + One-Sample $\chi^2$ Test for the Variance 
-    + One-Sample proportion test
-  + Two-Sample Inference
-    + Two-Sample *t* test to Compare Two Means
-    + Wilcoxon-Mann-Whitney to test Compare Two Location 
-    + Two-Sample *F* Test to Compare Two Variances
-    + Two-Sample proportion test    
-  + Three-Sample Inference
-    + One-Way Analysis of Variance (ANOVA)
-    + Kruskal-Wallis Rank Sum test
-    + Two-Way ANOVA
-    + Friedman rank sum test
 
-* **Linear Regression**
+```
 
-  + Simple linear regression
-  + Multiple linear regression
 
-If you have any question or want to report to *israel.almodovar@upr.edu* or *maitra@iastate.edu*
 
+
+If you have any question or want to report something.  Send a message to *israel.almodovar@upr.edu* or *maitra@iastate.edu*.

@@ -27,3 +27,4 @@ tabPanel("Categorical Data Analysis", uiOutput("chis")),
   )
 )
 )
+

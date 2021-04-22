@@ -1,0 +1,257 @@
+---
+title: "Two-Sample Inference"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+  extract <- function(text) {
+    text <- gsub(" ", "", text)
+    split <- strsplit(text, ",", fixed = FALSE)[[1]]
+    as.numeric(split)
+  }
+  ##***************************************
+##
+## @file: inference-one-sample.R
+##
+## Perform one sample inference for the location parameter
+## FIRSTkit allow for one-sample t-test 
+## and the Wilcoxon signed-rank test
+## 
+## Author:
+## Israel A. Almodovar-Rivera, PhD
+## israel.almodovar@upr.edu
+## February 2021
+##**************************************
+
+
+all.t.two.sample.test <- function(x, y, delta0 = 0,alpha = 0.05,...){
+  twosided <- t.test(x = x, y = y,mu = delta0, 
+                     alternative = "two.sided",
+                     conf.level = 1-alpha)
+  oneless <- t.test(x = x, y = y,mu = delta0, 
+                    alternative = "less",
+                    conf.level = 1-alpha)
+  onegreater <- t.test(x = x, y = y,mu = delta0, 
+                       alternative = "greater",
+                       conf.level = 1-alpha)
+  
+  tt <- round(c(twosided$statistic, oneless$statistic, onegreater$statistic),digits=3)
+  pval <- round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits = 3) 
+  
+  ci <- c(paste("(",paste(round(twosided$conf.int[1],digits=3),",",
+                          round(twosided$conf.int[2],digits=3),sep=""),")",sep=""),
+          paste("(",paste(round(oneless$conf.int[1],digits=3),",",
+                          round(oneless$conf.int[2],digits=3),sep=""),")",sep=""),
+          paste("(",paste(round(onegreater$conf.int[1],digits=3),",",
+                          round(onegreater$conf.int[2],digits=3),sep=""),")",sep=""))
+  
+  res <- data.frame(Test = tt,Pval = pval, CI =ci)
+  names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
+  
+  rownames(res) <- c(paste("H_1:mu_1-mu_2 = ",delta0,sep=""),
+                     paste("H_1:mu_1-mu_2 < ",delta0,sep=""),
+                     paste("H_1:mu_1-mu_2 > ",delta0,sep=""))
+  res
+}
+
+
+
+##
+
+all.wilcoxon.two.sample.test <- function(x,  y, delta0 = 0, alpha = 0.05,...){
+  twosided <- wilcox.test(x = x, y= y, mu = delta0, 
+                          alternative = "two.sided",
+                          conf.level = 1-alpha,conf.int = TRUE)
+  oneless <- wilcox.test(x = x, y = y,mu = delta0, 
+                         alternative = "less",
+                         conf.level = 1-alpha,conf.int = TRUE)
+  onegreater <- wilcox.test(x = x, y= y, mu = delta0, 
+                            alternative = "greater",
+                            conf.level = 1-alpha,conf.int = TRUE)
+  
+  tt <- round(c(twosided$statistic, oneless$statistic, onegreater$statistic),digits=3)
+  pval <- round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits = 3) 
+  
+  ci <- c(paste("(",paste(round(twosided$conf.int[1],digits=3),",",
+                          round(twosided$conf.int[2],digits=3),sep=""),")",sep=""),
+          paste("(",paste(round(oneless$conf.int[1],digits=3),",",
+                          round(oneless$conf.int[2],digits=3),sep=""),")",sep=""),
+          paste("(",paste(round(onegreater$conf.int[1],digits=3),",",
+                          round(onegreater$conf.int[2],digits=3),sep=""),")",sep=""))
+  
+  res <- data.frame(Test = tt,Pval = pval, CI =ci)
+  names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
+  
+  rownames(res) <- c(paste("H_1:mu_1-mu_2 = ",delta0,sep=""),
+                     paste("H_1:mu_1-mu_2 < ",delta0,sep=""),
+                     paste("H_1:mu_1-mu_2 > ",delta0,sep=""))
+  res
+}
+
+
+
+```
+
+This *Shiny App* is made with the purpose to be free and educational. It comes without guarantee. You can perform basic statistical inference analysis such as one-sample. The user can perform parametric *t* test as well, $\chi^2$ test for the variance. Note that the argument to perform a one sample test for the variance is in terms of the standard deviation. 
+
+User can also select non-parametric approach. Wilcoxon-signed rank test uses the argument of $\mu_0$, although, this does not represent the mean but rather a location parameter. 
+
+
+
+### Mean
+
+$H_0: \mu_1-\mu_2 = \delta_0$ versus $H_1: \mu_1-\mu_2 \neq \delta_0$
+
+### Variance
+
+$H_0: \frac{\sigma^2_1}{\sigma^2_2} = 1$ versus $H_1: \frac{\sigma^2_1}{\sigma^2_2} \neq 1$
+
+### Proportion
+
+$H_0: p_1 -p_2 = p_0$ versus $H_1: p_1-p_2 \neq p_0$
+
+
+
+
+```{r inputs, echo=FALSE}
+
+  sidebarLayout(
+    sidebarPanel(
+     textInput("x", "Data (Group 1)", value = "", placeholder = "Enter values separated by a comma, e.g. 1, 2, 3, etc."),
+    textInput("y", "Data (Group 2)", value = "", placeholder = "Enter values separated by a comma, e.g. 1, 2, 3, etc."),
+      textInput("alpha","alpha",value="0.05",placeholder="Significance level"),
+     textInput("delta0","Delta 0",value="0",placeholder="Number indicating the true value of the mean "),
+     textInput("R","Ratio of variance",value="1",placeholder="Number indicating the true value of the ratio of variance"),
+  checkboxInput("upload","Upload datafile",TRUE),  
+                        # Input: Select a file ----
+      fileInput("file1", "Choose CSV File",
+                multiple = TRUE,
+                accept = c("text/csv",
+                           "text/comma-separated-values,text/plain",
+                           ".csv")),
+          # Horizontal line ----
+      tags$hr(),
+      
+      # Input: Checkbox if file has header ----
+      checkboxInput("header", "Header", TRUE),
+      
+      # Input: Select separator ----
+      radioButtons("sep", "Separator",
+                   choices = c(Comma = ",",
+                               Semicolon = ";",
+                               Tab = "\t"),
+                   selected = ","),
+      
+        # Input: Select quotes ----
+      radioButtons("quote", "Quote",
+                   choices = c(None = "",
+                               "Double Quote" = '"',
+                               "Single Quote" = "'"),
+                   selected = '"'),
+           # Input: Select number of rows to display ----
+      radioButtons("disp", "Display",
+                   choices = c(Head = "head",
+                               All = "all"),
+                   selected = "head")),
+
+
+                  mainPanel(
+                    
+                    tabsetPanel(type = "tabs",
+                                tabPanel("Data", DT::dataTableOutput('tbldata')), # Data 
+                                tabPanel("Mean Inference",
+                                        br(),
+                                         tags$b("Two Sample t test"),
+                                         uiOutput("mean"),
+                                         br(),
+                                         tags$b("Wilcoxon-Mann-Whitney"),
+                                         uiOutput("loc")),
+                                tabPanel("Variance Inference",uiOutput("variance")),
+                                tabPanel("Proportion Inference",uiOutput("prop"))
+                  )
+  )
+  )
+
+ output$tbldata <- DT::renderDataTable({
+    # input$file1 will be NULL initially. After the user selects
+    # and uploads a file, head of that data file by default,
+    # or all rows if selected, will be shown.
+    if(input$upload){
+    req(input$file1)
+    
+    df <- read.csv(input$file1$datapath,
+                   header = input$header,
+                   sep = input$sep,
+                   quote = input$quote)
+    } else{
+    x <- extract(input$x)
+    y <- extract(input$y)
+    if(length(x) != length(y)){
+      n1 <- length(x)
+      n2 <- length(y)
+
+      if(n1 < n2){
+        x <- c(x,rep(NA,n2-n1))
+      } else{
+          y <- c(y,rep(NA,n1-n2))
+      }
+    }
+    df <- data.frame(x,y)
+    }
+  if(input$disp == "head") {
+      return(head(df))
+    }
+    else {
+      return(df)
+    }
+    df
+
+ })
+ 
+output$mean <- renderTable({
+
+    delta0 <- as.numeric(input$delta0)
+    alpha <- as.numeric(input$alpha)
+  
+    if(input$upload){
+    req(input$file1)
+    
+    df <- read.csv(input$file1$datapath,
+                   header = input$header,
+                   sep = input$sep,
+                   quote = input$quote)
+    } else{
+
+    x <- extract(input$x)
+    y <- extract(input$y)
+    }
+   all.t.two.sample.test(x = x,y = y,delta0 = delta0,alpha = alpha)
+
+},rownames = TRUE)
+  
+output$loc <- renderTable({
+
+    delta0 <- as.numeric(input$delta0)
+    alpha <- as.numeric(input$alpha)
+  
+    if(input$upload){
+    req(input$file1)
+    
+    df <- read.csv(input$file1$datapath,
+                   header = input$header,
+                   sep = input$sep,
+                   quote = input$quote)
+    } else{
+
+    x <- extract(input$x)
+    y <- extract(input$y)
+    }
+    all.wilcoxon.two.sample.test(x = x,y = y,delta0 = delta0,alpha = alpha)
+},rownames = TRUE)
+ 
+```
+
+
+To learn more, see [FIRSTkit](https://github.com/ialmodovar/FIRSTkit). If you have any question or want to report to *israel.almodovar@upr.edu* or *maitra@iastate.edu*

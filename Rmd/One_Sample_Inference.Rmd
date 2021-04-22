@@ -1,0 +1,314 @@
+---
+title: "One-Sample Inference"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library("readxl")
+knitr::opts_chunk$set(echo = TRUE)
+  extract <- function(text) {
+    text <- gsub(" ", "", text)
+    split <- strsplit(text, ",", fixed = FALSE)[[1]]
+    as.numeric(split)
+  }
+
+all.t.one.sample.test <- function(x, mu0 = 0, alpha = 0.05,...){
+  twosided <- t.test(x = x, mu = mu0, 
+                     alternative = "two.sided",
+                     conf.level = 1-alpha)
+  oneless <- t.test(x = x, mu = mu0, 
+                    alternative = "less",
+                    conf.level = 1-alpha)
+  onegreater <- t.test(x = x, mu = mu0, 
+                       alternative = "greater",
+                       conf.level = 1-alpha)
+  
+tt <- round(c(twosided$statistic, oneless$statistic, onegreater$statistic),digits=3)
+pval <- round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits = 5) 
+
+ci <- c(paste("(",paste(round(twosided$conf.int[1],digits=3),",",
+        round(twosided$conf.int[2],digits=3),sep=""),")",sep=""),
+        paste("(",paste(round(oneless$conf.int[1],digits=3),",",
+                        round(oneless$conf.int[2],digits=3),sep=""),")",sep=""),
+        paste("(",paste(round(onegreater$conf.int[1],digits=3),",",
+                        round(onegreater$conf.int[2],digits=3),sep=""),")",sep=""))
+
+res <- data.frame(Test = tt,Pval = pval, CI =ci)
+names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
+ rownames(res) <- c(paste("H_1: mu = ",mu0,sep=""),
+                     paste("H_1: mu < ",mu0,sep=""),
+                     paste("H_1: mu > ",mu0,sep=""))
+res
+}
+
+all.wilcoxon.one.sample.test <- function(x, mu0 = 0, alpha = 0.05,...){
+  twosided <- wilcox.test(x = x, mu = mu0, 
+                     alternative = "two.sided",
+                     conf.level = 1-alpha,conf.int = TRUE)
+  oneless <- wilcox.test(x = x, mu = mu0, 
+                         alternative = "less",
+                         conf.level = 1-alpha,conf.int = TRUE)
+  onegreater <- wilcox.test(x = x, mu = mu0, 
+                            alternative = "greater",
+                            conf.level = 1-alpha,conf.int = TRUE)
+  
+  tt <- round(c(twosided$statistic, oneless$statistic, onegreater$statistic),digits=3)
+  pval <- round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits = 5) 
+  
+  ci <- c(paste("(",paste(round(twosided$conf.int[1],digits=3),",",
+                          round(twosided$conf.int[2],digits=3),sep=""),")",sep=""),
+          paste("(",paste(round(oneless$conf.int[1],digits=3),",",
+                          round(oneless$conf.int[2],digits=3),sep=""),")",sep=""),
+          paste("(",paste(round(onegreater$conf.int[1],digits=3),",",
+                          round(onegreater$conf.int[2],digits=3),sep=""),")",sep=""))
+  
+  res <- data.frame(Test = tt,Pval = pval, CI =ci)
+  names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
+  
+ rownames(res) <- c(paste("H_1: mu = ",mu0,sep=""),
+                     paste("H_1: mu < ",mu0,sep=""),
+                     paste("H_1: mu > ",mu0,sep=""))
+ 
+res
+}
+
+one.sample.var.test <- function(x,sigma0=1,alpha=0.05,...){
+  x <- x[!is.na(x)]
+    df <- length(x)-1
+  vv <- var(x,na.rm = TRUE)
+  sigma02 <- sigma0^2
+  X2 <- df * vv/sigma02 #test statistics
+##
+  pval <- c(pchisq(X2,df=df,lower.tail = FALSE),pchisq(X2,df=df,lower.tail = TRUE),pchisq(X2,df=df,lower.tail = FALSE))
+  c1 <- qchisq(p=1-alpha/2,df = df)
+  c2 <- qchisq(p=alpha/2,df = df)
+  ci <- c(paste("(",round(df*vv/c1,digits=3),",",round(df*vv/c2,digits=3),")",sep=""),paste("(",0,",",round(df*vv/qchisq(p=alpha,df = df),digits=3),")",sep=""),
+       paste("(",round(df*vv/qchisq(p=alpha,df = df),digits=3),",",Inf,")",sep=""))
+  res <- data.frame(Test = X2,Pval = pval, CI =ci)
+names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
+
+ rownames(res) <- c(paste("H_1: sigma^2 =",sigma0,sep=""),
+                     paste("H_1: sigma^2 < ",sigma0,sep=""),
+                     paste("H_1: sigma^2 > ",sigma0,sep=""))
+ 
+res
+
+}
+
+one.sample.prop.test <- function(x = NULL,n, p = NULL, p0 = 0.5, alpha = 0.05)
+{
+  if(is.null(x)& is.null(p)){
+    stop("You must either provide the number of success or the probability of success")
+  }
+  if(!is.null(x) & is.null(p)){
+    p <- x/n
+  } 
+  if(is.null(x) & !is.null(p)){
+    p <- p
+  }
+if(!is.null(x) & !is.null(p)){
+    p <- x/n
+  } 
+  z <- (p-p0)/sqrt(p0*(1-p0)/n)
+  pval <- c(2 * pnorm(abs(z), lower.tail = FALSE),pnorm(z, lower.tail = TRUE),pnorm(z, lower.tail = FALSE))
+  se <- sqrt(p*(1-p)/n)
+  ci <- c(paste("(",paste(round(p+c(-1,1)* qnorm(1-alpha/2) * se,digits=5),collapse = ","),")",sep=""),
+          paste("(",0,",",round(p-1* qnorm(1-alpha) * se,digits=5),")",sep=""),
+paste("(",round(p+1* qnorm(alpha) * se,digits=5),",",1,")",sep=""))
+  
+  res <- data.frame(Test = z,Pval = pval, CI =ci)
+names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
+
+ rownames(res) <- c(paste("H_1: p = ",p0,sep=""),
+                     paste("H_1: p < ",p0,sep=""),
+                     paste("H_1: p > ",p0,sep=""))
+ 
+res
+
+}
+
+```
+
+This **Shiny App** is made with the purpose to be free and educational. It comes without guarantee. You can perform basic statistical inference analysis such as one-sample. The user can perform parametric *t* test as well, $\chi^2$ test for the variance. Note that the argument to perform a one sample test for the variance is in terms of the standard deviation. 
+
+User can also select non-parametric approach. Wilcoxon-signed rank test uses the argument of $\mu_0$, although, this does not represent the mean but rather a location parameter. 
+
+
+```{r inputs-one-sample, echo=FALSE}
+
+sidebarLayout(
+  sidebarPanel(
+    selectInput(
+      inputId = "datachoice",
+      label = "Data (Input some data or upload a file)",
+      choices = c("Input data","Upload file","Upload .xls/.xslx file"),
+      multiple = FALSE,
+      selected = NULL##"Input data"
+    ),
+    hr(),
+    conditionalPanel(
+    condition = "input.datachoice == 'Input data'",
+    textInput("x", "Data", value = "",
+    placeholder = "Enter values separated by a comma with decimals as points, e.g. 1.2, 3.14, 3.1417, etc."),
+    hr(),
+    ),
+    conditionalPanel(
+    condition = "input.datachoice == 'Upload file'",
+    fileInput("file1", "Choose CSV File",
+              multiple = TRUE,
+              accept = c("text/csv",
+                         "text/comma-separated-values,text/plain",
+                         ".csv")),
+    hr(),
+        # Input: Checkbox if file has header ----
+    checkboxInput("header", "Header", TRUE),
+        
+    # Input: Select separator ----
+    radioButtons("sep", "Separator",
+                  choices = c(Comma = ",",
+                              Semicolon = ";",
+                              Tab = "\t"),
+                  selected = ","),
+        
+        # Input: Select quotes ----
+    radioButtons("quote", "Quote",
+                 choices = c(None = "",
+                            "Double Quote" = '"',
+                            "Single Quote" = "'"),
+                selected = '"'),
+    ),
+    conditionalPanel(
+    condition = "input.datachoice == 'Upload .xls/.xslx file'",
+    fileInput('file2', 'Choose .xls/.xlsx file',accept = c(".xlsx",".xls"))
+    ),
+    selectInput("variable","Variable", choices = NULL),
+    uiOutput("alpha_line"),
+    textInput("mu0","\\(  H_0:\\mu = \\mu_0 \\)",value="0",placeholder="Indicate the true value for the location of interest "),
+     textInput("sigma0","\\( H_0:\\sigma^2 = \\sigma^2_0 \\)",value="1",placeholder="Indicate the true value for the dispersion of interest"),
+    textInput("p0","\\( H_0: p = p_0 \\)",value="0.5",placeholder="Indicate the true value for the proportion of interest"),
+        numericInput("nprop", " Sample size (\\(n \\))",
+                     value = 50, min = 0, step = 1
+        ),
+            hr(),
+        radioButtons(
+          inputId = "propsuccess",
+          label = NULL,
+          choices = c(
+            "Proportion of success \\(\\hat{p}\\)" = "pr",
+            "Number of successes \\(x\\)" = "success"
+          )
+        ),
+       conditionalPanel(
+          condition = "input.propsuccess == 'pr'",
+          numericInput("p_prop", "Proportion of success (\\(\\hat{p} \\))",
+                       value = 0.5, min = 0, max = 1, step = 0.001
+          )
+        ),
+        conditionalPanel(
+          condition = "input.propsuccess == 'success'",
+          numericInput("x_prop", "Number of successes(\\(x\\))",
+                       value = 20, min = 0, step = 1
+          )
+        ),
+        sliderInput("alpha","Significance level \\(\\alpha \\)",
+                    min = 0,
+                    max = 1,
+                    value = 0.05,step=0.001,
+        ),
+
+    ),
+      mainPanel(
+        tabsetPanel(type = "tabs",
+        tabPanel("Location Inference",
+        br(),
+        tags$b("One Sample \\( t \\) test"),
+        uiOutput("mean"),
+        br(),
+        tags$b("Wilcoxon-signed rank test"),
+        uiOutput("loc")),
+        tabPanel("Dispersion Inference",
+        br(),
+        tags$b("One Sample Variance test"),
+        withMathJax(uiOutput("variance"))),
+        tabPanel("Proportion Inference",
+        tags$b("One Sample proportion test"),
+                 uiOutput("proportion"))
+        )
+  )
+    )
+
+d <- reactive({  
+  if(!is.null(input$file1)){
+    req(input$file1)
+    
+    tt <- read.csv(input$file1$datapath,
+                   header = input$header,
+                   sep = input$sep,
+                   quote = input$quote)
+   
+  } 
+  if(!is.null(input$file2)){
+    req(input$file2)
+    tt <- as.data.frame(read_excel(input$file2$datapath,sheet=1))
+  }
+  if(is.null(input$file1) & is.null(input$file2)){
+  x <- extract(input$x)
+  tt<- data.frame(x = x)
+  } 
+  
+  var.opts <- colnames(tt)
+  updateSelectInput(inputId =  "variable", choices = var.opts)
+
+  return(tt)
+})
+
+
+output$mean <- renderTable({
+    mu0 <- as.numeric(input$mu0)
+    alpha <- as.numeric(input$alpha)
+    df <- d()
+    
+    x <- df[,input$variable]
+    
+   all.t.one.sample.test(x = x, mu0 = mu0,alpha = alpha)
+},rownames = TRUE)
+
+output$loc <- renderTable({
+    mu0 <- as.numeric(input$mu0)
+    alpha <- as.numeric(input$alpha)
+    df <- d()
+    
+    x <- df[,input$variable]
+    
+   all.wilcoxon.one.sample.test(x = x, mu0 = mu0,alpha = alpha)
+   
+},rownames = TRUE)
+
+output$variance <- renderTable({
+    sigma0 <- as.numeric(input$sigma0)
+    alpha <- as.numeric(input$alpha)
+    df <- d()
+    
+    x <- df[,input$variable]
+    
+   one.sample.var.test(x = x, sigma0 = sigma0,alpha = alpha)
+},rownames = TRUE)
+
+output$proportion <- renderTable({
+  p0 <- as.numeric(input$p0)
+  alpha <- as.numeric(input$alpha)
+  
+  one.sample.prop.test(x = input$x_prop,
+                       n = input$nprop,p = input$p_prop,p0 = p0,alpha = alpha)
+},rownames = TRUE,digits = 4)
+  
+```
+
+### One sample $t$ test
+
+### A chi-square test
+
+A chi-square test (Snedecor and Cochran, 1983) can be used to test if the variance of a population is equal to a specified value. This test can be either a two-sided test or a one-sided test. The two-sided version tests against the alternative that the true variance is either less than or greater than the specified value. The one-sided version only tests in one direction. The choice of a two-sided or one-sided test is determined by the problem. For example, if we are testing a new process, we may only be concerned if its variability is greater than the variability of the current process. 
+
+To learn more, see [FIRSTkit](https://github.com/ialmodovar/FIRSTkit). If you have any question or want to report to *israel.almodovar@upr.edu* or *maitra@iastate.edu*. 

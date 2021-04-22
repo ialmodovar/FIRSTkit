@@ -37,6 +37,8 @@ knitr::opts_chunk$set(echo = TRUE)
 )
 
 ```
+## Introduction
+The first step in looking at data is to describe the data at hand in some clear manner. 
 
 
 ```{r descriptive-stats, echo=FALSE}
@@ -44,7 +46,7 @@ sidebarLayout(
   sidebarPanel(
     selectInput(
       inputId = "datachoice",
-      label = "Data",
+      label = "Data (Input some data or upload a file)",
       choices = c("Input data","Upload file","Upload .xls/.xslx file"),
       multiple = FALSE,
       selected = NULL##"Input data"
@@ -86,16 +88,15 @@ sidebarLayout(
     fileInput('file2', 'Choose .xls/.xlsx file',accept = c(".xlsx",".xls"))
       ),
               # Input: Select what to display
-     selectInput("variable","Variable", choices = NULL),
-     selectInput("group","Groups", choices = NULL),
-    ## Input graphical display
+     selectInput("variable","Variable:", choices = NULL),
+     selectInput("group","Group:", choices = NULL),
      selectInput("plot.type","Plot Type:",
                  list(boxplot = "boxplot", 
                       histogram = "histogram", 
                       density = "density", 
                       bar = "bar",
                       ScatterPlot = "Scatter Plot")),
-    checkboxInput("show.points", "Display points (Boxplot only)", FALSE)
+    checkboxInput("show.points", "show points", FALSE)
 
     ),
     mainPanel(
@@ -111,7 +112,7 @@ sidebarLayout(
                uiOutput("dispersion")),
       tabPanel("Graphical Display",
                uiOutput("baralpha"),
-               plotlyOutput("plots",height = "600px", width = "600px"))
+               plotlyOutput("plots",height = "400px", width = "600px"))
     )
       )
     )
@@ -119,11 +120,12 @@ sidebarLayout(
 d <- reactive({  
   if(!is.null(input$file1)){
     req(input$file1)
+    
     tt <- read.csv(input$file1$datapath,
                    header = input$header,
                    sep = input$sep,
                    quote = input$quote)
-
+   
   } 
   if(!is.null(input$file2)){
     req(input$file2)
@@ -145,7 +147,7 @@ output$tbl1 <- DT::renderDataTable({
   })
 
 output$bartrim <- renderUI({
-  sliderInput("trim", "Trim level for the mean",min = 0, max = 0.5, value = 0)
+  sliderInput("trim", "Trim level for mean",min = 0, max = 0.5, value = 0)
 })
 
 output$location <- renderTable({
@@ -184,8 +186,8 @@ output$dispersion <- renderTable({
   mads <- apply(df,2,mad,na.rm=TRUE)
   ranges <- apply(df,2,range,na.rm=TRUE)
   nks <- apply(df,2,function(z) sum(!is.na(z)))
-  dt1 <- rbind(ranges,sds,vars, IQRs, mads)
-  rownames(dt1) <- c("Min","Max","SD","Variance","IQR","MAD")
+  dt1 <- rbind(nks,ranges,sds,vars, IQRs, mads)
+  rownames(dt1) <- c("n","Min","Max","SD","Variance","IQR","MAD")
   t(dt1)
  },rownames = TRUE,digits = 3)
  
@@ -202,6 +204,13 @@ output$plots <- renderPlotly({
 
     plot.obj<-obj
     
+    # #conditions for plotting
+    # if(is.null(plot.obj)) return()
+    # 
+    # #make sure variable and group have loaded
+    # if(plot.obj$variable == "" | plot.obj$group =="") return()
+    
+    #plot types
     plot.type<-switch(input$plot.type,
                       "boxplot" 	= geom_boxplot(alpha=input$alpha),
                       "histogram" =  geom_histogram(alpha=input$alpha,position="identity"),
@@ -255,13 +264,33 @@ output$plots <- renderPlotly({
 ### Location Measurements
 Given a sample of size $n$, consider  independent random variables $X_1, X_2,\ldots, X_n$, each corresponding to one randomly selected observation. Each of these variables has the distribution of the population, with mean $\mu$ and standard deviation $\sigma$.
 
-1- [**Arithmetic mean**](https://github.com/ialmodovar/FIRSTkit/help)
+1- **Arithmetic mean**: The sample mean from a group of observations is an estimate of the population mean $\mu$.  The sample mean is defined to be,
 
-2- **Trimmed mean**
+\[
+\bar{x}= \frac{1}{n}\sum^n_{i=1}x_i
+\]
+2- **Trimmed mean**: This mean is computed after discarding given parts of a probability distribution or sample at the high and low end, and typically discarding an equal amount of both. This number of points to be discarded is usually given as a percentage of the total number of points, but may also be given as a fixed number of points. 
 
-3- **Median** 
+- First find $n =$ number of observations.
 
-4- **Geometric Mean**
+- Reorder them as ``order statistics'' $X_i$ from the smallest to the largest.
+
+- Find lower case $p=P/100$ = proportion trimmed.
+
+- Compute $np$. If $np$ is an integer use $k=np$ and trim $k$ observations at both ends. $R = \mbox{remaining observations} = n-2k$. The trimmed mean is defined as,
+
+\[
+\bar{x}_{k} = \frac{X_{k+1}+X_{k+2}+…+X_{n-k}}{R} 
+\]
+
+3- **Median**: Middle value separating the greater and lesser halves of a data set ,
+\[
+M = X_{(0.5 \times n)}
+\]
+4- **Geometric Mean**: The geometric mean of a non-empty data set of (positive) numbers is always at most their arithmetic mean. Equality is only obtained when all numbers in the data set are equal; otherwise, the geometric mean is smaller. 
+\[
+g = \left(\prod^n_{i=1}x_i\right)^{1/n}
+\]
 
 ### Dispersion Measurements
 Given a sample of size $n$, consider  independent random variables $X_1, X_2,\ldots, X_n$, each corresponding to one randomly selected observation. Each of these variables has the distribution of the population, with mean $\mu$ and standard deviation $\sigma$.
