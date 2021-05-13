@@ -52,11 +52,11 @@ The importance of statistics in all disciplines is well-established and so is th
 **FIRSTkit** is designed to be run from the browser and hosted on an institutional Shiny server so that students and users do not have any need for installation. 
 However,the software can also be installed and run locally.
 
-  + Using RStudio:
+  + *Using RStudio:*
     + Download the file, uncompress and navigate to the directory.
     + Open the file ui.R.
     + Click on "Run App" 
-  + Using base R:
+  + *Using base R:*
     + Download the file, uncompress and navigate to the directory.
     + Note that the R package **shiny** is needed from CRAN.
     + Then run **shiny::runApp()**
