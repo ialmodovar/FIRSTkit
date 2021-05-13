@@ -2,7 +2,7 @@
 
 ## Introduction 
 
-We all have seen the importance of statistics in sciences. Therefore, there is a tremendous need of teaching statistics as a introductory core course. A essential part in any statistics course is the use of a statistical software. On of the most popular statistical software is [**R**](https://www.r-project.org/). However, **R** can be challenging specially for those individuals who do not have any experience or just do not have the time to learn a programming language. [**FIRSTkit**](https://github.com/ialmodovar/FIRSTkit) was created with this in mind. **FIRSTkit** is Shiny App that is created to be free companion to introductory courses without required any previous programming knowledge. 
+The importance of statistics in all disciplines is well-established and so is the need for teaching statistics introductory statistics as a class in all disciplines. An essential aspect of teaching statistics is the ability to do it practically, and therfore, through the use of software, that should therefore be included in instructional activities. On of the most popular statistical software is [**R**](https://www.r-project.org/). However, **R** can be challenging specially for those individuals who do not have any experience or the time to or desire to learn a programming language. Other software bring up costs and installation issues. [**FIRSTkit**](https://github.com/ialmodovar/FIRSTkit) was created with all this as the background. **FIRSTkit** is a shiny app that is created to be a free companion to introductory courses with no requirement of programming knowledge or experience. The software can be run on institutional servers so that there is no need for installation woes on the part of the students. 
 
 ## FIRSTkit capabilities
 
@@ -48,5 +48,18 @@ We all have seen the importance of statistics in sciences. Therefore, there is a
   + Simple linear regression
   + Multiple linear regression
 
-If you have any question or want to report to *israel.almodovar@upr.edu* or *maitra@iastate.edu*
+## Local Installation
+**FIRSTkit** is designed to be run from the browser and hosted on an institutional Shiny server so that students and users do not have any need for installation. 
+However,the software can also be installed and run locally.
+
+  + Using RStudio:
+    + Download the file, uncompress and navigate to the directory.
+    + Open the file ui.R.
+    + Click on "Run App" 
+  + Using base R:
+    + Download the file, uncompress and navigate to the directory.
+    + Note that the R package **shiny** is needed from CRAN.
+    + Then run **shiny::runApp()**
+
+If you have any questions e-mail *israel.almodovar@upr.edu* or *maitra@iastate.edu* or open an "issue" above (preferred).
 
