@@ -1,4 +1,4 @@
-# First-timers Introductory R-based Statistics Toolkit (FIRSTkit)
+# First Impressions R-based Statistics Toolkit (FIRSTkit)
 
 ## Introduction 
 
