@@ -40,10 +40,15 @@ all.t.two.sample.test <- function(x, y, delta0 = 0,alpha = 0.05,...){
   res <- data.frame(Test = tt,Pval = pval, CI =ci)
   names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
   
-  rownames(res) <- c(paste("H_1: mu_1-mu_2 = ",delta0,sep=""),
-                     paste("H_1: mu_1-mu_2 < ",delta0,sep=""),
-                     paste("H_1: mu_1-mu_2 > ",delta0,sep=""))
-  res
+#   rownames(res) <- c(paste("\\(H_{1}: \\mu_{1}-\\mu_{2} =\\) ",delta0,sep=""),
+#                      paste("H_1: mu_1-mu_2 < ",delta0,sep=""),
+#                      paste("H_1: mu_1-mu_2 > ",delta0,sep=""))
+# res
+  rownames(res) <- c(paste("\\(H_{1}: \\mu_{1}-\\mu_{2} \\neq \\) ",delta0,sep=""),
+                     paste("\\(H_{1}: \\mu_{1}-\\mu_{2} <\\) ",delta0,sep=""),
+                     paste("\\(H_{1}: \\mu_{1}-\\mu_{2} >\\) ",delta0,sep=""))
+res
+
 }
 
 ##
@@ -71,10 +76,10 @@ all.wilcoxon.two.sample.test <- function(x,  y, delta0 = 0, alpha = 0.05,...){
   res <- data.frame(Test = tt,Pval = pval, CI =ci)
   names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
   
-  rownames(res) <- c(paste("H_1: mu_1-mu_2 = ",delta0,sep=""),
-                     paste("H_1: mu_1-mu_2 < ",delta0,sep=""),
-                     paste("H_1: mu_1-mu_2 > ",delta0,sep=""))
-  res
+ rownames(res) <- c(paste("\\(H_{1}: \\mu_{1}-\\mu_{2} \\neq \\) ",delta0,sep=""),
+                     paste("\\(H_{1}: \\mu_{1}-\\mu_{2} <\\) ",delta0,sep=""),
+                     paste("\\(H_{1}: \\mu_{1}-\\mu_{2} >\\) ",delta0,sep=""))
+res
 }
 
 all.var.two.sample.test <- function(x, y, ratio = 1,alpha = 0.05,...){
@@ -101,12 +106,53 @@ all.var.two.sample.test <- function(x, y, ratio = 1,alpha = 0.05,...){
   res <- data.frame(Test = tt,Pval = pval, CI =ci)
   names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
   
-  rownames(res) <- c(paste("H_1: sigma^2_1/sigma^2_2 = ",ratio,sep=""),
-                     paste("H_1: sigma^2_1/sigma^2_2 < ",ratio,sep=""),
-                     paste("H_1: sigma^2_1/sigma^2_2 > ",ratio,sep=""))
-  res
+  # rownames(res) <- c(paste("H_1: sigma^2_1/sigma^2_2 = ",ratio,sep=""),
+  #                    paste("H_1: sigma^2_1/sigma^2_2 < ",ratio,sep=""),
+  #                    paste("H_1: sigma^2_1/sigma^2_2 > ",ratio,sep=""))
+  # res
+  
+   rownames(res) <- c(paste("\\(H_{1}: \\sigma^{2}_{1}/\\sigma^{2}_{2} \\neq \\)",ratio,sep=""),
+                     paste("\\(H_{1}: \\sigma^{2}_{1}/\\sigma^{2}_{2} <\\)",ratio,sep=""),
+                     paste("\\(H_{1}: \\sigma^{2}_{1}/\\sigma^{2}_{2} >\\)",ratio,sep=""))
+res
+
 }
 
+all.ansari.two.sample.test <- function(x, y, ratio = 1,alpha = 0.05,...){
+  twosided <- ansari.test(x = x, y = y, conf.int=TRUE, 
+                     alternative = "two.sided",
+                     conf.level = 1-alpha)
+  oneless <- ansari.test(x = x, y = y,conf.int=TRUE,
+                     alternative = "less",
+                     conf.level = 1-alpha)
+  onegreater <- ansari.test(x = x, y = y,conf.int=TRUE,
+                     alternative = "greater",
+                     conf.level = 1-alpha)
+  
+  tt <- round(c(twosided$statistic, oneless$statistic, onegreater$statistic),digits=3)
+  pval <- round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits = 3) 
+  
+  ci <- c(paste("(",paste(round(twosided$conf.int[1],digits=3),",",
+                          round(twosided$conf.int[2],digits=3),sep=""),")",sep=""),
+          paste("(",paste(round(oneless$conf.int[1],digits=3),",",
+                          round(oneless$conf.int[2],digits=3),sep=""),")",sep=""),
+          paste("(",paste(round(onegreater$conf.int[1],digits=3),",",
+                          round(onegreater$conf.int[2],digits=3),sep=""),")",sep=""))
+  
+  res <- data.frame(Test = tt,Pval = pval, CI =ci)
+  names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
+  
+  # rownames(res) <- c(paste("H_1: sigma^2_1/sigma^2_2 = ",ratio,sep=""),
+  #                    paste("H_1: sigma^2_1/sigma^2_2 < ",ratio,sep=""),
+  #                    paste("H_1: sigma^2_1/sigma^2_2 > ",ratio,sep=""))
+  # res
+  
+   rownames(res) <- c(paste("\\(H_{1}: \\sigma_{1}/\\sigma_{2} \\neq \\)",1,sep=""),
+                     paste("\\(H_{1}: \\sigma_{1}/\\sigma_{2} <\\)",1,sep=""),
+                     paste("\\(H_{1}: \\sigma_{1}/\\sigma_{2} >\\)",1,sep=""))
+res
+
+}
 
 ```
 
@@ -118,7 +164,7 @@ sidebarLayout(
     selectInput(
       inputId = "datachoice",
       label = "Data (Input some data or upload a file)",
-      choices = c("Input data","Upload file","Upload .xls/.xslx file"),
+      choices = c("Upload file","Upload .xls/.xslx file","Input data"),
       multiple = FALSE,
       selected = NULL
     ),
@@ -161,6 +207,12 @@ sidebarLayout(
     fileInput('file2', 'Choose .xls/.xlsx file',accept = c(".xlsx",".xls"))
     ),
     
+# checkboxInput("melt", "Melt Data", FALSE),
+#         conditionalPanel(
+#           condition = "input.melt == 1",
+#               selectInput("variable1","Sample 1", choices = NULL)
+#         ),
+    
     selectInput("variable1","Sample 1", choices = NULL),
     selectInput("variable2","Sample 2", choices = NULL),
     uiOutput("alpha_line"),
@@ -168,47 +220,32 @@ sidebarLayout(
      textInput("sigma0","\\( H_0:\\sigma^2_1/\\sigma^2_2 = R \\)",value="1",placeholder="Indicate the true value for the rat"),
     textInput("p0","\\( H_0: p_1 - p_2 = p_0 \\)",value="0.5",placeholder="Indicate the true value for the proportion of interest"),
         numericInput("nprop1", " Sample size (\\(n_1 \\))",
-                     value = 50, min = 0, step = 1
-        ),
+                     value = 50, min = 0, step = 1),
             numericInput("nprop2", " Sample size (\\(n_2 \\))",
-                     value = 50, min = 0, step = 1
-        ),
-            hr(),
+                     value = 50, min = 0, step = 1),
+        hr(),
         radioButtons(
           inputId = "propsuccess1",
           label = NULL,
           choices = c(
             "Proportion of success \\(\\hat{p}_1\\)" = "pr1",
-            "Number of successes \\(x_1\\)" = "success1"
-          )
-        ),
+            "Number of successes \\(x_1\\)" = "success1")),
        conditionalPanel(
           condition = "input.propsuccess == 'pr1'",
-          numericInput("p_prop1", "Proportion of success (\\(\\hat{p}_1 \\))",
-                       value = 0.5, min = 0, max = 1, step = 0.001
-          )
-        ),
+          numericInput("p_prop1", "Proportion of success (\\(\\hat{p}_1 \\))",value = 0.5, min = 0, max = 1, step = 0.001)),
         conditionalPanel(
           condition = "input.propsuccess == 'success1'",
-          numericInput("x_prop1", "Number of successes(\\(x_1\\))",
-                       value = 20, min = 0, step = 1
-          )
-        ),
+          numericInput("x_prop1", "Number of successes(\\(x_1\\))",value = 20, min = 0, step = 1)),
     
         radioButtons(
           inputId = "propsuccess2",
           label = NULL,
           choices = c(
             "Proportion of success \\(\\hat{p}_2\\)" = "pr2",
-            "Number of successes \\(x_2\\)" = "success2"
-          )
-        ),
+            "Number of successes \\(x_2\\)" = "success2")),
        conditionalPanel(
           condition = "input.propsuccess == 'pr2'",
-          numericInput("p_prop2", "Proportion of success (\\(\\hat{p}_2 \\))",
-                       value = 0.5, min = 0, max = 1, step = 0.001
-          )
-        ),
+          numericInput("p_prop2", "Proportion of success (\\(\\hat{p}_2 \\))",value = 0.5, min = 0, max = 1, step = 0.001)),
         conditionalPanel(
           condition = "input.propsuccess == 'success2'",
           numericInput("x_prop2", "Number of successes(\\(x_2\\))",
@@ -218,23 +255,28 @@ sidebarLayout(
         sliderInput("alpha","Significance level \\(\\alpha \\)",
                     min = 0,
                     max = 1,
-                    value = 0.05,step=0.001,
-        ),
+                    value = 0.05,step=0.001),
 
     ),
       mainPanel(
+        withMathJax(),
         tabsetPanel(type = "tabs",
         tabPanel("Location Inference",
         br(),
         tags$b("Two Sample \\( t \\) test"),
-        uiOutput("mean"),
+        withMathJax(),
+        uiOutput("tableUImean"),
         br(),
         tags$b("Mann-Whitney-Wilcoxon-signed rank test"),
-        uiOutput("loc")),
+        uiOutput("tableUIloc")),
         tabPanel("Dispersion Inference",
         br(),
         tags$b("Two Sample Variance test"),
-        withMathJax(uiOutput("variance"))),
+        withMathJax(uiOutput("tableUIvar")),
+          br(),
+        tags$b("Ansari-Bradley test"),
+        withMathJax(uiOutput("tableUIansari")),
+        ),
         tabPanel("Proportion Inference",
         tags$b("Two Sample proportion test"),
                  uiOutput("proportion"))
@@ -276,8 +318,6 @@ output$mean <- renderTable({
     y <- df[,input$variable2]
    all.t.two.sample.test(x = x, y = y, delta0 = delta0,alpha = alpha)
 
-
-
 # ##d <-read.csv(file="../Data/palmer-penguins.csv",header=T)
 # ##if(select.groups){
 #      var.opts <- colnames(df)
@@ -293,42 +333,72 @@ output$mean <- renderTable({
 # ##}
 #   ##   all.t.two.sample.test(x = x, y = y, delta0 = delta0,alpha = alpha)
 },rownames = TRUE)
+
+output$loc <- renderTable({
+    delta0 <- as.numeric(input$delta0)
+    alpha <- as.numeric(input$alpha)
+    df <- d()
+    
+    x <- df[,input$variable1]
+    y <- df[,input$variable2]
+   all.wilcoxon.two.sample.test(x = x, y = y, delta0 = delta0,alpha = alpha)},rownames = TRUE)
+
+output$variance <- renderTable({
+    sigma0 <- as.numeric(input$sigma0)
+    alpha <- as.numeric(input$alpha)
+    df <- d()
+    
+    x <- df[,input$variable1]
+    y <- df[,input$variable2]
+   all.var.two.sample.test(x = x, y = y, ratio = sigma0,alpha = alpha)},rownames = TRUE)
+
+output$ansari <- renderTable({
+    sigma0 <- as.numeric(input$sigma0)
+    alpha <- as.numeric(input$alpha)
+    df <- d()
+    
+    x <- df[,input$variable1]
+    y <- df[,input$variable2]
+   all.ansari.two.sample.test(x = x, y = y, alpha = alpha)},rownames = TRUE)
+
+
+  output$tableUImean <- renderUI({
+    delta0 <- as.numeric(input$delta0)
+    alpha <- as.numeric(input$alpha)
+    tagList(
+      withMathJax(),
+      withMathJax(tableOutput("mean"))
+    )
+  })
+    output$tableUIloc <- renderUI({
+    delta0 <- as.numeric(input$delta0)
+    alpha <- as.numeric(input$alpha)
+    tagList(
+      withMathJax(),
+      withMathJax(tableOutput("loc"))
+    )
+  })
+      output$tableUIvar <- renderUI({
+    delta0 <- as.numeric(input$delta0)
+    alpha <- as.numeric(input$alpha)
+    tagList(
+      withMathJax(),
+      withMathJax(tableOutput("variance"))
+    )
+  })
+  output$tableUIansari <- renderUI({
+    delta0 <- as.numeric(input$delta0)
+    alpha <- as.numeric(input$alpha)
+    tagList(
+      withMathJax(),
+      withMathJax(tableOutput("ansari"))
+    )
+  })
 ```
 
 
 
-## Location test
 
-### Two Sample $t$-test
-
-The two-sample $t$-test is used to determine if two population means are equal. A common application is to test if a new process or treatment is superior to a current process or treatment.
-
-- The data may either be paired or not paired. By paired, we mean that there is a one-to-one correspondence between the values in the two samples. That is, if $X_1, X_2, \ldots, X_n$ and $Y_1, Y_2,\ldots, Y_n$ are the two samples, then $X_i$ corresponds to $Y_i$. For paired samples, the difference $X_i-Y_i$ is usually calculated. For unpaired samples, the sample sizes for the two samples may or may not be equal. The formulas for paired data are somewhat simpler than the formulas for unpaired data.
-
-- The variances of the two samples may be assumed to be equal or unequal. Equal variances yields somewhat simpler formulas, although with computers this is no longer a significant issue.
-
-- In some applications, you may want to adopt a new process or treatment only if it exceeds the current treatment by some threshold. In this case, we can state the null hypothesis in the form that the difference between the two populations means is equal to some constant $\mu_1-\mu_2 =\delta_0$ where the constant is the desired threshold.
-
-
-
-### Variance
-
-$H_0: \frac{\sigma^2_1}{\sigma^2_2} = 1$ versus $H_1: \frac{\sigma^2_1}{\sigma^2_2} \neq 1$
-
-### Proportion
-
-$H_0: p_1 -p_2 = p_0$ versus $H_1: p_1-p_2 \neq p_0$
-
-
-## Dependent $t$-test for paired samples
-
-This test is used when the samples are dependent; that is, when there is only one sample that has been tested twice (repeated measures) or when there are two samples that have been matched or ``paired''. This is an example of a paired difference test. The t statistic is calculated as
-\[
-    t = \frac{\bar{X}-\mu_0}{s_D/\sqrt{n}}
-\]
-where $\bar{X}$ are the average and $s_D$ standard deviation of the differences between all pairs. The pairs are e.g. either one person's pre-test and post-test scores or between-pairs of persons matched into meaningful groups (for instance drawn from the same family or age group: see table). The constant μ0 is zero if we want to test whether the average of the difference is significantly different. The degree of freedom used is $n-1$, where $n$ represents the number of pairs. 
-
-This *Shiny App* is made with the purpose to be free and educational. It comes without guarantee. You can perform basic statistical inference analysis such as one-sample. The user can perform parametric *t* test as well, $\chi^2$ test for the variance. Note that the argument to perform a one sample test for the variance is in terms of the standard deviation. 
 
 
 If you have any question or want to report to *israel.almodovar@upr.edu* or *maitra@iastate.edu*. To learn more, see [FIRSTkit](https://github.com/ialmodovar/FIRSTkit).

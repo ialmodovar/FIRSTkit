@@ -45,7 +45,7 @@ sidebarLayout(
     selectInput(
       inputId = "datachoice",
       label = "Data",
-      choices = c("Input data","Upload file","Upload .xls/.xslx file"),
+      choices = c("Upload file","Upload .xls/.xslx file","Input data"),
       multiple = FALSE,
       selected = NULL##"Input data"
     ),
@@ -58,11 +58,10 @@ sidebarLayout(
     ),
     conditionalPanel(
     condition = "input.datachoice == 'Upload file'",
-    fileInput("file1", "Choose CSV File",
+    fileInput("file1", "Choose File",
               multiple = TRUE,
-              accept = c("text/csv",
-                         "text/comma-separated-values,text/plain",
-                         ".csv")),
+              accept = c("text/csv",                       "text/comma-separated-values,text/plain",
+                         ".csv",".txt")),
     hr(),
         # Input: Checkbox if file has header ----
     checkboxInput("header", "Header", TRUE),
@@ -90,11 +89,11 @@ sidebarLayout(
      selectInput("group","Groups", choices = NULL),
     ## Input graphical display
      selectInput("plot.type","Plot Type:",
-                 list(boxplot = "boxplot", 
-                      histogram = "histogram", 
+                 list(boxplot = "Boxplot", 
+                      histogram = "Histogram", 
                       density = "density", 
                       bar = "bar",
-                      ScatterPlot = "Scatter Plot")),
+                      ScatterPlot = "ScatterPlot")),
     checkboxInput("show.points", "Display points (Boxplot only)", FALSE)
 
     ),
@@ -111,7 +110,8 @@ sidebarLayout(
                uiOutput("dispersion")),
       tabPanel("Graphical Display",
                uiOutput("baralpha"),
-               plotlyOutput("plots",height = "600px", width = "600px"))
+               plotlyOutput("plots",
+                            height = "600px", width ="600px"))
     )
       )
     )
@@ -193,7 +193,7 @@ output$baralpha <- renderUI({
       sliderInput("alpha", "Transparency",min = 0, max = 1, value = 1)
 })
 
-  #plotting function using ggplot2
+  ##plotting function using ggplot2
 output$plots <- renderPlotly({
   if(!is.null(input$file1)| !is.null(input$file2)){
     obj<-list(data=d(),
@@ -203,10 +203,10 @@ output$plots <- renderPlotly({
     plot.obj<-obj
     
     plot.type<-switch(input$plot.type,
-                      "boxplot" 	= geom_boxplot(alpha=input$alpha),
+                      "boxplot" = geom_boxplot(alpha=input$alpha),
                       "histogram" =  geom_histogram(alpha=input$alpha,position="identity"),
-                      "density" 	=	geom_density(alpha=input$alpha),
-                      "bar" 		=	geom_bar(position="dodge")
+                      "density" =	geom_density(alpha=input$alpha),
+                      "bar" =	geom_bar(position="dodge")
     )
     
     
@@ -219,7 +219,7 @@ output$plots <- renderPlotly({
                 )
       ) + plot.type
       
-      if(input$show.points==TRUE)
+      if(input$show.points)
       {
         p<-p+ geom_point(color='black',alpha=0.5, position = 'jitter')
       }
@@ -247,50 +247,8 @@ output$plots <- renderPlotly({
   
   
   })
+##[**Arithmetic mean**](https://github.com/ialmodovar/FIRSTkit/help)
 
 ```
 
-
-
-### Location Measurements
-Given a sample of size $n$, consider  independent random variables $X_1, X_2,\ldots, X_n$, each corresponding to one randomly selected observation. Each of these variables has the distribution of the population, with mean $\mu$ and standard deviation $\sigma$.
-
-1- [**Arithmetic mean**](https://github.com/ialmodovar/FIRSTkit/help)
-
-2- **Trimmed mean**
-
-3- **Median** 
-
-4- **Geometric Mean**
-
-### Dispersion Measurements
-Given a sample of size $n$, consider  independent random variables $X_1, X_2,\ldots, X_n$, each corresponding to one randomly selected observation. Each of these variables has the distribution of the population, with mean $\mu$ and standard deviation $\sigma$.
-
-1- **Sample standard deviation**: is a measure of the amount of variation or dispersion of a set of values.
-\[
-s = \sqrt{\frac{1}{n}\sum^n_{i=1}(x_i-\bar{x})^2}
-\]
-2- **Sample Variance**: is the expectation of the squared deviation of a random variable from its mean. Informally, it measures how far a set of numbers is spread out from their average value. 
-\[
-s^2 = \frac{1}{n}\sum^n_{i=1}(x_i-\bar{x})^2
-\]
-
-3- **Interquartile Range**:  difference between 75th and 25th percentiles, or between upper and lower quartiles,
-\[
-IQR = X_{(0.75 n)}- X_{0(0.25 n)}
-\]
-
-4- **Median absolute deviation** (MAD): Compute the median absolute deviation, i.e., the (lo-/hi-) median of the absolute deviations from the median, and (by default) adjust by a factor for asymptotically normal consistency.
-
-\[
-MAD = \mbox{median}_i(|X_i-\mbox{median}(X_i)|)
-\]
-
-5- **Range**: the difference between minimum and maximum of all the given arguments.
-\[
-R = \max X_i - \min X_i
-\]
-
-If {\tt na.rm} is {\tt FALSE}, {\tt NA} and {\tt NaN} values in any of the arguments will cause {\tt NA} values to be returned, otherwise {\tt NA} values are ignored.
-
-If you have any question or want to report something.  Send a message to *israel.almodovar@upr.edu* or *maitra@iastate.edu*.
+If you have any question or want to report something. Send a message to *israel.almodovar@upr.edu* or *maitra@iastate.edu*.

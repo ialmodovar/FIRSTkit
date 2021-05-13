@@ -17,14 +17,13 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 This Shiny App performs a simple and multiple linear regression. The user can upload (or input) the dataset of interest. User will obtain estimates of the parameters in the model. Also confidence intervals (CI), the default is 95% CI, as well $p$-value. We can check for the assumptions of normality based on the quantile-quantile plot, assumption of constant variance and linearity.
 
-### Simple Linear regression
+### Multiple Linear regression
 
 Obtain a fitted model of the simple linear regression:
 \[
 Y_i = \beta_0+\beta_1 x_i+\varepsilon_i
 \]
 where $Y_i \sim N(\beta_0+\beta_1 x_i,\sigma^2)$ and $\varepsilon_i \sim N(0,\sigma^2)$.
-To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
 
 
 
