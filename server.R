@@ -32,7 +32,7 @@ shinyServer(function(input, output, session) {
 	withMathJax(inclRmd("./Rmd/One_Sample_Inference.Rmd"))
 	})
 	output$TwoSample <- renderUI({
-	  withMathJax(inclRmd("./Rmd/Two_Sample_Inference.Rmd"))
+	  withMathJax(inclRmd("./Rmd/Two_Sample_Inference_V2.Rmd"))
 	})
 	output$kSample <- renderUI({
 	  withMathJax(inclRmd("./Rmd/Three_Sample_or_more_Inference.Rmd"))
@@ -43,8 +43,8 @@ shinyServer(function(input, output, session) {
 	output$slr <- renderUI({
 	  withMathJax(inclRmd("./Rmd/SLR.Rmd"))
 	})
-	output$mlr <- renderUI({
-	  withMathJax(inclRmd("./Rmd/MLR.Rmd"))
-	})
+	# output$mlr <- renderUI({
+	#   withMathJax(inclRmd("./Rmd/MLR.Rmd"))
+	# })
 
 })

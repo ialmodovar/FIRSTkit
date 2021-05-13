@@ -1,10 +1,8 @@
 # First-timers Introductory R-based Statistics Toolkit (FIRSTkit)
 
-
-
 ## Introduction 
 
-Sometimes we just want to do some basic statistical analysis without required any previous programming knowledge. [FIRSTkit](https://github.com/ialmodovar/FIRSTkit) was created with this in mind. The goal of *FIRSTkit* is to allow first time [R](https://www.r-project.org/) users, or users who have low interest in *R*  coding to perform basic statistics.
+We all have seen the importance of statistics in sciences. Therefore, there is a tremendous need of teaching statistics as a introductory core course. A essential part in any statistics course is the use of a statistical software. On of the most popular statistical software is [**R**](https://www.r-project.org/). However, **R** can be challenging specially for those individuals who do not have any experience or just do not have the time to learn a programming language. [**FIRSTkit**](https://github.com/ialmodovar/FIRSTkit) was created with this in mind. **FIRSTkit** is Shiny App that is created to be free companion to introductory courses without required any previous programming knowledge. 
 
 ## FIRSTkit capabilities
 
@@ -43,8 +41,7 @@ Sometimes we just want to do some basic statistical analysis without required an
   + Three-Sample or more Inference
     + One-Way Analysis of Variance (ANOVA)
     + Kruskal-Wallis Rank Sum test
-    + Two-Way ANOVA
-    + Friedman rank sum test
+    + Bartlett Test for Homogeneity of Variance
 
 * **Linear Regression**
 
