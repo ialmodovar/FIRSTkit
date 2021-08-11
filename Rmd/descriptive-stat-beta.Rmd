@@ -1,0 +1,267 @@
+---
+title: "Descriptive Statistics"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library("ggplot2")
+library("plotly")
+library("gridExtra")
+library("rmarkdown")
+library("knitr")
+library("pander")
+library("shinythemes")
+library("readxl")
+library("googlesheets4")
+
+knitr::opts_chunk$set(echo = TRUE)
+ extract <- function(text) {
+    text <- gsub(" ", "", text)
+    split <- strsplit(text, ",", fixed = FALSE)[[1]]
+    as.numeric(split)
+ }
+ geo.mean <- function(x,na.rm=TRUE){
+  x <- x[!is.na(x)]
+   if(any(x < 0)){
+     stop("geometric mean defined for positive values only\n")
+   } else{
+     exp(mean(log(x),na.rm=na.rm))
+   }
+ }
+ #plotting theme for ggplot2
+.theme<- theme(
+  axis.line = element_line(colour = 'gray', size = .75),
+  panel.background = element_blank(),
+  plot.background = element_blank()
+)
+
+```
+
+
+```{r descriptive-stats, echo=FALSE}
+sidebarLayout(
+  sidebarPanel(
+    selectInput(
+      inputId = "datachoice",
+      label = "Data",
+      choices = c("Upload file","Upload .xls/.xslx file",
+                  "Google Sheets","Input data"),
+      multiple = FALSE,
+      selected = NULL##"Input data"
+    ),
+    hr(),
+    conditionalPanel(
+    condition = "input.datachoice == 'Input data'",
+    textInput("x", "Data", value = "",
+    placeholder = "Enter values separated by a comma with decimals as points, e.g. 1.2, 3.14, 3.1417, etc."),
+    hr(),
+    ),
+    conditionalPanel(
+    condition = "input.datachoice == 'Upload file'",
+    fileInput("file1", "Choose File",
+              multiple = TRUE,
+              accept = c("text/csv",                       "text/comma-separated-values,text/plain",
+                         ".csv",".txt")),
+    hr(),
+    # Input: Checkbox if file has header ----
+    checkboxInput("header", "Header", TRUE),
+        
+    # Input: Select separator ----
+    radioButtons("sep", "Separator",
+                  choices = c(Comma = ",",
+                              Semicolon = ";",
+                              Tab = "\t",
+                 WhiteSpace=""),
+                  selected = ","),
+        
+        # Input: Select quotes ----
+    radioButtons("quote", "Quote",
+                 choices = c(None = "",
+                            "Double Quote" = '"',
+                            "Single Quote" = "'"),
+                selected = '"'),
+    ),
+    conditionalPanel(
+    condition = "input.datachoice == 'Upload .xls/.xslx file'",
+    fileInput('file2', 'Choose .xls/.xlsx file',accept = c(".xlsx",".xls"))
+    ),
+    conditionalPanel(
+    condition = "input.datachoice == 'Google Sheets'",
+    textInput("gsheets", "URL/Key", value = "", placeholder = "Enter URL or Key"),
+    submitButton("Submit"),
+    helpText("FIRSTkit usesd the R package googlesheets4. Make sure you have OAuth access credentials. For any question about googlesheets4 package, see https://github.com/tidyverse/googlesheets4.")
+    ),
+              # Input: Select what to display
+    selectInput("variable","Variable", choices = NULL),
+    selectInput("group","Groups", choices = NULL),
+    ## Input graphical display
+    selectInput("plot.type","Plot Type:",
+                 list(boxplot = "Boxplot", 
+                      histogram = "Histogram", 
+                      density = "density", 
+                      bar = "bar",
+                      ScatterPlot = "ScatterPlot")),
+    checkboxInput("show.points", "Display points (Boxplot only)", FALSE)
+
+    ),
+    mainPanel(
+      tabsetPanel(type = "tabs",
+      tabPanel("Data", 
+      DT::dataTableOutput('tbl1'),icon=icon("table")), # Data  
+      tabPanel("Location Summary",
+      hr(),
+      h4("Numerical variables"),
+      uiOutput("bartrim"),
+      uiOutput("location"),icon=icon("list-alt")),
+      tabPanel("Dispersion Summary",
+               uiOutput("dispersion")),
+      tabPanel("Graphical Display",
+               uiOutput("baralpha"),
+               plotlyOutput("plots",
+                            height = "600px", 
+                            width ="600px"),
+               icon=icon("bar-chart-o"))
+    )
+      )
+    )
+  
+d <- reactive({  
+  if(!is.null(input$file1)){
+    req(input$file1)
+    tt <- read.csv(input$file1$datapath,
+                   header = input$header,
+                   sep = input$sep,
+                   quote = input$quote)
+
+  } 
+  if(!is.null(input$file2)){
+    req(input$file2)
+    tt <- read_excel(input$file2$datapath,1)
+  }
+  # if(!is.null(input$gsheets)){
+  #   req(input$gsheets)
+  #   tt <- read_sheet(input$gsheets)
+  # }
+  if(is.null(input$file1) & is.null(input$file2)){
+  x <- extract(input$x)
+  tt<- data.frame(x = x)
+  } 
+  var.opts<-colnames(tt)
+  updateSelectInput(inputId =  "variable", choices = var.opts)
+  updateSelectInput(inputId = "group", choices = var.opts)
+
+  return(tt)
+})
+
+output$tbl1 <- DT::renderDataTable({
+    d()
+  })
+
+output$bartrim <- renderUI({
+  sliderInput("trim", "Trim level for the mean",min = 0, max = 0.5, value = 0)
+})
+
+output$location <- renderTable({
+  
+df1 <- d()
+if(ncol(df1)> 1){
+find.classes <- sapply(df1,class)
+df <- df1[,which((find.classes =="numeric")| (find.classes=="integer"))]
+} else{
+  df <- df1
+}
+    ## compute means
+   trim <- input$trim
+   Means <- apply(df,2,mean,na.rm=TRUE)
+   Trim.means <- apply(df,2,mean,na.rm=TRUE,trim = trim)
+   Medians <- apply(df,2,median,na.rm=TRUE)
+   geo.Means <- apply(df,2,geo.mean,na.rm=TRUE)
+   nks <- apply(df,2,function(z) sum(!is.na(z)))
+  dt1 <- rbind(nks,Means, Trim.means,Medians, geo.Means)
+  rownames(dt1) <- c("n","Mean",paste("Trimmed Mean (",paste(trim*100),"%)",sep = ""),"Median","Geometric Mean")
+  t(dt1)
+ },rownames = TRUE,digits=3)
+
+
+output$dispersion <- renderTable({
+  df1 <- d()
+  if(ncol(df1)> 1){
+    find.classes <- sapply(df1,class)
+    df <- df1[,which((find.classes =="numeric")| (find.classes=="integer"))]
+    } else{
+  df <- df1
+}
+  sds <- apply(df,2,sd,na.rm=TRUE)
+  vars <- apply(df,2,var,na.rm=TRUE)
+  IQRs <- apply(df,2,IQR,na.rm=TRUE)
+  mads <- apply(df,2,mad,na.rm=TRUE)
+  ranges <- apply(df,2,range,na.rm=TRUE)
+  nks <- apply(df,2,function(z) sum(!is.na(z)))
+  dt1 <- rbind(ranges,sds,vars, IQRs, mads)
+  rownames(dt1) <- c("Min","Max","SD","Variance","IQR","MAD")
+  t(dt1)
+ },rownames = TRUE,digits = 3)
+ 
+output$baralpha <- renderUI({
+      sliderInput("alpha", "Transparency",min = 0, max = 1, value = 1)
+})
+
+  ##plotting function using ggplot2
+output$plots <- renderPlotly({
+  if(!is.null(input$file1)| !is.null(input$file2)){
+    obj<-list(data=d(),
+               variable=input$variable,
+               group=input$group)
+
+    plot.obj<-obj
+    
+    plot.type<-switch(input$plot.type,
+                      "boxplot" = geom_boxplot(alpha=input$alpha),
+                      "histogram" =  geom_histogram(alpha=input$alpha,position="identity"),
+                      "density" =	geom_density(alpha=input$alpha),
+                      "bar" =	geom_bar(position="dodge")
+    )
+    
+    
+    if(input$plot.type=="boxplot")	{		##control for 1D or 2D graphs
+      p<-ggplot(plot.obj$data,
+                aes_string(
+                  x 		= plot.obj$group,
+                  y 		= plot.obj$variable,
+                  fill 	= plot.obj$group # let type determine plotting
+                )
+      ) + plot.type
+      
+      if(input$show.points)
+      {
+        p<-p+ geom_point(color='black',alpha=0.5, position = 'jitter')
+      }
+      
+    } else {
+      
+      p<-ggplot(plot.obj$data,
+                aes_string(
+                  x 		= plot.obj$variable,
+                  fill 	= plot.obj$group,
+                  group 	= plot.obj$group
+                  #color 	= as.factor(plot.obj$group)
+                )
+      ) + plot.type
+    }
+    
+    p<-p+labs(
+      fill 	= input$group,
+      x 		= "",
+      y 		= input$variable
+    )  +
+      .theme 
+    ggplotly(p)##print(p)
+  }
+  
+  
+  })
+
+```
+
+If you have any question or want to report something. Send a message to *israel.almodovar@upr.edu* or *maitra@iastate.edu*.

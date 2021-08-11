@@ -21,8 +21,7 @@ shinyUI(
     tabPanel("Two-Sample Inference", uiOutput("TwoSample")),#, getdeps()),
     tabPanel("Multi-sample inference and Analysis of Variance", uiOutput("kSample")),#, getdeps()),
 tabPanel("Categorical Data Analysis", uiOutput("chis")),
-    tabPanel("Simple Linear Regression", uiOutput("slr"))#, getdeps()),
-#    tabPanel("Multiple Linear Regression", uiOutput("mlr"))
+    tabPanel("Linear Regression", uiOutput("slr"))
   )
   )
 )
