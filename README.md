@@ -2,7 +2,7 @@
 
 ## Introduction 
 
-We all have seen the importance of statistics in sciences. Therefore, there is a tremendous need of teaching statistics as a introductory core course. A essential part in any statistics course is the use of a statistical software. On of the most popular statistical software is [**R**](https://www.r-project.org/). However, **R** can be challenging specially for those individuals who do not have any experience or just do not have the time to learn a programming language. [**FIRSTkit**](https://github.com/ialmodovar/FIRSTkit) was created with this in mind. **FIRSTkit** is Shiny App that is created to be free companion to introductory courses without required any previous programming knowledge. 
+We all have seen the increasing importance of statistical literacy in almost all disciplines. Consequently, there is tremendous need for teaching statistics as a introductory core course. Modern statistics is best done on the computer, so an essential part of any statistics course is necessarily the use of  statistical software. On of the most popular statistical software is [**R**](https://www.r-project.org/). However, **R** can be challenging specially for those individuals who do not have any experience or just do not have the time to learn a programming language. [**FIRSTkit**](https://github.com/ialmodovar/FIRSTkit) was created with this in mind. **FIRSTkit** is Shiny App that is created to be free companion to introductory courses without required any previous programming knowledge. 
 
 ## FIRSTkit capabilities
 
