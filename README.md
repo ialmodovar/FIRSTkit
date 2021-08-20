@@ -58,7 +58,7 @@ However,the software can also be installed and run locally.
     + Click on "Run App" 
   + *Using base R:*
     + Download the file, uncompress and navigate to the directory.
-    + Note that the R package **shiny** is needed from CRAN.
+    + Note that the R package **shiny** and **googlesheets** is needed from CRAN.
     + Then run **shiny::runApp()**
 
 If you have any questions e-mail *israel.almodovar@upr.edu* or *maitra@iastate.edu* or open an "issue" above (preferred).
