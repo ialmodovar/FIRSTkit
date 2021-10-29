@@ -8,8 +8,7 @@ shinyServer(function(input, output, session) {
       sliderInput("alpha","Significance level \\(\\alpha \\)",
                   min = 0,
                   max = 1,
-                  value = 0.05,step=0.001,
-      )
+                  value = 0.05,step=0.001)
     )
   )
   })
@@ -17,8 +16,7 @@ shinyServer(function(input, output, session) {
   output$intro <- renderUI({
     inclRmd("./Rmd/introduction.Rmd")
   })
-  
-	output$descriptive <- renderUI({
+  output$descriptive <- renderUI({
 	  inclRmd("./Rmd/descriptive-stat.Rmd")
 	})
 
@@ -28,23 +26,19 @@ shinyServer(function(input, output, session) {
 	#  withMathJax(inclRmd("./Rmd/Three_Sample_or_more_Inference.Rmd"))	
 	# })
 	
-	output$OneSample <- renderUI({
-	withMathJax(inclRmd("./Rmd/One_Sample_Inference.Rmd"))
-	})
-	output$TwoSample <- renderUI({
-	  withMathJax(inclRmd("./Rmd/Two_Sample_Inference_V2.Rmd"))
-	})
+	 output$OneSample <- renderUI({
+	 withMathJax(inclRmd("./Rmd/One_Sample_Inference.Rmd"))
+	 })
+	 output$TwoSample <- renderUI({
+	   withMathJax(inclRmd("./Rmd/Two_Sample_Inference.Rmd"))
+	 })
 	output$kSample <- renderUI({
-	  withMathJax(inclRmd("./Rmd/Three_Sample_or_more_Inference.Rmd"))
-	})
-	output$chis <- renderUI({
-	  withMathJax(inclRmd("./Rmd/categorical.Rmd"))
-	})
-	output$slr <- renderUI({
-	  withMathJax(inclRmd("./Rmd/SLR.Rmd"))
-	})
-	# output$mlr <- renderUI({
-	#   withMathJax(inclRmd("./Rmd/MLR.Rmd"))
+	   withMathJax(inclRmd("./Rmd/Three_Sample_or_more_Inference.Rmd"))
+	 })
+	# output$chis <- renderUI({
+	#   withMathJax(inclRmd("./Rmd/categorical.Rmd"))
 	# })
-
+	 output$slr <- renderUI({
+	   withMathJax(inclRmd("./Rmd/SLR.Rmd"))
+	 })
 })

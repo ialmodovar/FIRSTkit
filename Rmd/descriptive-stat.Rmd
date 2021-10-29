@@ -1,11 +1,10 @@
 ---
-title: "Descriptive statistics"
+title: "Descriptive Statistics"
 output: html_document
 runtime: shiny
 ---
 
-
-```{r setup, include=FALSE}
+```{r setup, include=FALSE,message=FALSE}
 library("ggplot2")
 library("plotly")
 library("gridExtra")
@@ -14,19 +13,24 @@ library("knitr")
 library("pander")
 library("shinythemes")
 library("readxl")
+library("googlesheets4")
 
 knitr::opts_chunk$set(echo = TRUE)
- extract <- function(text) {
+
+extract <- function(text) {
     text <- gsub(" ", "", text)
     split <- strsplit(text, ",", fixed = FALSE)[[1]]
     as.numeric(split)
  }
+ 
  geo.mean <- function(x,na.rm=TRUE){
-  x <- x[!is.na(x)]
+    if(na.rm){
+    x <- x[!is.na(x)]
+    }
    if(any(x < 0)){
-     stop("geometric mean defined for positive values only\n")
+     stop("geometric mean is only defined for positive values only\n")
    } else{
-     exp(mean(log(x),na.rm=na.rm))
+     exp(mean(log(x)))
    }
  }
  #plotting theme for ggplot2
@@ -39,16 +43,18 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-```{r descriptive-stats, echo=FALSE}
+```{r descriptive-stats, echo=FALSE,message=FALSE}
 sidebarLayout(
   sidebarPanel(
     selectInput(
       inputId = "datachoice",
       label = "Data",
-      choices = c("Upload file","Upload .xls/.xslx file","Input data"),
+      choices = c("Upload file",
+                  "Upload .xlsx/.xls file",
+                  "Google Sheets",
+                  "Input data"),
       multiple = FALSE,
-      selected = NULL##"Input data"
-    ),
+      selected = NULL),
     hr(),
     conditionalPanel(
     condition = "input.datachoice == 'Input data'",
@@ -59,19 +65,20 @@ sidebarLayout(
     conditionalPanel(
     condition = "input.datachoice == 'Upload file'",
     fileInput("file1", "Choose File",
-              multiple = TRUE,
+              multiple = FALSE,
               accept = c("text/csv",                       "text/comma-separated-values,text/plain",
                          ".csv",".txt")),
     hr(),
-        # Input: Checkbox if file has header ----
+    # Input: Checkbox if file has header ----
     checkboxInput("header", "Header", TRUE),
         
     # Input: Select separator ----
     radioButtons("sep", "Separator",
                   choices = c(Comma = ",",
                               Semicolon = ";",
-                              Tab = "\t"),
-                  selected = ","),
+                              Tab = "\t",
+                              WhiteSpace=""),
+                selected = ","),
         
         # Input: Select quotes ----
     radioButtons("quote", "Quote",
@@ -81,41 +88,63 @@ sidebarLayout(
                 selected = '"'),
     ),
     conditionalPanel(
-    condition = "input.datachoice == 'Upload .xls/.xslx file'",
-    fileInput('file2', 'Choose .xls/.xlsx file',accept = c(".xlsx",".xls"))
-      ),
+    condition = "input.datachoice == 'Upload .xlsx/.xls file'",
+    fileInput('file2', 'Choose .xls/.xlsx file',multiple = FALSE,accept = c(".xlsx",".xls"))
+    ),
+    conditionalPanel(
+    condition = "input.datachoice == 'Google Sheets'",
+    textInput("gsheets", "URL/Key", value = "", placeholder = "Enter URL or Key"),
+    submitButton("Submit"),
+    helpText("FIRSTkit uses the R package googlesheets4. Make sure you have OAuth access credentials. For any question about googlesheets4 package, see https://github.com/tidyverse/googlesheets4.")
+    ),
               # Input: Select what to display
-     selectInput("variable","Variable", choices = NULL),
-     selectInput("group","Groups", choices = NULL),
+    selectInput("variable","Variable", choices = NULL),
+    selectInput("group","Groups", choices = NULL),
     ## Input graphical display
-     selectInput("plot.type","Plot Type:",
-                 list(boxplot = "Boxplot", 
-                      histogram = "Histogram", 
-                      density = "density", 
-                      bar = "bar",
+    selectInput("plot.type","Plot Type:",
+                 list(Boxplot = "Boxplot", 
+                      Histogram = "Histogram", 
+                      Density = "Density", 
+                      Bar = "Bar",
                       ScatterPlot = "ScatterPlot")),
     checkboxInput("show.points", "Display points (Boxplot only)", FALSE)
-
     ),
     mainPanel(
       tabsetPanel(type = "tabs",
       tabPanel("Data", 
-      DT::dataTableOutput('tbl1')), # Data  
-      tabPanel("Location Summary",
+      DT::dataTableOutput('tbl1'),
+      icon=icon("table")), # Data  
+      tabPanel("Descriptive Statistics",
       hr(),
       h4("Numerical variables"),
       uiOutput("bartrim"),
-      uiOutput("location")),
-      tabPanel("Dispersion Summary",
-               uiOutput("dispersion")),
+      h4("Location Summaries"),
+      uiOutput("location"),
+      h4("Dispersion Summaries"),
+      uiOutput("dispersion"),
+      icon=icon("list-alt")),
       tabPanel("Graphical Display",
                uiOutput("baralpha"),
-               plotlyOutput("plots",
-                            height = "600px", width ="600px"))
-    )
+               uiOutput("plots"),
+               icon=icon("bar-chart-o"))
+      )
       )
     )
+
+ # #update group and
+ #  #variables based on the data
+ #  observe({
+ #    #browser()
+ #    if(!exists(input$dataset)) return() #make sure upload exists
+ #    var.opts<-colnames(get(input$dataset))
+ #    updateSelectInput(session, "variable", choices = var.opts)
+ #    updateSelectInput(session, "group", choices = var.opts)
+ #  })
   
+output$plots <- renderUI({
+    plotlyOutput("pp")
+  })
+
 d <- reactive({  
   if(!is.null(input$file1)){
     req(input$file1)
@@ -129,6 +158,10 @@ d <- reactive({
     req(input$file2)
     tt <- read_excel(input$file2$datapath,1)
   }
+  # if(!is.null(input$gsheets)){
+  #   req(input$gsheets)
+  #   tt <- read_sheet(input$gsheets)
+  # }
   if(is.null(input$file1) & is.null(input$file2)){
   x <- extract(input$x)
   tt<- data.frame(x = x)
@@ -149,9 +182,8 @@ output$bartrim <- renderUI({
 })
 
 output$location <- renderTable({
-  
-df1 <- d()
-if(ncol(df1)> 1){
+  df1 <- d()
+  if(ncol(df1)> 1){
 find.classes <- sapply(df1,class)
 df <- df1[,which((find.classes =="numeric")| (find.classes=="integer"))]
 } else{
@@ -167,7 +199,7 @@ df <- df1[,which((find.classes =="numeric")| (find.classes=="integer"))]
   dt1 <- rbind(nks,Means, Trim.means,Medians, geo.Means)
   rownames(dt1) <- c("n","Mean",paste("Trimmed Mean (",paste(trim*100),"%)",sep = ""),"Median","Geometric Mean")
   t(dt1)
- },rownames = TRUE,digits=3)
+ },rownames = TRUE,digits=4)
 
 
 output$dispersion <- renderTable({
@@ -185,17 +217,17 @@ output$dispersion <- renderTable({
   ranges <- apply(df,2,range,na.rm=TRUE)
   nks <- apply(df,2,function(z) sum(!is.na(z)))
   dt1 <- rbind(ranges,sds,vars, IQRs, mads)
-  rownames(dt1) <- c("Min","Max","SD","Variance","IQR","MAD")
+  rownames(dt1) <- c("Min","Max","Std Dev","Var","IQR","MAD")
   t(dt1)
- },rownames = TRUE,digits = 3)
+ },rownames = TRUE,digits = 4)
  
 output$baralpha <- renderUI({
       sliderInput("alpha", "Transparency",min = 0, max = 1, value = 1)
 })
 
   ##plotting function using ggplot2
-output$plots <- renderPlotly({
-  if(!is.null(input$file1)| !is.null(input$file2)){
+output$pp <- renderPlotly({
+ if(!is.null(input$file1)| !is.null(input$file2)){
     obj<-list(data=d(),
                variable=input$variable,
                group=input$group)
@@ -203,25 +235,36 @@ output$plots <- renderPlotly({
     plot.obj<-obj
     
     plot.type<-switch(input$plot.type,
-                      "boxplot" = geom_boxplot(alpha=input$alpha),
-                      "histogram" =  geom_histogram(alpha=input$alpha,position="identity"),
-                      "density" =	geom_density(alpha=input$alpha),
-                      "bar" =	geom_bar(position="dodge")
+                      "Boxplot" = geom_boxplot(alpha=input$alpha),
+                      "Histogram" = geom_histogram(alpha=input$alpha,position="identity"),
+                      "Density" =	geom_density(alpha=input$alpha),
+                      "Bar" =	geom_bar(position="dodge"),
+                      "ScatterPlot" = geom_point()
     )
     
-    
-    if(input$plot.type=="boxplot")	{		##control for 1D or 2D graphs
+    if((input$plot.type=="Boxplot")|input$plot.type=="ScatterPlot")	{	
+      if(input$plot.type=="Boxplot"){
       p<-ggplot(plot.obj$data,
                 aes_string(
                   x 		= plot.obj$group,
                   y 		= plot.obj$variable,
-                  fill 	= plot.obj$group # let type determine plotting
+                  fill 	= plot.obj$group 
                 )
       ) + plot.type
       
       if(input$show.points)
       {
         p<-p+ geom_point(color='black',alpha=0.5, position = 'jitter')
+      }
+      } else{
+          p<-ggplot(plot.obj$data,
+                aes_string(
+                  x 		= plot.obj$group,
+                  y 		= plot.obj$variable,
+                  fill 	= plot.obj$group,
+                  col = plot.obt$group,
+                )
+      ) + plot.type
       }
       
     } else {
@@ -240,15 +283,13 @@ output$plots <- renderPlotly({
       fill 	= input$group,
       x 		= "",
       y 		= input$variable
-    )  +
-      .theme 
-    ggplotly(p)##print(p)
+    )  + .theme 
+    ggplotly(p)
+  
   }
   
-  
   })
-##[**Arithmetic mean**](https://github.com/ialmodovar/FIRSTkit/help)
 
 ```
 
-If you have any question or want to report something. Send a message to *israel.almodovar@upr.edu* or *maitra@iastate.edu*.
+

@@ -36,9 +36,9 @@ ci <- c(paste("(",paste(round(twosided$conf.int[1],digits=3),",",
 
 res <- data.frame(Test = tt,Pval = pval, CI =ci)
 names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
- rownames(res) <- c(paste("H_1: mu = ",mu0,sep=""),
-                     paste("H_1: mu < ",mu0,sep=""),
-                     paste("H_1: mu > ",mu0,sep=""))
+ rownames(res) <- c(paste("\\( H_{1}: \\mu = \\)",mu0,sep=""),
+                     paste("\\( H_{1}: \\mu < \\)",mu0,sep=""),
+                     paste("\\( H_{1}: \\mu > \\)",mu0,sep=""))
 res
 }
 
@@ -66,9 +66,9 @@ all.wilcoxon.one.sample.test <- function(x, mu0 = 0, alpha = 0.05,...){
   res <- data.frame(Test = tt,Pval = pval, CI =ci)
   names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
   
- rownames(res) <- c(paste("H_1: mu = ",mu0,sep=""),
-                     paste("H_1: mu < ",mu0,sep=""),
-                     paste("H_1: mu > ",mu0,sep=""))
+ rownames(res) <- c(paste("\\( H_{1}: \\mu = \\)",mu0,sep=""),
+                     paste("\\( H_{1}: \\mu < \\)",mu0,sep=""),
+                     paste("\\( H_{1}: \\mu > \\)",mu0,sep=""))
  
 res
 }
@@ -88,9 +88,9 @@ one.sample.var.test <- function(x,sigma0=1,alpha=0.05,...){
   res <- data.frame(Test = X2,Pval = pval, CI =ci)
 names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
 
- rownames(res) <- c(paste("H_1: sigma^2 =",sigma0,sep=""),
-                     paste("H_1: sigma^2 < ",sigma0,sep=""),
-                     paste("H_1: sigma^2 > ",sigma0,sep=""))
+ rownames(res) <- c(paste("\\( H_{1}: \\sigma^{2} =\\",sigma0,sep=""),
+                     paste("\\( H_{1}: \\sigma^{2} < \\)",sigma0,sep=""),
+                     paste("\\( H_{1}: \\sigma^{2} > \\)",sigma0,sep=""))
  
 res
 
@@ -120,9 +120,9 @@ paste("(",round(p+1* qnorm(alpha) * se,digits=5),",",1,")",sep=""))
   res <- data.frame(Test = z,Pval = pval, CI =ci)
 names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
 
- rownames(res) <- c(paste("H_1: p = ",p0,sep=""),
-                     paste("H_1: p < ",p0,sep=""),
-                     paste("H_1: p > ",p0,sep=""))
+ rownames(res) <- c(paste("\\( H_{1}: p = \\)",p0,sep=""),
+                     paste("\\( H_{1}: p < \\)",p0,sep=""),
+                     paste("\\( H_{1}: p > \\)",p0,sep=""))
  
 res
 
@@ -130,9 +130,6 @@ res
 
 ```
 
-This **Shiny App** is made with the purpose to be free and educational. It comes without guarantee. You can perform basic statistical inference analysis such as one-sample. The user can perform parametric *t* test as well, $\chi^2$ test for the variance. Note that the argument to perform a one sample test for the variance is in terms of the standard deviation. 
-
-User can also select non-parametric approach. Wilcoxon-signed rank test uses the argument of $\mu_0$, although, this does not represent the mean but rather a location parameter. 
 
 
 ```{r inputs-one-sample, echo=FALSE}
@@ -142,7 +139,7 @@ sidebarLayout(
     selectInput(
       inputId = "datachoice",
       label = "Data (Input some data or upload a file)",
-      choices = c("Input data","Upload file","Upload .xls/.xslx file"),
+      choices = c("Upload file","Upload .xls/.xslx file","Input data"),
       multiple = FALSE,
       selected = NULL##"Input data"
     ),
@@ -150,7 +147,7 @@ sidebarLayout(
     conditionalPanel(
     condition = "input.datachoice == 'Input data'",
     textInput("x", "Data", value = "",
-    placeholder = "Enter values separated by a comma with decimals as points, e.g. 1.2, 3.14, 3.1417, etc."),
+    placeholder = "Enter values separated by a comma with decimals as points, e.g. 3.14, 3.1417, etc."),
     hr(),
     ),
     conditionalPanel(
@@ -184,8 +181,8 @@ sidebarLayout(
     ),
     selectInput("variable","Variable", choices = NULL),
     uiOutput("alpha_line"),
-    textInput("mu0","\\(  H_0:\\mu = \\mu_0 \\)",value="0",placeholder="Indicate the true value for the location of interest "),
-     textInput("sigma0","\\( H_0:\\sigma^2 = \\sigma^2_0 \\)",value="1",placeholder="Indicate the true value for the dispersion of interest"),
+    textInput("mu0","\\(  H_0:\\mu = \\mu_0 \\)",value="0",placeholder="Null value for the location"),
+     textInput("sigma0","\\( H_0:\\sigma^2 = \\sigma^2_0 \\)",value="1",placeholder="Null value for the population variance "),
     textInput("p0","\\( H_0: p = p_0 \\)",value="0.5",placeholder="Indicate the true value for the proportion of interest"),
         numericInput("nprop", " Sample size (\\(n \\))",
                      value = 50, min = 0, step = 1
@@ -222,17 +219,20 @@ sidebarLayout(
         tabsetPanel(type = "tabs",
         tabPanel("Location Inference",
         br(),
-        tags$b("One Sample \\( t \\) test"),
-        uiOutput("mean"),
+        tags$b("One-Sample \\( t \\) test"),
+        withMathJax(),
+        uiOutput("tableUImean"),
         br(),
         tags$b("Wilcoxon-signed rank test"),
         uiOutput("loc")),
         tabPanel("Dispersion Inference",
         br(),
         tags$b("One Sample Variance test"),
-        withMathJax(uiOutput("variance"))),
+        withMathJax(),
+        uiOutput("tableUIvar"),
+        ),
         tabPanel("Proportion Inference",
-        tags$b("One Sample proportion test"),
+        tags$b("One-Sample Proportion test"),
                  uiOutput("proportion"))
         )
   )
@@ -303,12 +303,24 @@ output$proportion <- renderTable({
                        n = input$nprop,p = input$p_prop,p0 = p0,alpha = alpha)
 },rownames = TRUE,digits = 4)
   
+  output$tableUImean <- renderUI({
+    mu0 <- as.numeric(input$mu0)
+    alpha <- as.numeric(input$alpha)
+    tagList(
+      withMathJax(),
+      withMathJax(tableOutput("mean"))
+    )
+  })
+
+  output$tableUIvar <- renderUI({
+    sigma0 <- as.numeric(input$sigma0)
+    alpha <- as.numeric(input$alpha)
+    tagList(
+      withMathJax(),
+      withMathJax(tableOutput("variance"))
+    )
+  })
 ```
 
-### One sample $t$ test
-
-### A chi-square test
-
-A chi-square test (Snedecor and Cochran, 1983) can be used to test if the variance of a population is equal to a specified value. This test can be either a two-sided test or a one-sided test. The two-sided version tests against the alternative that the true variance is either less than or greater than the specified value. The one-sided version only tests in one direction. The choice of a two-sided or one-sided test is determined by the problem. For example, if we are testing a new process, we may only be concerned if its variability is greater than the variability of the current process. 
 
 To learn more, see [FIRSTkit](https://github.com/ialmodovar/FIRSTkit). If you have any question or want to report to *israel.almodovar@upr.edu* or *maitra@iastate.edu*. 

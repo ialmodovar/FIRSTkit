@@ -12,15 +12,14 @@
 
 shinyUI(
   fluidPage(theme = shinytheme("sandstone"),
-            withMathJax(
+  withMathJax(
   navbarPage("FIRSTkit",
     tabPanel("Home", uiOutput("intro")),
     tabPanel("Descriptive Statistics", uiOutput("descriptive"),getdeps()),
-#    tabPanel("Inference",cases.inference, uiOutput("Inference"), getdeps()),
     tabPanel("One-Sample Inference", uiOutput("OneSample"), getdeps()),
-    tabPanel("Two-Sample Inference", uiOutput("TwoSample")),#, getdeps()),
-    tabPanel("Multi-sample inference and Analysis of Variance", uiOutput("kSample")),#, getdeps()),
-tabPanel("Categorical Data Analysis", uiOutput("chis")),
+    tabPanel("Two-Sample Inference", uiOutput("TwoSample"), getdeps()),
+   tabPanel("Multi-sample inference and Analysis of Variance", uiOutput("kSample")),#, getdeps()),
+#tabPanel("Categorical Data Analysis", uiOutput("chis")),
     tabPanel("Linear Regression", uiOutput("slr"))
   )
   )

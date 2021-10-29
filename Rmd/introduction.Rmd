@@ -1,5 +1,5 @@
 ---
-title: First Impressions R-based Statistics Toolkit ([FIRSTkit](https://github.com/ialmodovar/FIRSTkit))
+title: First Impressions *R*-based Statistics Toolkit ([FIRSTkit](https://github.com/ialmodovar/FIRSTkit))
 output: html_document
 runtime: shiny
 fontsize: 12pt
@@ -19,11 +19,10 @@ knitr::opts_chunk$set(echo = TRUE)
 # Introduction 
 
 
-[**FIRSTkit**](https://github.com/ialmodovar/FIRSTkit) was created to be used as a companion for introductory statistics courses. It does not required any previous knowledge of [**R**](https://www.r-project.org/). **FIRSTkit** was made with the purpose to be used as companion to introductory statistics and data sciences courses. Most web-based application are created as a alternative tool for data analysis rather than teaching. This will allow first time  users, or users who have low interest in **R** programming to perform statistical analysis and be successful in their courses. 
+[**FIRSTkit**](https://github.com/ialmodovar/FIRSTkit) was created to be used as a companion for introductory statistics courses. It does not required any previous knowledge of [**R**](https://www.r-project.org/). **FIRSTkit** was made with the purpose to be used as companion to introductory statistics and data sciences courses. Unlike most Shiny-App that are create for basic analysis, **FIRSTkit** is indented to be a companion in introductory courses. Most web-based application are created as a alternative tool for data analysis rather than teaching. This will allow first time users, or users who have low interest in **R** programming to perform statistical analysis and be successful in their courses. 
 
 
 ## FIRSTkit capabilities
-
 
 User can input their own values for a quick analysis, upload their own datasets. **FIRSTkit** allow to upload *.csv, .txt, .xls, xlsx*. If missing values are present, **FIRSTkit** will be remove them. **FIRSTkit** uses the **R** argument *na.rm=TRUE* whenever is possible. Our software is create to be use in introductory classes. Therefore, **FIRSTkit** consist in topics cover in this class. The topics that are cover in **FIRSTkit** 1) Descriptive Statistics 2) Inference Statistics and 3) Linear regression.
 
@@ -32,11 +31,11 @@ User can input their own values for a quick analysis, upload their own datasets.
 As a descriptive tools, **FIRSTkit** allow to compute location and dispersion summary. It also allow graphical display to be used in descriptive statistics
 
   + Location measurements
-    + Mean: The sample mean is defined to be,
+    + **Mean**: The sample mean is defined to be,
 \[
 \bar{x}= \frac{1}{n}\sum^n_{i=1}x_i
 \]
-    + Trimmed Mean: This mean is computed after discarding given parts of a probability distribution or sample at the high and low end, and typically discarding an equal amount of both. This number of points to be discarded is usually given as a percentage of the total number of points, but may also be given as a fixed number of points. 
+    + **Trimmed Mean**: This mean is computed after discarding given parts of a probability distribution or sample at the high and low end, and typically discarding an equal amount of both. This number of points to be discarded is usually given as a percentage of the total number of points, but may also be given as a fixed number of points. 
 
       1- Find the number of observations $n$.
       
@@ -48,42 +47,45 @@ As a descriptive tools, **FIRSTkit** allow to compute location and dispersion su
 \[
 \bar{x}_{k} = \frac{X_{k+1}+X_{k+2}+…+X_{n-k}}{n-2k} 
 \]
-    + Median: Middle value separating the greater and lesser halves of a data set. The sample median is defined as,
+    + **Median**: Middle value separating the greater and lesser halves of a data set. The sample median is defined as,
 \[
-M = X_{(0.5 \times n)}
+M = X_{(0.5 \times n)} =\begin{cases}
+\frac{X_{(n/2)}+X_{(n/2)+1}}{2} & \mbox{if $n$ is even} \\
+X_{(n+1)/2} & \mbox{if $n$ is odd}
+\end{cases}
 \]
-    + Geometric Mean: The geometric mean of a non-empty data set of (positive) numbers is always at most their arithmetic mean. The geometric mean is defined as,
+    + **Geometric Mean**: The geometric mean of a non-empty data set of (positive) numbers is always at most their arithmetic mean. The geometric mean is defined as,
 \[
 g = \left(\prod^n_{i=1}x_i\right)^{1/n}
 \]
   + Dispersion summary 
-    + Standard Deviation: is a measure of the amount of variation or dispersion of a set of values. The sample standard deviation is defined as,
+    + **Standard Deviation**: is a measure of the amount of variation or dispersion of a set of values. The sample standard deviation is defined as,
 \[
 s = \sqrt{\frac{1}{n-1}\sum^n_{i=1}(x_i-\bar{x})^2}
 \]
-    + Variance: is the expectation of the squared deviation of a random variable from its mean. Informally, it measures how far a set of numbers is spread out from their average value. 
+    + **Variance**: is the expectation of the squared deviation of a random variable from its mean. Informally, it measures how far a set of numbers is spread out from their average value. 
 \[
 s^2 = \frac{1}{n-1}\sum^n_{i=1}(x_i-\bar{x})^2
 \]
-    + Inter-quartile range (IQR): difference between 75th and 25th percentiles. The IQR is defined as
+    + **Inter-quartile range (IQR)**: difference between 75th and 25th percentiles. The IQR is defined as
 \[
 IQR = X_{(0.75 n)}- X_{(0.25 n)}
 \]
-    + Median Absolute Deviation (MAD): Compute the median absolute deviation, i.e., the (lo-/hi-) median of the absolute deviations from the median, and (by default) adjust by a factor for asymptotically normal consistency.
+    + **Median Absolute Deviation (MAD)**: Compute the median absolute deviation, i.e., the (lo-/hi-) median of the absolute deviations from the median, and (by default) adjust by a factor for asymptotically normal consistency.
 \[
 MAD = \mbox{median}_i(|X_i-\mbox{median}(X_i)|)
 \]
-    + Range:  the difference between minimum and maximum of all the given arguments.
+    + **Range**: the difference between minimum and maximum of all the given arguments.
 \[
 R = \max X_i - \min X_i
 \]
 
   + Univariate graphical display 
-    + Box-plot:  Graphical tool to depicting groups of numerical data through their quartiles. Box plots may also have lines extending from the boxes (whiskers) indicating variability outside the upper and lower quartiles, hence the terms box-and-whisker plot and box-and-whisker diagram. Outliers may be plotted as individual points
-    + Histogram: Graphical approximation of the distribution of numerical variable
-    + Density plot: Graphical representation of the distribution of a numerical variable. It uses a smooth estimating to show the probability density function of the variable.
-    + Bar Graph: Graphical tool that presents categorical data with rectangular bars with heights or lengths proportional to the values that they represent.
-    + Scatter plot (two variables): Graphical display that shows the relationship between two numerical variables $(x,y)$
+    + **Box-plot**:  Graphical tool to depicting groups of numerical data through their quartiles. Box plots may also have lines extending from the boxes (whiskers) indicating variability outside the upper and lower quartiles, hence the terms box-and-whisker plot and box-and-whisker diagram. Outliers may be plotted as individual points
+    + **Histogram**: Graphical approximation of the distribution of numerical variable
+    + **Density plot**: Graphical representation of the distribution of a numerical variable. It uses a smooth estimating to show the probability density function of the variable.
+    + **Bar Graph**: Graphical tool that presents categorical data with rectangular bars with heights or lengths proportional to the values that they represent.
+    + **Scatter plot (two variables)**: Graphical display that shows the relationship between two numerical variables $(x,y)$
 
 ### **Inference statistics**
 
@@ -93,7 +95,7 @@ R = \max X_i - \min X_i
       H_0: \mu = \mu_0 \mbox{ against } H_1: \mu \neq \mu_0
       \]
     + Wilcoxon signed-ranked test a location parameter: If your sample sizes are very small, you might not be able to test for normality.  When you cannot safely assume normality, you can perform a nonparametric test that does not assume normality
-          \[
+      \[
       H_0: M = M_0 \mbox{ against } H_1: M \neq M_0
       \]
 
@@ -103,20 +105,24 @@ R = \max X_i - \min X_i
       H_0: \sigma^2 = \sigma^2_0 \mbox{ against } H_1: \sigma^2 \neq \sigma^2_0
       \]
     + One-Sample proportion test
+    
+Performs an exact test of a simple null hypothesis about the probability of success in a Bernoulli experiment.
+      \[
+      H_0: p = p_0 \mbox{ against } H_1: p \neq p_0
+      \]
+    
+    
   + Two-Sample Inference
   + Dependent $t$-test for paired samples
-This test is used when the samples are dependent; that is, when there is only one sample that has been tested twice (repeated measures) or when there are two samples that have been matched or ``paired''. This is an example of a paired difference test. The t statistic is calculated as
+This test is used when the samples are dependent; that is, when there is only one sample that has been tested twice (repeated measures) or when there are two samples that have been matched or ``paired''.  The $t$ statistic is calculated as
 \[
-    t = \frac{\bar{X}-\mu_0}{s_D/\sqrt{n}}
+t = \frac{\bar{X}-\delta_0}{s_D/\sqrt{n}}
 \]
-where $\bar{X}$ are the average and $s_D$ standard deviation of the differences between all pairs. The pairs are e.g. either one person's pre-test and post-test scores or between-pairs of persons matched into meaningful groups (for instance drawn from the same family or age group: see table). The constant μ0 is zero if we want to test whether the average of the difference is significantly different. The degree of freedom used is $n-1$, where $n$ represents the number of pairs. 
+where $\bar{X}$ are the average and $s_D$ standard deviation of the differences between all pairs. The constant $\delta_0$ is zero if we want to test whether the average of the difference is significantly different. The degree of freedom used is $n-1$, where $n$ represents the number of pairs. 
 
-This *Shiny App* is made with the purpose to be free and educational. It comes without guarantee. You can perform basic statistical inference analysis such as one-sample. The user can perform parametric *t* test as well, $\chi^2$ test for the variance. Note that the argument to perform a one sample test for the variance is in terms of the standard deviation. 
-
-  + Two-Sample *t* test to compare Two Means
+  + Two-Sample $t$ test to compare Two Means
     
-The two-sample $t$-test is used to determine if two population means are equal. A common application is to test if a new process or treatment is superior to a current process or treatment.
-
+The two-sample $t$-test is used to determine if two population means are equal. 
 - The data may either be paired or not paired. By paired, we mean that there is a one-to-one correspondence between the values in the two samples. That is, if $X_1, X_2, \ldots, X_n$ and $Y_1, Y_2,\ldots, Y_n$ are the two samples, then $X_i$ corresponds to $Y_i$. For paired samples, the difference $X_i-Y_i$ is usually calculated. For unpaired samples, the sample sizes for the two samples may or may not be equal. The formulas for paired data are somewhat simpler than the formulas for unpaired data.
 
 - The variances of the two samples may be assumed to be equal or unequal. Equal variances yields somewhat simpler formulas, although with computers this is no longer a significant issue.
@@ -152,9 +158,9 @@ where $Y_i \sim N(\beta_0+\sum^p_{j=1}\beta_j x_{ij},\sigma^2)$ and $\varepsilon
 
 ## Authors
 
-- [Israel A. Almodóvar-Rivera](https://github.com/ialmodovar/) is Assistant Professor in the Department of Biostatistics and Epidemiology at University of Puerto Rico-Medical Science Campus. 
+- [Israel A. Almodóvar-Rivera](https://github.com/ialmodovar/) is an Assistant Professor in the Department of Mathematical Sciences at University of Puerto Rico at Mayag\"uez. 
 
-- [Ranjan Maitra](https://www.stat.iastate.edu/people/ranjan-maitra) is Professor in the Department of Statistics at Iowa State University.
+- [Ranjan Maitra](https://www.stat.iastate.edu/people/ranjan-maitra) is an Professor in the Department of Statistics at Iowa State University.
 
-If you have any question or want to report something. Send a message to *israel.almodovar@upr.edu* or *maitra@iastate.edu*.
+If you have any question or want to report something, or you want to contribute in this project you can send a message  to *israel.almodovar@upr.edu* or *maitra@iastate.edu*.
 
