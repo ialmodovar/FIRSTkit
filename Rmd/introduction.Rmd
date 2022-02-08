@@ -150,9 +150,9 @@ The two-sample $t$-test is used to determine if two population means are equal.
 ### **Linear Regression**
 
 Fit a linear regression model, (either simple or multiple)  linear regression. Suppose we have a dependent variable $Y$ and multiple regressors $x_1,\ldots, x_p$. The linear regression accepted in *FIRSTkit* assumed the following structure
-\begin{equation}
+\[
 Y_i = \beta_0+\sum^p_{j=1}\beta_j x_{ij}+\varepsilon_i
-\end{equation}
+\]
 where $Y_i \sim N(\beta_0+\sum^p_{j=1}\beta_j x_{ij},\sigma^2)$ and $\varepsilon_i \sim N(0,\sigma^2)$. In the linear regression the parameters have the following roles, $\beta_0$ is the $y$-intercept. While $\beta_1,\ldots, \beta_p$ are the slope associated with each of the regressors. In linear regression, we are assuming constant variance. *FIRSTkit* report the 
 
 
