@@ -158,9 +158,9 @@ where $Y_i \sim N(\beta_0+\sum^p_{j=1}\beta_j x_{ij},\sigma^2)$ and $\varepsilon
 
 ## Authors
 
-- [Israel A. Almodóvar-Rivera](https://github.com/ialmodovar/) is an Assistant Professor in the Department of Mathematical Sciences at University of Puerto Rico at Mayag\"uez. 
+- [Israel A. Almodóvar-Rivera](https://github.com/ialmodovar/) is Assistant Professor in the Department of Mathematical Sciences at University of Puerto Rico at Mayag\"uez. 
 
-- [Ranjan Maitra](https://www.stat.iastate.edu/people/ranjan-maitra) is an Professor in the Department of Statistics at Iowa State University.
+- [Ranjan Maitra](https://www.stat.iastate.edu/people/ranjan-maitra) is Professor and Associate Chair for Research in the Department of Statistics at Iowa State University.
 
 If you have any question or want to report something, or you want to contribute in this project you can send a message  to *israel.almodovar@upr.edu* or *maitra@iastate.edu*.
 
