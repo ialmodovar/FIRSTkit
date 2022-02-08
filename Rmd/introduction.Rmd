@@ -160,7 +160,7 @@ where $Y_i \sim N(\beta_0+\sum^p_{j=1}\beta_j x_{ij},\sigma^2)$ and $\varepsilon
 
 - [Israel A. Almodóvar-Rivera](https://github.com/ialmodovar/) is Assistant Professor in the Department of Mathematical Sciences at University of Puerto Rico at Mayag\"uez. 
 
-- [Ranjan Maitra](https://www.stat.iastate.edu/people/ranjan-maitra) is Professor and Associate Chair for Research in the Department of Statistics at Iowa State University.
+- [Ranjan Maitra](https://github.com/maitra) is Professor and Associate Chair for Research in the Department of Statistics at Iowa State University.
 
-If you have questions or want to report something, or you want to contribute to this project you can open an issue (**preferred**) or send a message  to *israel.almodovar@upr.edu* or *maitra@iastate.edu*.
+If you have questions or want to report something, or you want to contribute to this project please open an issue (**preferred**) or send a message  to *israel.almodovar@upr.edu* or *maitra@iastate.edu*.
 
