@@ -22,43 +22,56 @@ knitr::opts_chunk$set(echo = TRUE)
 [**FIRSTkit**](https://github.com/ialmodovar/FIRSTkit) was created to be used as a companion for introductory statistics courses. It does not required any previous knowledge of [**R**](https://www.r-project.org/). **FIRSTkit** was made with the purpose to be used as companion to introductory statistics and data sciences courses. Unlike most Shiny-App that are create for basic analysis, **FIRSTkit** is indented to be a companion in introductory courses. Most web-based application are created as a alternative tool for data analysis rather than teaching. This will allow first time users, or users who have low interest in **R** programming to perform statistical analysis and be successful in their courses. 
 
 
-## FIRSTkit capabilities
+## Data Input/Upload
 
-User can input their own values for a quick analysis, upload their own datasets. **FIRSTkit** allow to upload *.csv, .txt, .xls, xlsx*. If missing values are present, **FIRSTkit** will be remove them. **FIRSTkit** uses the **R** argument *na.rm=TRUE* whenever is possible. Our software is create to be use in introductory classes. Therefore, **FIRSTkit** consist in topics cover in this class. The topics that are cover in **FIRSTkit** 1) Descriptive Statistics 2) Inference Statistics and 3) Linear regression.
+**FIRSTkit** allow the user to upload dataset in the following extensions *.csv, .txt, .xls, xlsx*. Users can input their own values for a quick analysis. **FIRSTkit** also can read files from Google Sheets, this is because it uses the **R** package googlesheets. If missing values are present, **FIRSTkit** will automatically remove them, because **FIRSTkit** functions uses the **R** argument *na.rm=TRUE* whenever is possible. 
+
+## Topics
+
+Our software is create to be use in introductory statistics classes. Therefore, **FIRSTkit** consist in topics cover in this course. 
+The topics that are cover in **FIRSTkit** 
+
+1) Descriptive Statistics
+2) Introduction to Probability Theory
+3) Introduction to Distribution Function
+2) Statistical Inference 
+3) Simple and Multiple Linear regression.
 
 ### **Descriptive statistics**
 
 As a descriptive tools, **FIRSTkit** allow to compute location and dispersion summary. It also allow graphical display to be used in descriptive statistics
 
-  + Location measurements
+  + **Location measurements**
     + **Mean**: The sample mean is defined to be,
 \[
 \bar{x}= \frac{1}{n}\sum^n_{i=1}x_i
 \]
     + **Trimmed Mean**: This mean is computed after discarding given parts of a probability distribution or sample at the high and low end, and typically discarding an equal amount of both. This number of points to be discarded is usually given as a percentage of the total number of points, but may also be given as a fixed number of points. 
 
-      1- Find the number of observations $n$.
+      <!-- 1- Find the number of observations $n$. -->
+
+      <!-- 2- Reorder the $X_i$ from the smallest to the largest. -->
+
+      <!-- 3- Find lower case $p$ proportion trimmed. -->
+
+      <!-- 4- Compute $np$. If $np$ is an integer use $k=np$ and trim $k$ observations at both ends. The remaining observations is $n-2k$. The trimmed mean is defined as, -->
+      \[
+      \bar{x}_{k} = \frac{X_{k+1}+X_{k+2}+…+X_{n-k}}{n-2k} 
+      \]
       
-      2- Reorder the $X_i$ from the smallest to the largest.
-      
-      3- Find lower case $p$ proportion trimmed.
-      
-      4- Compute $np$. If $np$ is an integer use $k=np$ and trim $k$ observations at both ends. The remaining observations is $n-2k$. The trimmed mean is defined as,
-\[
-\bar{x}_{k} = \frac{X_{k+1}+X_{k+2}+…+X_{n-k}}{n-2k} 
-\]
     + **Median**: Middle value separating the greater and lesser halves of a data set. The sample median is defined as,
 \[
-M = X_{(0.5 \times n)} =\begin{cases}
+M = X_{(0.5 \times n)} =
+\begin{cases}
 \frac{X_{(n/2)}+X_{(n/2)+1}}{2} & \mbox{if $n$ is even} \\
 X_{(n+1)/2} & \mbox{if $n$ is odd}
 \end{cases}
 \]
-    + **Geometric Mean**: The geometric mean of a non-empty data set of (positive) numbers is always at most their arithmetic mean. The geometric mean is defined as,
+    + **Geometric Mean**: The geometric mean of a non-negative data set is always at most their arithmetic mean. The geometric mean is defined as,
 \[
 g = \left(\prod^n_{i=1}x_i\right)^{1/n}
 \]
-  + Dispersion summary 
+  + **Dispersion summary**
     + **Standard Deviation**: is a measure of the amount of variation or dispersion of a set of values. The sample standard deviation is defined as,
 \[
 s = \sqrt{\frac{1}{n-1}\sum^n_{i=1}(x_i-\bar{x})^2}
@@ -81,59 +94,80 @@ R = \max X_i - \min X_i
 \]
 
   + Univariate graphical display 
-    + **Box-plot**:  Graphical tool to depicting groups of numerical data through their quartiles. Box plots may also have lines extending from the boxes (whiskers) indicating variability outside the upper and lower quartiles, hence the terms box-and-whisker plot and box-and-whisker diagram. Outliers may be plotted as individual points
+    + **Box-plot**:  Graphical tool to depicting groups of numerical data through their quantiles. Box plots may also have lines extending from the boxes (whiskers) indicating variability outside the upper and lower quantiles, hence the terms box-and-whisker plot and box-and-whisker diagram. Outliers may be plotted as individual points
     + **Histogram**: Graphical approximation of the distribution of numerical variable
+    + **Stem-and-leaf plot**
     + **Density plot**: Graphical representation of the distribution of a numerical variable. It uses a smooth estimating to show the probability density function of the variable.
     + **Bar Graph**: Graphical tool that presents categorical data with rectangular bars with heights or lengths proportional to the values that they represent.
-    + **Scatter plot (two variables)**: Graphical display that shows the relationship between two numerical variables $(x,y)$
+    + **Scatter plot (two variables)**: Graphical display that shows the relationship between two numerical variables $(x,y)$.
+
+### **Probability Theory and Distribution functions**
+
+  + Probability Events
+    + For a given set of events, we can compute the union, intersection, independence of these events. The solutions are display using a Venn Diagram and for the conditional probability a Bayes tree diagram.
+  
+  + Bayes tree diagram required the input of a prior probability, false-positive, and true positive.
+    \[
+    P(A|B) = \frac{P(B|A)P(A)}{P(B)} = \frac{P(B|A)P(A)}{P(B|A^c)P(A^c)+P(B|A)P(A)}
+    \]
+  + Distribution functions
+    + Binomial Distribution:
+    + Poisson Distribution:
+    + Normal Distribution:
+    + Chi-Squared Distribution:
+    + Student's $t$ distribution:
+    + Snedecor's $F$ distribution:
 
 ### **Inference statistics**
 
-  + One-Sample Inference 
-    + One-Sample *t* test for the mean: If you have a continuous data and your data is a random sample from a normal population. Then, the one-sample $t$-test is a statistical hypothesis test that can be used to determine whether an unknown population mean is different from a specific value. 
+  + **One-Sample Inference** 
+    + **One-Sample *t*-test for a population mean $\mu$**: If you have a continuous data and your data is a random sample from a normal population. Then, the one-sample $t$-test is a statistical hypothesis test that can be used to determine whether an unknown population mean is different from a specific value. 
       \[
       H_0: \mu = \mu_0 \mbox{ against } H_1: \mu \neq \mu_0
       \]
-    + Wilcoxon signed-ranked test a location parameter: If your sample sizes are very small, you might not be able to test for normality.  When you cannot safely assume normality, you can perform a nonparametric test that does not assume normality
+    + **Wilcoxon signed-ranked test a location parameter**: When you cannot safely assume normality, you can perform a nonparametric test that does not assume normality
       \[
       H_0: M = M_0 \mbox{ against } H_1: M \neq M_0
       \]
-
-    + One-Sample $\chi^2$ Test for the Variance 
-    If you have a continuous data and your data is a random sample from a normal population. Then, the one-sample $\chi^2$ Test for the variance is a statistical hypothesis test that can be used to determine whether an unknown population variance is different from a specific value. 
+      Also, if your sample sizes are very small, you might need to consider this non-parametric approach.
+    + **One-Sample $\chi^2$-test for the population variance $\sigma^2$**: If you have a continuous data and your data is a random sample from a normal population. Then, the one-sample $\chi^2$ test for the variance is a statistical hypothesis test that can be used to determine whether an unknown population variance is different from a specific value. 
       \[
-      H_0: \sigma^2 = \sigma^2_0 \mbox{ against } H_1: \sigma^2 \neq \sigma^2_0
+      H_0: \sigma^2 = \sigma^2_0 \mbox{ against } H_1: \sigma^2 \neq \sigma^2_0,
       \]
-    + One-Sample proportion test
-    
-Performs an exact test of a simple null hypothesis about the probability of success in a Bernoulli experiment.
+      Note that this test can also be used for a standard deviation,
+      \[
+      H_0: \sigma = \sigma_0 \mbox{ against } H_1: \sigma \neq \sigma_0,
+      \]
+    + **One-Sample test for a population proportion**: Performs an exact test of a simple null hypothesis about the probability of success in a Bernoulli experiment.
       \[
       H_0: p = p_0 \mbox{ against } H_1: p \neq p_0
       \]
     
-    
-  + Two-Sample Inference
-  + Dependent $t$-test for paired samples
-This test is used when the samples are dependent; that is, when there is only one sample that has been tested twice (repeated measures) or when there are two samples that have been matched or ``paired''.  The $t$ statistic is calculated as
+  + **Two-Sample Inference**
+    + Two-Sample $t$-test for means comparison: The two-sample $t$-test is used to determine if two population means are equal. The data may either be paired or not paired.
+      + Dependent $t$-test for paired samples: This test is used when the samples are dependent; that is, when there is only one sample that has been tested twice (repeated measures) or when there are two samples that have been matched or ``paired''.  The $t$-statistic is calculated as
+    \[
+    t = \frac{\bar{X}-\delta_0}{S_D/\sqrt{n}},
+    \]
+where $\bar{X}$ are the average and $S_D$ standard deviation of the differences between all pairs. $\delta_0$ its the value under the null hypothesis, i.e., want to test whether the average of the difference is significantly different. The degree of freedom used is $n-1$, where $n$ represents the number of pairs. 
+      + **Independent two $t$-test for the comparison of two means**: 
+      This test is used when the samples are independent; that is, when there are two sample that are been tested. The variances of the two samples may be assumed to be equal or unequal. If we assumed (by default) constant variance, i.e., both samples have equal variances, then the $t$-statistic is calculated as
+    \[
+    t = \frac{\bar{X}_1-\bar{X}_2-\delta_0}{\sqrt{S^2_p\left(\frac{1}{n_1} +\frac{1}{n_2}\right)}},
+    \]
+where $S^2_p$ is the pooled variance.
 \[
-t = \frac{\bar{X}-\delta_0}{s_D/\sqrt{n}}
+S^2_p = \frac{(n_1-1)S^2_1+ (n_2-1)S^2_2}{n_1+n_2-2}
 \]
-where $\bar{X}$ are the average and $s_D$ standard deviation of the differences between all pairs. The constant $\delta_0$ is zero if we want to test whether the average of the difference is significantly different. The degree of freedom used is $n-1$, where $n$ represents the number of pairs. 
 
-  + Two-Sample $t$ test to compare Two Means
-    
-The two-sample $t$-test is used to determine if two population means are equal. 
-- The data may either be paired or not paired. By paired, we mean that there is a one-to-one correspondence between the values in the two samples. That is, if $X_1, X_2, \ldots, X_n$ and $Y_1, Y_2,\ldots, Y_n$ are the two samples, then $X_i$ corresponds to $Y_i$. For paired samples, the difference $X_i-Y_i$ is usually calculated. For unpaired samples, the sample sizes for the two samples may or may not be equal. The formulas for paired data are somewhat simpler than the formulas for unpaired data.
-
-- The variances of the two samples may be assumed to be equal or unequal. Equal variances yields somewhat simpler formulas, although with computers this is no longer a significant issue.
-
-- In some applications, you may want to adopt a new process or treatment only if it exceeds the current treatment by some threshold. In this case, we can state the null hypothesis in the form that the difference between the two populations means is equal to some constant $\mu_1-\mu_2 =\delta_0$ where the constant is the desired threshold.
     + Wilcoxon-Mann-Whitney to compare Two Location 
+
     + Two-Sample *F* Test to compare Two Variance: If you have a continuous data and your data is a random sample from a normal population. Then, the two-sample $F$-test for the comparison of two variance is a statistical hypothesis test that can be used to determine whether two unknown population variance are different from a specific value. 
       \[
       H_0: \sigma^2_1 = \sigma^2_2 \mbox{ against } H_1: \sigma^2_1 \neq \sigma^2_2
       \]
-    + Two-Sample proportion test    
+    + Two-Sample proportion test  
+    
   + Three or more Sample Inference
     + One-Way Analysis of Variance (ANOVA)
      If you have a continuous data and your data is a random sample from a normal population. Then, the ANOVA is a statistical hypothesis test that can be used to determine whether an unknown population mean is different from a specific value. 
@@ -147,20 +181,21 @@ The two-sample $t$-test is used to determine if two population means are equal.
 
   + $\chi^2$ association test
 
+
 ### **Linear Regression**
 
 Fit a linear regression model, (either simple or multiple)  linear regression. Suppose we have a dependent variable $Y$ and multiple regressors $x_1,\ldots, x_p$. The linear regression accepted in *FIRSTkit* assumed the following structure
-\[
+\begin{equation}
 Y_i = \beta_0+\sum^p_{j=1}\beta_j x_{ij}+\varepsilon_i
-\]
-where $Y_i \sim N(\beta_0+\sum^p_{j=1}\beta_j x_{ij},\sigma^2)$ and $\varepsilon_i \sim N(0,\sigma^2)$. In the linear regression the parameters have the following roles, $\beta_0$ is the $y$-intercept. While $\beta_1,\ldots, \beta_p$ are the slope associated with each of the regressors. In linear regression, we are assuming constant variance. *FIRSTkit* report the 
+\end{equation}
+where $Y_i \sim N(\beta_0+\sum^p_{j=1}\beta_j x_{ij},\sigma^2)$ and $\varepsilon_i \sim N(0,\sigma^2)$. In the linear regression the parameters have the following roles, $\beta_0$ is the $y$-intercept. While $\beta_1,\ldots, \beta_p$ are the slope associated with each of the regressors. In linear regression, we are assuming constant variance. 
 
 
 ## Authors
 
-- [Israel A. Almodóvar-Rivera](https://github.com/ialmodovar/) is Assistant Professor in the Department of Mathematical Sciences at University of Puerto Rico at Mayag\"uez. 
+- [Israel A. Almodóvar-Rivera](https://github.com/ialmodovar/) is an Assistant Professor in the Department of Mathematical Sciences at University of Puerto Rico at Mayag\"uez. 
 
-- [Ranjan Maitra](https://github.com/maitra) is Professor and Associate Chair for Research in the Department of Statistics at Iowa State University.
+- [Ranjan Maitra](https://www.stat.iastate.edu/people/ranjan-maitra) is an Professor in the Department of Statistics at Iowa State University.
 
-If you have questions or want to report something, or you want to contribute to this project please open an issue (**preferred**) or send a message  to *israel.almodovar@upr.edu* or *maitra@iastate.edu*.
+If you have any question or want to report something, or you want to contribute in this project you can send a message  to *israel.almodovar@upr.edu* or *maitra@iastate.edu*.
 
