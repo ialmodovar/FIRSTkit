@@ -1,29 +1,30 @@
-## Thanks for @timelyportfolio for this comment/fix
-## https://github.com/timelyportfolio/functionplotR/issues/1#issuecomment-224369431
- getdeps <- function() {
-   htmltools::attachDependencies(
-     htmltools::tagList(),
-     c(
-       htmlwidgets:::getDependency("datatables", "DT"),
-       htmlwidgets:::getDependency("renderPlotly","plotly")
-      )
-   )
- }
 
 shinyUI(
-  fluidPage(theme = shinytheme("sandstone"),
+  fluidPage(  
   withMathJax(
-  navbarPage("FIRSTkit",
-    tabPanel("Home", uiOutput("intro")),
-    tabPanel("Descriptive Statistics", uiOutput("descriptive"),getdeps()),
-    tabPanel("One-Sample Inference", uiOutput("OneSample"), getdeps()),
-    tabPanel("Two-Sample Inference", uiOutput("TwoSample"), getdeps()),
-   tabPanel("Multi-sample inference and Analysis of Variance", uiOutput("kSample")),#, getdeps()),
-#tabPanel("Categorical Data Analysis", uiOutput("chis")),
-    tabPanel("Linear Regression", uiOutput("slr"))
-  )
+    navbarPage(
+      title = "FIRSTkit",
+      tabPanel(title = "Home",
+               uiOutput("intro")),
+      tabPanel(title = "Descriptive Statistics",
+               uiOutput("descriptive")),
+      navbarMenu("Probability Theory",
+                 tabPanel("Events"),
+                 tabPanel("Bayes Tree Diagram",
+                          uiOutput("BayesTreeDiagram")),
+                 tabPanel("Distribution Functions")
+      ),
+      navbarMenu("Inference",
+                 tabPanel("One-Sample",
+                          uiOutput("OneSample")),
+                 tabPanel("Two-Sample",
+                          uiOutput("TwoSample")),
+                 tabPanel("Three-Sample",
+                          uiOutput("kSample"))
+      ),
+      tabPanel("Linear Regression", 
+               uiOutput("slr")),
+    )
   )
 )
 )
-
-##shiny::runApp()

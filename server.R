@@ -12,19 +12,19 @@ shinyServer(function(input, output, session) {
     )
   )
   })
+  
 
+  ## Introduce Modules
+  
   output$intro <- renderUI({
     inclRmd("./Rmd/introduction.Rmd")
   })
   output$descriptive <- renderUI({
 	  inclRmd("./Rmd/descriptive-stat.Rmd")
 	})
-
-	# output$Inference <- renderUI({
-	#   withMathJax(inclRmd("./Rmd/One_Sample_Inference.Rmd"))
-	#   withMathJax(inclRmd("./Rmd/Two_Sample_Inference.Rmd"))
-	#  withMathJax(inclRmd("./Rmd/Three_Sample_or_more_Inference.Rmd"))	
-	# })
+  output$BayesTreeDiagram <- renderUI({
+    withMathJax(inclRmd("./Rmd/Bayes_Tree_Diagram.Rmd"))
+  })
 	
 	 output$OneSample <- renderUI({
 	 withMathJax(inclRmd("./Rmd/One_Sample_Inference.Rmd"))
@@ -35,9 +35,7 @@ shinyServer(function(input, output, session) {
 	output$kSample <- renderUI({
 	   withMathJax(inclRmd("./Rmd/Three_Sample_or_more_Inference.Rmd"))
 	 })
-	# output$chis <- renderUI({
-	#   withMathJax(inclRmd("./Rmd/categorical.Rmd"))
-	# })
+	
 	 output$slr <- renderUI({
 	   withMathJax(inclRmd("./Rmd/SLR.Rmd"))
 	 })

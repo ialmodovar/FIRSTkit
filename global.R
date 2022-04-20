@@ -8,10 +8,9 @@ library("htmlwidgets")
 library("plotly")
 library("gridExtra")
 library("pander")
-library("shinythemes")
 library("readxl")
 library("readODS")
-library("googlesheets")
+##library("googlesheets")
 
 encoding <- getOption("shiny.site.encoding", default = "UTF-8")
 
@@ -23,12 +22,6 @@ knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE
 )
-
-
-## case names
-cases.inference <- list("1" = "One-Sample Inference",
-                        "2" = "Two-Sample Inference",
-                        "3" = "Three or more-Sample Inference")
 
 ## function to render .md files to html
 inclMD <- function(path) {
