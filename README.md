@@ -11,33 +11,46 @@ We have all seen the increasing importance of statistical literacy in almost all
 * **Descriptive statistics**
 
   + Location summary 
-    + Mean 
-    + Trimmed mean
-    + Median 
-    + Geometric Mean
+    + Sample Mean 
+    + Sample Trimmed mean
+    + Sample Median 
+    + Sample Geometric Mean
   + Dispersion summary 
-    + Standard Deviation
+    + Sample Standard Deviation
     + Minimum
     + Maximum
     + Variance 
-    + Inter-quartile range
-    + MAD
+    + Interquartile range
+    + Median Absolute Deviation
   + Univariate graphical display 
-    + box-plot 
-    + histograms
-    + density plots
-    + bar graphs
+    + Box-plot 
+    + Histograms
+    + Density plots
+    + Bar graphs
+
+* **Introduction to Probability Theory and Distribution Functions**
+
+  + Probability events
+  + Bayes Probability Tree
+  + Distributions Functions
+    + Binomial Distribution
+    + Poisson Distribution
+    + Chi-Squared Distribution
+    + Normal Distribution
+    + Student's $t$-distribution
 
 * **Inference statistics**
 
   + One-Sample Inference 
-    + One-Sample *t* test for a mean
-    + Wilcoxon signed-rank test a location
-    + One-Sample $\chi^2$ Test for the Variance 
+    + One-Sample $t$-test for a population mean
+    + Wilcoxon signed-rank test a location parameter
+    + One-Sample $\chi^2$ Test for the Population Variance 
+    + One-Sample proportion test
   + Two-Sample Inference
-    + Two-Sample *t* test to Compare Two Means
-    + Wilcoxon-Mann-Whitney to test Compare Two Location 
-    + Two-Sample *F* Test to Compare Two Variances
+    + Two-Sample $t$-test to Compare Two population Means (Dependent and Independent Samples)
+    + Wilcoxon-Mann-Whitney to test Compare Two Location Parameters 
+    + Two-Sample $F$-Test to Compare Two population Variances
+    + Two-Sample proportion test
   + Three-Sample or more Inference
     + One-Way Analysis of Variance (ANOVA)
     + Kruskal-Wallis Rank Sum test
@@ -45,19 +58,18 @@ We have all seen the increasing importance of statistical literacy in almost all
 
 * **Linear Regression**
 
-  + Simple linear regression
-  + Multiple linear regression
+  + Simple and multiple linear regression
   
 ## Local Installation
 **FIRSTkit** is designed to be run from the browser and hosted on an institutional Shiny server so that students and users do not have any need for installation. 
 However,the software can also be installed and run locally.
 
   + *Using RStudio:*
-    + Download the file, uncompress and navigate to the directory.
+    + Download the file, uncompressed and navigate to the directory.
     + Open the file ui.R.
     + Click on "Run App" 
   + *Using base R:*
-    + Download the file, uncompress and navigate to the directory.
+    + Download the file, uncompressed and navigate to the directory.
     + Note that the R package **shiny** and **googlesheets** is needed from CRAN.
     + Then run **shiny::runApp()**
 
