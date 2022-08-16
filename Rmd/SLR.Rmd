@@ -28,29 +28,27 @@ To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authorin
 
 
 ```{r interface-slm, echo=FALSE}
-
-    sidebarLayout(
-                  sidebarPanel(
-                    tags$b("Data:"),
-                    textInput("x", "x", value = "", placeholder = "Enter values separated by a comma, e.g. 1, 2, 3, etc."),
-                    textInput("y", "y", value = "", placeholder = "Enter values separated by a comma, e.g. 4,5,6, etc."),
-                    textInput("alpha","alpha",value="0.05",placeholder="Significance level"),
-                    hr(),
-                    tags$b("Plot:"),
-                    textInput("xlab", label = "Axis labels:", value = "x", placeholder = "x label"),
-                    textInput("ylab", label = NULL, value = "y", placeholder = "y label"),
-                    checkboxInput("se", "Add confidence interval around the regression line", TRUE)
-                    ),
-                  mainPanel(
-                    
-                    tabsetPanel(type = "tabs",
-                                tabPanel("Data", DT::dataTableOutput('tbl')), # Data as datatable
-                                tabPanel("Summary",
-                                         br(),
-                                         tags$b("Sample means of variables"),
-                                         uiOutput("data"),
-                                         br(),
-                                         tags$b("Estimates of the slope and intercept"),
+sidebarLayout(
+  sidebarPanel(
+  tags$b("Data:"),
+  textInput("x", "x", value = "", placeholder = "Enter values separated by a comma, e.g. 1, 2, 3, etc."),
+   textInput("y", "y", value = "", placeholder = "Enter values separated by a comma, e.g. 4,5,6, etc."),
+  textInput("alpha","alpha",value="0.05",placeholder="Significance level"),
+hr(),
+tags$b("Plot:"),
+textInput("xlab", label = "Axis labels:", value = "x", placeholder = "x label"),
+textInput("ylab", label = NULL, value = "y", placeholder = "y label"),
+checkboxInput("se", "Add confidence interval around the regression line", TRUE)
+),
+  mainPanel(
+    tabsetPanel(type = "tabs",
+    tabPanel("Data", DT::dataTableOutput('tbl')), # Data as datatable
+    tabPanel("Summary",
+    br(),
+    tags$b("Sample means of variables"),
+    uiOutput("data"),
+    br(),
+    tags$b("Estimates of the slope and intercept"),
                                          uiOutput("parameters"),
                                          br(),
                                          tags$b("Table Output"),

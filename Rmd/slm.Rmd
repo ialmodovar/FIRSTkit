@@ -30,53 +30,52 @@ To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authorin
 
 ```{r interface-slm, echo=FALSE}
 
-    sidebarLayout(
-                  sidebarPanel(
-                    tags$b("Data:"),
-                    textInput("x", "x", value = "90, 100, 90, 80, 87, 75", placeholder = "Enter values separated by a comma, e.g. 1, 2, 3, etc."),
-                    textInput("y", "y", value = "950, 1100, 850, 750, 950, 775", placeholder = "Enter values separated by a comma, e.g. 4,5,6, etc."),
-                    textInput("alpha","alpha",value="0.05",placeholder="Significance level"),
-                    hr(),
-                    tags$b("Plot:"),
-                    textInput("xlab", label = "Axis labels:", value = "x", placeholder = "x label"),
-                    textInput("ylab", label = NULL, value = "y", placeholder = "y label"),
-                    checkboxInput("se", "Add confidence interval around the regression line", TRUE)
+sidebarLayout(
+    sidebarPanel(
+      tags$b("Data:"),
+      textInput("x", "x", value = "90, 100, 90, 80, 87, 75", placeholder = "Enter values separated by a comma, e.g. 1, 2, 3, etc."),
+      textInput("y", "y", value = "950, 1100, 850, 750, 950, 775", placeholder = "Enter values separated by a comma, e.g. 4,5,6, etc."),
+      textInput("alpha","alpha",value="0.05",placeholder="Significance level"),
+      hr(),
+      tags$b("Plot:"),
+      textInput("xlab", label = "Axis labels:", value = "x", placeholder = "x label"),
+      textInput("ylab", label = NULL, value = "y", placeholder = "y label"),
+      checkboxInput("se", "Add confidence interval around the regression line", TRUE)
                     ),
-                  mainPanel(
-                    
-                    tabsetPanel(type = "tabs",
-                                tabPanel("Data", DT::dataTableOutput('tbl')), # Data as datatable
-                                tabPanel("Summary",
-                                         br(),
-                                         tags$b("Sample means of variables"),
-                                         uiOutput("data"),
-                                         br(),
-                                         tags$b("Estimates of the slope and intercept"),
-                                         uiOutput("parameters"),
-                                         br(),
-                                         tags$b("Table Output"),
-                                         uiOutput("tableoutput")),
-                                tabPanel("Regression plot", plotlyOutput("plot")), # Plot
-                                tabPanel("Residuals",
-                                         br(),
-                                         tags$b("Fitted values vs Residuals"),
-                                         plotlyOutput("diagnostic1"),
-                                         br(),
-                                         tags$b("QQ-Plot"),
-                                         plotlyOutput("diagnostic3"),
-                                         br(),
-                                         tags$b("Fitted values vs Studentized Residuals"),
-                                         plotlyOutput("diagnostic2"),
-                                         br(),
-                                         tags$b("QQ-Plot (Studentized Residuals)"),
-                                         plotlyOutput("diagnostic4"),
-                                         br(),
-                                ),
-                                tabPanel("Interpretation", uiOutput("interpretation")),
-                                tabPanel("R output", verbatimTextOutput("summary")))# Regression output
-                    
-                  )
-                )
+      mainPanel(
+      tabsetPanel(type = "tabs",
+      tabPanel("Data", DT::dataTableOutput('tbl')), 
+      tabPanel("Summary",
+      br(),
+      tags$b("Sample means of variables"),
+      uiOutput("data"),
+      br(),
+      tags$b("Estimates of the slope and intercept"),
+      uiOutput("parameters"),
+      br(),
+      tags$b("Table Output"),
+      uiOutput("tableoutput")),
+      tabPanel("Regression plot", plotlyOutput("plot")), # Plot
+      tabPanel("Residuals",
+      br(),
+      tags$b("Fitted values vs Residuals"),
+      plotlyOutput("diagnostic1"),
+      br(),
+      tags$b("QQ-Plot"),
+      plotlyOutput("diagnostic3"),
+      br(),
+      tags$b("Fitted values vs Studentized Residuals"),
+      plotlyOutput("diagnostic2"),
+      br(),
+      tags$b("QQ-Plot (Studentized Residuals)"),
+      plotlyOutput("diagnostic4"),
+      br(),
+      ),
+      tabPanel("Interpretation", uiOutput("interpretation")),
+      tabPanel("R output", verbatimTextOutput("summary")))# Regression output
+
+)
+)
 ##
   extract <- function(text) {
     text <- gsub(" ", "", text)

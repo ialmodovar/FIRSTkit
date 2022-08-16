@@ -1,0 +1,121 @@
+---
+title: "Data Upload/Input"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE,message=FALSE}
+library("readODS")
+library("readxl")
+library("googlesheets4")
+library("DT")
+## add the extract function
+
+extract <- function(text) {
+    text <- gsub(" ", "", text)
+    split <- strsplit(text, ",", fixed = FALSE)[[1]]
+    as.numeric(split)
+ }
+
+```
+
+```{r descriptive-stats, echo=FALSE,message=FALSE}
+sidebarLayout(
+  sidebarPanel(
+    selectInput(
+      inputId = "datachoice",
+      label = "Input/Upload",
+      choices = c("Input data",
+                  "Upload file",
+                  "Upload .xlsx/.xls file",
+                  "Google Sheets"),
+      multiple = FALSE,
+      selected = "Input data"),
+    hr(),
+    conditionalPanel(
+    condition = "input.datachoice == 'Input data'",
+    textInput("x", "Data", value = "",
+    placeholder = "Enter data values separated by a comma, e.g. 1.2, 3.14, 3.1417, etc."),
+    hr(),
+    ),
+    conditionalPanel(
+    condition = "input.datachoice == 'Upload file'",
+    fileInput("file1", "Choose File",
+              multiple = FALSE,
+              accept = c("text/csv",                       "text/comma-separated-values,text/plain",
+                         ".csv",".txt")),
+    hr(),
+    # Input: Checkbox if file has header ----
+    checkboxInput("header", "Header", TRUE),
+        
+    # Input: Select separator ----
+    radioButtons("sep", "Separator",
+                  choices = c(Comma = ",",
+                              Semicolon = ";",
+                              Tab = "\t",
+                              WhiteSpace=""),
+                selected = ","),
+        
+        # Input: Select quotes ----
+    radioButtons("quote", "Quote",
+                 choices = c(None = "",
+                            "Double Quote" = '"',
+                            "Single Quote" = "'"),
+                selected = '"'),
+    submitButton("Submit")
+    ),
+    conditionalPanel(
+    condition = "input.datachoice == 'Upload .xlsx/.xls file'",
+    fileInput('file2', 'Choose .xls/.xlsx file',multiple = FALSE,accept = c(".xlsx",".xls")),
+    submitButton("Submit")
+    ),
+    conditionalPanel(
+    condition = "input.datachoice == 'Google Sheets'",
+    textInput("gsheets", "URL/Key", value = "", placeholder = "Enter URL or Key"),
+    submitButton("Submit"),
+    helpText("FIRSTkit uses the R package googlesheets4. For any question about googlesheets4 package, see https://github.com/tidyverse/googlesheets4.")
+    )
+    ),
+    mainPanel(
+      tabsetPanel(type = "tabs",
+      tabPanel("Data", 
+      dataTableOutput('tbl1'),
+      icon=icon("table"))
+      )
+      )
+    )
+
+
+d <- reactive({  
+  if(!is.null(input$file1)){
+    req(input$file1)
+    tt <- read.table(input$file1$datapath,
+                   header = input$header,
+                   sep = input$sep,
+                   quote = input$quote)
+    ## make null again
+  } 
+  if(!is.null(input$file2)){
+    req(input$file2)
+    tt <- read_excel(input$file2$datapath,sheet = 1)
+  }
+   if(!is.null(input$gsheets)){
+     req(input$gsheets)
+     tt <- read_sheet(input$gsheets)
+  }
+  if(is.null(input$file1) & is.null(input$file2)){
+  x <- extract(input$x)
+  tt<- data.frame(x = x)
+  } 
+  var.opts<-colnames(tt)
+  updateSelectInput(inputId =  "variable", choices = var.opts)
+  updateSelectInput(inputId = "group", choices = var.opts)
+
+  return(tt)
+})
+
+output$tbl1 <- renderDataTable({
+    d()
+  })
+
+```

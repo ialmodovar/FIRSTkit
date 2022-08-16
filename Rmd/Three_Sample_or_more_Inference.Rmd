@@ -144,8 +144,7 @@ output$aovSummary <- renderTable({
 
 #        if(input$submit > 0){
           if(input$type == 'type1'){
-                        return(isolate(anova(lm(as.formula(paste(input$dvar,"~",input$ivar,collapse="")), data =d()))))
-
+        return(isolate(anova(lm(as.formula(paste(input$dvar,"~",input$ivar,collapse="")), data =d()))))
           }
           if(input$type == 'type2'){
             return(isolate(Anova(lm(as.formula(paste(input$dvar,"~",input$ivar,collapse="")), data =d()), 
@@ -161,21 +160,33 @@ output$aovSummary <- renderTable({
       },rownames=TRUE)
       
 output$KWSummary <- renderTable({
-#        if(input$submit > 0){
+
           fit <- kruskal.test(as.formula(paste(input$dvar,"~",input$ivar,collapse="")), data =d())
+          if(fit$p.value >= 0.001){
           XX <- cbind(fit$parameter, fit$statistic, fit$p.value)
-          colnames(XX) <- c("DF","X2-statistic","P(>X2)")
+          } else{
+            XX <- data.frame(fit$parameter,
+                             fit$statistic,
+                             "<0.001")
+          }
+          colnames(XX) <- c("DF","X2-statistic","Pr(>X2)")
           rownames(XX) <- "Kruskal-Wallis"
           XX
-#        }
+#
       },rownames = TRUE,colnames = TRUE)
 
 output$BartlettSummary <- renderTable({
   #      if(input$submit > 0){
         
           fit <- bartlett.test(as.formula(paste(input$dvar,"~",input$ivar,collapse="")), data =d())
+          if(fit$p.value >= 0.001){
           XX <- cbind(fit$parameter, fit$statistic, fit$p.value)
-          colnames(XX) <- c("DF","X2-statistic","P(>X2)")
+          } else{
+            XX <- data.frame(fit$parameter,
+                             fit$statistic,
+                             "<0.001")
+          }
+          colnames(XX) <- c("DF","X2-statistic","Pr(>X2)")
           rownames(XX) <- "Bartlett"
           XX
   #      }
