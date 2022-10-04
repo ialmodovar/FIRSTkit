@@ -9,6 +9,8 @@ runtime: shiny
 library("DiagrammeR") 
 library("dplyr")
 
+## code from https://daranzolin.github.io/2018-01-07-probability-trees/
+## modified to be a shiny app by Israel A. Almodóvar-Rivera.
 bayes_probability_tree <- function(prior,sensitivity, specificity) {
   
   if (!all(c(prior,sensitivity, specificity) > 0) && !all(c(prior,sensitivity, specificity) < 1)) {
@@ -25,7 +27,7 @@ bayes_probability_tree <- function(prior,sensitivity, specificity) {
   b3 <- c_prior * c_tn
   b4 <- c_prior * specificity
   
-  bp <-  round(b1/(b1 + b3),digits=4)
+  bp <- round(b1/(b1 + b3),digits=4)
   
   labs <- c("X", prior, c_prior, sensitivity, c_tp, specificity, c_tn, b1, b2, b4, b3)
   
@@ -64,7 +66,7 @@ bayes_probability_tree <- function(prior,sensitivity, specificity) {
       from = 2,
       to = 4,
       edge_aes = edge_aes(
-        label = "Sensitivity",
+        label = "True Positive", ## Sensitivity=TRUE POSITIVE
         fontsize=13,
       )
     ) %>% 
@@ -88,7 +90,7 @@ bayes_probability_tree <- function(prior,sensitivity, specificity) {
       from = 3,
       to = 6,
       edge_aes = edge_aes(
-        label = "Specificity",
+        label = "True Negative", ## Specificity = True Negative
         fontsize=13,
       )
     ) %>% 
@@ -124,9 +126,6 @@ bayes_probability_tree <- function(prior,sensitivity, specificity) {
         fontsize=13,
       )
     ) 
-##  message(glue::glue("The probability of having (prior) after testing positive is {bp}"))
-  ##print(render_graph(tree))
-  ##invisible(tree)
   tree
 }
 
@@ -142,8 +141,12 @@ submitButton("Submit"),
     ),
     mainPanel(
       tabPanel("Bayes Tree Diagram",
-      grVizOutput('diagram', width = "100%", height = "760px")
-      ##textOutput(outputId = prob)
+               h4("Posterior Probability Tree"),
+               br(),
+      grVizOutput('diagram', width = "100%", height = "460px"),
+      br(),
+      h4("Posterior Probability"),
+uiOutput("posterior"),
       )
       )
     )
@@ -155,6 +158,25 @@ output$diagram <- renderGrViz({
     grViz({
 generate_dot(graph)
     })
+    
+})
+
+   output$posterior <- renderUI({
+  c_prior <- 1 - input$prior
+  c_tp <- 1 - input$tp
+  c_tn <- 1 - input$tn
+  
+
+  b1 <- input$prior * input$tp
+  b2 <- input$prior * c_tp
+  b3 <- c_prior * c_tn
+  b4 <- c_prior * input$tn
+  
+  bp <- round(b1/(b1 + b3),digits=4)
+
+    withMathJax(
+        paste0("The probability of having (prior =", input$prior,")","after testing positive,i.e., $$P(Disease|Testing \\: Positive) = $$, ", bp)
+      )
 })
 
 
