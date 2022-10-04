@@ -94,9 +94,9 @@ R = \max X_i - \min X_i
 \]
 
   + Univariate graphical display 
-    + **Box-plot**:  Graphical tool to depicting groups of numerical data through their quantiles. Box plots may also have lines extending from the boxes (whiskers) indicating variability outside the upper and lower quantiles, hence the terms box-and-whisker plot and box-and-whisker diagram. Outliers may be plotted as individual points
+    + **Box-plot**:  Graphical tool to depicting groups of numerical data through their quantiles. Box plots may also have lines extending from the boxes (whiskers) indicating variability outside the upper and lower quantiles, hence the terms box-and-whisker plot and box-and-whisker diagram. Outliers may be plotted as individual points.
     + **Histogram**: Graphical approximation of the distribution of numerical variable
-    + **Stem-and-leaf plot**
+    + **Stem-and-leaf plot**:
     + **Density plot**: Graphical representation of the distribution of a numerical variable. It uses a smooth estimating to show the probability density function of the variable.
     + **Bar Graph**: Graphical tool that presents categorical data with rectangular bars with heights or lengths proportional to the values that they represent.
     + **Scatter plot (two variables)**: Graphical display that shows the relationship between two numerical variables $(x,y)$.
@@ -111,12 +111,21 @@ R = \max X_i - \min X_i
     P(A|B) = \frac{P(B|A)P(A)}{P(B)} = \frac{P(B|A)P(A)}{P(B|A^c)P(A^c)+P(B|A)P(A)}
     \]
   + Distribution functions
-    + Binomial Distribution:
-    + Poisson Distribution:
-    + Normal Distribution:
-    + Chi-Squared Distribution:
-    + Student's $t$ distribution:
-    + Snedecor's $F$ distribution:
+    + **Binomial Distribution**: The binomial distribution arise from  $n$ independent Bernoulli experiments. The parameters of the Binomial distribution are $n$ and $p$, the first is the number of experiment and $p$ the probability of success. In statistics course notations, the probability mass function (pmf) is given by $X\sim \mbox{Binomial}(n,p)$,
+    \[
+ f(x|n,p) = {n \choose x} p^{x} (1-p)^{n-x}; x \in \{0,1,\ldots,n\}; p \in [0,1]
+\]
+    + **Poisson Distribution**: Named after the French Mathematician Sim\'eon Denis Poisson (1781-1840). Involve observing discrete events in a continuous ``interval'' of time, length or space. But we are not dealing with a interval in a mathematical sense. A random variable in a Poisson process is $X$, the number of occurrences of the event in a interval of size $s$ units. A random variable $X$ is Poisson with average $\lambda$,probability mass function given by
+\[
+f(x|\lambda) = \frac{e^{-\lambda} \lambda^x}{x!}; x \in\{0,1,2,3,\ldots,\}; \lambda >0
+\]
+    + **Normal Distribution**: The normal distribution plays a central role in introductory statistics courses. The normal distribution and distributions associated with it are very tractable analytically. The normal distribution have the familiar bell-shaped, symmetric and makes it appealing to model populations. The central limit theorem, the normal distribution can be used to approximate others distributions for large samples. A random variable $X \sim N(\mu,\sigma^2)$, in here $\mu$ is the mean and $\sigma^2$ is the variance, the pdf its given by
+\[
+f(x|\mu,\sigma^2) = \frac{1}{\sqrt{2\pi \sigma^2}} \exp\left\{-\frac{(x-\mu)^2}{2\sigma^2} \right\} \mbox{ for all } x\in \mathbb{R}; \mu \in \mathbb{R}; \sigma > 0
+\]
+    + **Chi-Squared Distribution**:
+    + **Student's $t$ distribution**:
+    + **Snedecor's $F$ distribution**:
 
 ### **Inference statistics**
 
