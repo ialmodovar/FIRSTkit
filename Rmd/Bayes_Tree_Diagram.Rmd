@@ -29,7 +29,7 @@ bayes_probability_tree <- function(prior,sensitivity, specificity) {
   
   bp <- round(b1/(b1 + b3),digits=4)
   
-  labs <- c("X", prior, c_prior, sensitivity, c_tp, specificity, c_tn, b1, b2, b4, b3)
+  labs <- c("", prior, c_prior, sensitivity, c_tp, specificity, c_tn, b1, b2, b4, b3)
   
   tree <-
     create_graph() %>%
@@ -175,7 +175,8 @@ generate_dot(graph)
   bp <- round(b1/(b1 + b3),digits=4)
 
     withMathJax(
-        paste0("The probability of having (prior =", input$prior,")","after testing positive,i.e., $$P(Disease|Testing \\: Positive) = $$, ", bp)
+      #  paste0("The probability of having (prior =", input$prior,")","after testing positive,i.e., $$P(Disease|Testing \\: Positive) = $$, ", bp)
+      sprintf("$$P(D|T+) = \\frac{%.4f \\times %.4f}{%.4f \\times %.4f+%.4f \\times %.4f}= %.4f $$",input$tp,input$prior,input$tp,input$prior,c_prior,input$tn,bp)
       )
 })
 
