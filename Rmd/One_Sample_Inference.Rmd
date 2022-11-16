@@ -25,20 +25,22 @@ all.t.one.sample.test <- function(x, mu0 = 0, alpha = 0.05,...){
                        conf.level = 1-alpha)
   
 tt <- round(c(twosided$statistic, oneless$statistic, onegreater$statistic),digits=3)
-pval <- round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits = 5) 
+pval <- round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits = 5)
+
+pval <- ifelse(pval < 0.001, "<0.001",as.character(pval))
 
 ci <- c(paste("(",paste(round(twosided$conf.int[1],digits=3),",",
         round(twosided$conf.int[2],digits=3),sep=""),")",sep=""),
-        paste("(",paste(round(oneless$conf.int[1],digits=3),",",
+        paste("(",paste("\\(-\\infty\\)",",",
                         round(oneless$conf.int[2],digits=3),sep=""),")",sep=""),
         paste("(",paste(round(onegreater$conf.int[1],digits=3),",",
-                        round(onegreater$conf.int[2],digits=3),sep=""),")",sep=""))
+                        "\\(\\infty\\)",sep=""),")",sep=""))
 
-res <- data.frame(Test = tt,Pval = pval, CI =ci)
-names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
- rownames(res) <- c(paste("\\( H_{1}: \\mu = \\)",mu0,sep=""),
-                     paste("\\( H_{1}: \\mu < \\)",mu0,sep=""),
-                     paste("\\( H_{1}: \\mu > \\)",mu0,sep=""))
+res <- data.frame(Test = tt, CI =ci,Pval = pval)
+names(res) <- c("statistic",paste(as.character((1-alpha)*100),"% CI",sep=""),"\\(p\\)-value")
+ rownames(res) <- c(paste("\\( H_{1}: \\mu \\neq  \\)",mu0,sep=""),
+                     paste("\\( H_{1}: \\mu <  \\)",mu0,sep=""),
+                     paste("\\( H_{1}: \\mu >  \\)",mu0,sep=""))
 res
 }
 
@@ -56,26 +58,27 @@ all.wilcoxon.one.sample.test <- function(x, mu0 = 0, alpha = 0.05,...){
   tt <- round(c(twosided$statistic, oneless$statistic, onegreater$statistic),digits=3)
   pval <- round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits = 5) 
   
-  ci <- c(paste("(",paste(round(twosided$conf.int[1],digits=3),",",
-                          round(twosided$conf.int[2],digits=3),sep=""),")",sep=""),
-          paste("(",paste(round(oneless$conf.int[1],digits=3),",",
-                          round(oneless$conf.int[2],digits=3),sep=""),")",sep=""),
-          paste("(",paste(round(onegreater$conf.int[1],digits=3),",",
-                          round(onegreater$conf.int[2],digits=3),sep=""),")",sep=""))
+  pval <- ifelse(pval < 0.001, "<0.001",as.character(pval))
   
-  res <- data.frame(Test = tt,Pval = pval, CI =ci)
-  names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
+ci <- c(paste("(",paste(round(twosided$conf.int[1],digits=3),",",
+        round(twosided$conf.int[2],digits=3),sep=""),")",sep=""),
+        paste("(",paste("\\(-\\infty\\)",",",
+                        round(oneless$conf.int[2],digits=3),sep=""),")",sep=""),
+        paste("(",paste(round(onegreater$conf.int[1],digits=3),",",
+                        "\\(\\infty\\)",sep=""),")",sep=""))
+  res <- data.frame(Test = tt, CI =ci,Pval = pval)
+  names(res) <- c("statistic",paste(as.character((1-alpha)*100),"% CI",sep=""),"\\(p\\)-value")
   
- rownames(res) <- c(paste("\\( H_{1}: \\mu = \\)",mu0,sep=""),
-                     paste("\\( H_{1}: \\mu < \\)",mu0,sep=""),
-                     paste("\\( H_{1}: \\mu > \\)",mu0,sep=""))
+ rownames(res) <- c(paste("\\( H_{1}: \\mu \\neq  \\)",mu0,sep=""),
+                     paste("\\( H_{1}: \\mu <  \\)",mu0,sep=""),
+                     paste("\\( H_{1}: \\mu >  \\)",mu0,sep=""))
  
 res
 }
 
 one.sample.var.test <- function(x,sigma0=1,alpha=0.05,...){
   x <- x[!is.na(x)]
-    df <- length(x)-1
+  df <- length(x)-1
   vv <- var(x,na.rm = TRUE)
   sigma02 <- sigma0^2
   X2 <- df * vv/sigma02 #test statistics
@@ -84,11 +87,13 @@ one.sample.var.test <- function(x,sigma0=1,alpha=0.05,...){
   c1 <- qchisq(p=1-alpha/2,df = df)
   c2 <- qchisq(p=alpha/2,df = df)
   ci <- c(paste("(",round(df*vv/c1,digits=3),",",round(df*vv/c2,digits=3),")",sep=""),paste("(",0,",",round(df*vv/qchisq(p=alpha,df = df),digits=3),")",sep=""),
-       paste("(",round(df*vv/qchisq(p=alpha,df = df),digits=3),",",Inf,")",sep=""))
-  res <- data.frame(Test = X2,Pval = pval, CI =ci)
-names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
+       paste("(",round(df*vv/qchisq(p=alpha,df = df),digits=3),",","\\( \\infty \\)",")",sep=""))
+    pval <- ifelse(pval < 0.001, "<0.001",as.character(pval))
 
- rownames(res) <- c(paste("\\( H_{1}: \\sigma^{2} =\\",sigma0,sep=""),
+  res <- data.frame(Test = X2,CI =ci,Pval = pval)
+names(res) <- c("statistic",paste(as.character((1-alpha)*100),"% CI",sep=""),"\\(p)\\-value")
+
+ rownames(res) <- c(paste("\\( H_{1}: \\sigma^{2} \\neq \\)",sigma0,sep=""),
                      paste("\\( H_{1}: \\sigma^{2} < \\)",sigma0,sep=""),
                      paste("\\( H_{1}: \\sigma^{2} > \\)",sigma0,sep=""))
  
@@ -117,10 +122,10 @@ if(!is.null(x) & !is.null(p)){
           paste("(",0,",",round(p-1* qnorm(1-alpha) * se,digits=5),")",sep=""),
 paste("(",round(p+1* qnorm(alpha) * se,digits=5),",",1,")",sep=""))
   
-  res <- data.frame(Test = z,Pval = pval, CI =ci)
-names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
+  res <- data.frame(Test = z, CI =ci,Pval = pval)
+names(res) <- c("statistic",paste(as.character((1-alpha)*100),"% CI",sep=""),"\\(p \\)-value")
 
- rownames(res) <- c(paste("\\( H_{1}: p = \\)",p0,sep=""),
+ rownames(res) <- c(paste("\\( H_{1}: p \\neq \\)",p0,sep=""),
                      paste("\\( H_{1}: p < \\)",p0,sep=""),
                      paste("\\( H_{1}: p > \\)",p0,sep=""))
  
@@ -208,11 +213,11 @@ sidebarLayout(
                        value = 20, min = 0, step = 1
           )
         ),
-        sliderInput("alpha","Significance level \\(\\alpha \\)",
-                    min = 0,
-                    max = 1,
-                    value = 0.05,step=0.001,
-        ),
+         sliderInput("alpha","Significance level \\(\\alpha \\)",
+                     min = 0,
+                     max = 1,
+                     value = 0.05,step=0.001,
+         ),
 
     ),
       mainPanel(
@@ -227,13 +232,14 @@ sidebarLayout(
         uiOutput("loc")),
         tabPanel("Dispersion Inference",
         br(),
-        tags$b("One Sample Variance test"),
+        tags$b("One Sample \\( \\chi^2 \\) Variance test"),
         withMathJax(),
         uiOutput("tableUIvar"),
         ),
         tabPanel("Proportion Inference",
         tags$b("One-Sample Proportion test"),
-                 uiOutput("proportion"))
+        withMathJax(),
+        uiOutput("tableUIprop"))
         )
   )
     )
@@ -263,8 +269,8 @@ d <- reactive({
   return(tt)
 })
 
-
 output$mean <- renderTable({
+  ## compute means
     mu0 <- as.numeric(input$mu0)
     alpha <- as.numeric(input$alpha)
     df <- d()
@@ -318,6 +324,15 @@ output$proportion <- renderTable({
     tagList(
       withMathJax(),
       withMathJax(tableOutput("variance"))
+    )
+  })
+  
+    output$tableUIprop <- renderUI({
+    p0 <- as.numeric(input$p0)
+    alpha <- as.numeric(input$alpha)
+    tagList(
+      withMathJax(),
+      withMathJax(tableOutput("proportion"))
     )
   })
 ```

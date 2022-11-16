@@ -4,18 +4,64 @@ output: html_document
 runtime: shiny
 ---
 
+Welcome to FIRSTkit!We are happy (sort of) that you are here! 
+
 ```{r setup, include=FALSE,message=FALSE}
 library("readODS")
 library("readxl")
 library("googlesheets4")
 library("DT")
-## add the extract function
+fExt <- function(filename) {
+  nameSplit <- strsplit(x = filename, split = "\\.")[[1]]
+  fnameext <- paste(".",nameSplit[length(nameSplit)],sep="")
+  return(fnameext)
+}
 
 extract <- function(text) {
-    text <- gsub(" ", "", text)
-    split <- strsplit(text, ",", fixed = FALSE)[[1]]
-    as.numeric(split)
- }
+  text <- gsub(" ", "", text)
+  split <- strsplit(text, ",", fixed = FALSE)[[1]]
+  as.numeric(split)
+}
+
+read_data_FIRSTkit <- function(fname, input,choice="Upload File"){
+    
+    choice <- match.arg(arg = choice, 
+                        choices = c("Upload File (Acceptable extensions)",
+                                    "Google Sheets",
+                                    "Input Data"))
+    
+    if(choice=="Upload File"){
+    
+    ##check extension
+    ext <- fExt(input)#$file$datapath)
+      
+    if(!(ext %in% c(".csv",".txt",".xls",".xlsx",".dat",".ods"))){
+      stop("Not supported extension")
+    } else{
+      if(ext %in% c(".xls",".xlsx")){
+           df <- read_excel(fname,sheet=1)
+      }      
+     if(ext %in% c(".csv",".txt",".dat")){
+       df <- read.table(fname,
+                  header = input$header,
+                  sep = input$sep,
+                  quote = input$quote)
+     }
+      if(ext %in% c(".ods")){
+        df <- read_ods(path = fname)
+      }
+    }
+    }
+    if(choice=="Google Sheets"){
+        df <- read_sheet(fname)
+    }
+    if(choice=="Input Data"){
+      x <- extract(fname)
+      tt<- data.frame(x = x)
+    } 
+     
+    df
+}
 
 ```
 
@@ -25,30 +71,26 @@ sidebarLayout(
     selectInput(
       inputId = "datachoice",
       label = "Input/Upload",
-      choices = c("Input data",
-                  "Upload file",
-                  "Upload .xlsx/.xls file",
-                  "Google Sheets"),
+      choices = c("Upload File","Google Sheets","Input Data"),
       multiple = FALSE,
-      selected = "Input data"),
+      selected = "Upload File"),
     hr(),
     conditionalPanel(
-    condition = "input.datachoice == 'Input data'",
+    condition = "input.datachoice == 'Input Data'",
     textInput("x", "Data", value = "",
     placeholder = "Enter data values separated by a comma, e.g. 1.2, 3.14, 3.1417, etc."),
     hr(),
     ),
     conditionalPanel(
-    condition = "input.datachoice == 'Upload file'",
+    condition = "input.datachoice == 'Upload File'",
     fileInput("file1", "Choose File",
               multiple = FALSE,
               accept = c("text/csv",                       "text/comma-separated-values,text/plain",
-                         ".csv",".txt")),
+                         ".csv",".txt",".xlsx",".xls")),
     hr(),
-    # Input: Checkbox if file has header ----
+    ## Input: Checkbox if file has header ----
     checkboxInput("header", "Header", TRUE),
-        
-    # Input: Select separator ----
+    ## Input: Select separator ----
     radioButtons("sep", "Separator",
                   choices = c(Comma = ",",
                               Semicolon = ";",
@@ -56,17 +98,12 @@ sidebarLayout(
                               WhiteSpace=""),
                 selected = ","),
         
-        # Input: Select quotes ----
+    ### Input: Select quotes ----
     radioButtons("quote", "Quote",
                  choices = c(None = "",
                             "Double Quote" = '"',
                             "Single Quote" = "'"),
                 selected = '"'),
-    submitButton("Submit")
-    ),
-    conditionalPanel(
-    condition = "input.datachoice == 'Upload .xlsx/.xls file'",
-    fileInput('file2', 'Choose .xls/.xlsx file',multiple = FALSE,accept = c(".xlsx",".xls")),
     submitButton("Submit")
     ),
     conditionalPanel(
@@ -87,26 +124,8 @@ sidebarLayout(
 
 
 d <- reactive({  
-  if(!is.null(input$file1)){
-    req(input$file1)
-    tt <- read.table(input$file1$datapath,
-                   header = input$header,
-                   sep = input$sep,
-                   quote = input$quote)
-    ## make null again
-  } 
-  if(!is.null(input$file2)){
-    req(input$file2)
-    tt <- read_excel(input$file2$datapath,sheet = 1)
-  }
-   if(!is.null(input$gsheets)){
-     req(input$gsheets)
-     tt <- read_sheet(input$gsheets)
-  }
-  if(is.null(input$file1) & is.null(input$file2)){
-  x <- extract(input$x)
-  tt<- data.frame(x = x)
-  } 
+
+  tt <- read_data_FIRSTkit(fname=input$file$datapath,input)
   var.opts<-colnames(tt)
   updateSelectInput(inputId =  "variable", choices = var.opts)
   updateSelectInput(inputId = "group", choices = var.opts)
