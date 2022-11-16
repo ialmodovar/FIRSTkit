@@ -10,6 +10,9 @@ library("gridExtra")
 library("pander")
 library("readxl")
 library("readODS")
+library("DiagrammeR") 
+library("shinythemes")
+
 ##library("googlesheets")
 
 encoding <- getOption("shiny.site.encoding", default = "UTF-8")

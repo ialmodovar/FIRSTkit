@@ -1,9 +1,9 @@
 shinyServer(function(input, output, session) {
 
   ## this add the significance level 
+  ## using renderUI here because Knitr will not create a slider
   output$alpha_line <- renderUI({
   withMathJax(
-    ## using renderUI here because Knitr will not create a slider
     tagList(
       sliderInput("alpha","Significance level \\(\\alpha \\)",
                   min = 0,
@@ -12,9 +12,12 @@ shinyServer(function(input, output, session) {
     )
   )
   })
-  
 
-  ## Introduce Modules
+  ## Modules
+  
+  output$FIRSTkitData <- renderUI({
+    inclRmd("./Rmd/data_input.Rmd")
+  })
   
   output$intro <- renderUI({
     inclRmd("./Rmd/introduction.Rmd")
