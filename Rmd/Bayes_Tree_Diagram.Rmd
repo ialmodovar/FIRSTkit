@@ -1,5 +1,4 @@
 ---
-title: "Conditional Probability and Bayes Tree Diagram"
 output: html_document
 runtime: shiny
 ---
@@ -142,26 +141,35 @@ submitButton("Submit"),
     ),
     mainPanel(
       tabPanel("Bayes Tree Diagram",
-               h4("Posterior Probability Tree"),
-               br(),
-      grVizOutput('diagram', width = "100%", height = "460px"),
-      br(),
-      h4("Posterior Probability"),
+#               h4("Posterior Probability Tree"),
+#               br(),
+#      grVizOutput('diagram', width = "100%", height = "460px"),
+      uiOutput('diagram', width = "500px", height = "500px"),
+#      br(),
+#      h4("Posterior Probability"),
 uiOutput("posterior"),
       )
       )
     )
 
-output$diagram <- renderGrViz({
+# output$diagram <- renderGrViz({
+#    graph <- bayes_probability_tree(prior = input$prior, 
+#                                    sensitivity = input$tp,
+#                                    specificity = input$tn)
+#     grViz({
+# generate_dot(graph)
+#     })
+#     
+# })
+
+
+output$diagram <- renderUI({
    graph <- bayes_probability_tree(prior = input$prior, 
                                    sensitivity = input$tp,
                                    specificity = input$tn)
-    grViz({
-generate_dot(graph)
-    })
+    print(render_graph(graph))
     
 })
-
 output$posterior <- renderUI({
   c_prior <- 1 - input$prior
   c_tp <- 1 - input$tp
@@ -181,6 +189,5 @@ output$posterior <- renderUI({
 sprintf("\\frac{%.4f \\times %.4f}{%.4f \\times %.4f+%.4f \\times %.4f}= %.4f $$",input$tp,input$prior,input$tp,input$prior,c_prior,input$tn,bp))
       )
 })
-
 
 ```

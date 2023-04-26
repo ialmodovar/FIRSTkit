@@ -23,45 +23,41 @@ extract <- function(text) {
   as.numeric(split)
 }
 
-read_data_FIRSTkit <- function(fname, input,choice="Upload File"){
-    
-    choice <- match.arg(arg = choice, 
-                        choices = c("Upload File (Acceptable extensions)",
-                                    "Google Sheets",
-                                    "Input Data"))
-    
-    if(choice=="Upload File"){
-    
+
+read_data_FIRSTkit <- function(fname, choice="File"){
+  
+  choice <- match.arg(arg = choice, 
+                      choices = c("File",
+                                  "Google Sheets",
+                                  "Input Data"))
+  
+  if(choice=="File"){
     ##check extension
-    ext <- fExt(input)#$file$datapath)
-      
+    ext <- fExt(fname)#$file$datapath)
+    
     if(!(ext %in% c(".csv",".txt",".xls",".xlsx",".dat",".ods"))){
       stop("Not supported extension")
     } else{
       if(ext %in% c(".xls",".xlsx")){
-           df <- read_excel(fname,sheet=1)
+        df <- read_excel(fname,sheet=1)
       }      
-     if(ext %in% c(".csv",".txt",".dat")){
-       df <- read.table(fname,
-                  header = input$header,
-                  sep = input$sep,
-                  quote = input$quote)
-     }
+      if(ext %in% c(".csv",".txt",".dat")){
+        df <- read.table(fname,
+                         header = input$header,
+                         sep = input$sep,
+                         quote = input$quote)
+      }
       if(ext %in% c(".ods")){
         df <- read_ods(path = fname)
       }
     }
-    }
-    if(choice=="Google Sheets"){
-        df <- read_sheet(fname)
-    }
-    if(choice=="Input Data"){
-      x <- extract(fname)
-      tt<- data.frame(x = x)
-    } 
-     
-    df
+  }
+  if(choice=="Google Sheets"){
+    df <- read_sheet(fname)
+  }
+  df
 }
+
 
 ```
 

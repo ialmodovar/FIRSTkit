@@ -1,5 +1,4 @@
 ---
-title: "Linear Regression"
 output: html_document
 runtime: shiny
 ---
@@ -14,16 +13,16 @@ library("pander")
 
 knitr::opts_chunk$set(echo = TRUE)
 ```
-This Shiny App performs a simple and multiple linear regression. The user can upload (or input) the dataset of interest. User will obtain estimates of the parameters in the model. Also confidence intervals (CI), the default is 95% CI, as well $p$-value. We can check for the assumptions of normality based on the quantile-quantile plot, assumption of constant variance and linearity.
+<!-- This Shiny App performs a simple and multiple linear regression. The user can upload (or input) the dataset of interest. User will obtain estimates of the parameters in the model. Also confidence intervals (CI), the default is 95% CI, as well $p$-value. We can check for the assumptions of normality based on the quantile-quantile plot, assumption of constant variance and linearity. -->
 
-### Simple Linear regression
+<!-- ### Simple Linear regression -->
 
-Obtain a fitted model of the simple linear regression:
-\[
-Y_i = \beta_0+\beta_1 x_i+\varepsilon_i
-\]
-where $Y_i \sim N(\beta_0+\beta_1 x_i,\sigma^2)$ and $\varepsilon_i \sim N(0,\sigma^2)$.
-To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+<!-- Obtain a fitted model of the simple linear regression: -->
+<!-- \[ -->
+<!-- Y_i = \beta_0+\beta_1 x_i+\varepsilon_i -->
+<!-- \] -->
+<!-- where $Y_i \sim N(\beta_0+\beta_1 x_i,\sigma^2)$ and $\varepsilon_i \sim N(0,\sigma^2)$. -->
+<!-- To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html). -->
 
 
 
@@ -68,12 +67,10 @@ checkboxInput("se", "Add confidence interval around the regression line", TRUE)
                                          tags$b("QQ-Plot (Studentized Residuals)"),
                                          plotlyOutput("diagnostic4"),
                                          br(),
-                                ),
-                                tabPanel("Interpretation", uiOutput("interpretation")),
-                                tabPanel("R output", verbatimTextOutput("summary")))# Regression output
-                    
+                                )
                   )
                 )
+)
 ##
   extract <- function(text) {
     text <- gsub(" ", "", text)
@@ -213,48 +210,7 @@ checkboxInput("se", "Add confidence interval around the regression line", TRUE)
     
   })
   
-  output$interpretation <- renderUI({
-    y <- extract(input$y)
-    x <- extract(input$x)
-    fit <- lm(y ~ x)
-    alpha <- input$alpha
-    b0 <- round(fit$coef[["(Intercept)"]], digits=3)
-    b1 <- round(fit$coef[["x"]], digits= 3)
-    pv0 <- round(summary(fit)$coef["(Intercept)","Pr(>|t|)"],digits=3)
-    pv1 <- round(summary(fit)$coef["x","Pr(>|t|)"],digits=3)
-    if ((pv0 < alpha) & (pv1 < alpha)) {
-      withMathJax(
-        paste0("(Make sure the assumptions for linear regression (independence, linearity, normality and homoscedasticity) are met before interpreting the coefficients.)"),
-        br(),
-        paste0("For a (hypothetical) value of ", input$xlab, " = 0, the mean of ", input$ylab, " = ", b0, "."),
-        br(),
-        paste0("For an increase of one unit of ", input$xlab, ", ", input$ylab, ifelse(b1 >= 0, " increases (on average) by ", " decreases (on average) by "), abs(b1), ifelse(abs(b1) >= 2, " units", " unit"), ".")
-      )
-    } else if ((pv0 < alpha) & (pv1 >= alpha)) {
-      withMathJax(
-        paste0("(Make sure the assumptions for linear regression (independence, linearity, normality and homoscedasticity) are met before interpreting the coefficients.)"),
-        br(),
-        paste0("For a (hypothetical) value of ", input$xlab, " = 0, the mean of ", input$ylab, " = ", b1, "."),
-        br(),
-        paste0("$ \\beta_1 $", " is not significantly different from 0 ($p$-value = ", pv1, ") so there is no significant relationship between ", input$xlab, " and ", input$ylab, ".")
-      )
-    } else if ((pv0 >= alpha) & (pv1 < alpha)) {
-      withMathJax(
-        paste0("(Make sure the assumptions for linear regression (independence, linearity, normality and homoscedasticity) are met before interpreting the coefficients.)"),
-        br(),
-        paste0("$ \\beta_0 $", " is not significantly different from 0 ($p$-value = ", pv0, ") so when ", input$xlab, " = 0, the mean of ", input$ylab, " is not significantly different from 0."),
-        br(),
-        paste0("For an increase of one unit of ", input$xlab, ", ", input$ylab, ifelse(b1 >= 0, " increases (on average) by ", " decreases (on average) by "), abs(b1), ifelse(abs(b1) >= 2, " units", " unit"), ".")
-      )
-    } else {
-      withMathJax(
-        paste0("(Make sure the assumptions for linear regression (independence, linearity, normality and homoscedasticity) are met before interpreting the coefficients.)"),
-        br(),
-        paste0("$\\beta_0 $", " and ", "$ \\beta_1 $", " are not significantly different from 0 (p-values = ",pv0 , " and ", pv1, ", respectively) so the mean of ", input$ylab, " is not significantly different from 0.")
-      )
-    }
-  })
-  
+
   output$plot <- renderPlotly({
     y <- extract(input$y)
     x <- extract(input$x)

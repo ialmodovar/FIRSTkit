@@ -1,5 +1,4 @@
 ---
-title: "Descriptive Statistics"
 output: html_document
 runtime: shiny
 ---

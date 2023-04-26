@@ -2,7 +2,7 @@
 title: First Impressions *R*-based Statistics Toolkit ([FIRSTkit](https://github.com/ialmodovar/FIRSTkit))
 output: html_document
 runtime: shiny
-fontsize: 12pt
+fontsize: 15pt
 editor_options: 
   markdown: 
     wrap: 72
@@ -21,33 +21,18 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
-[**FIRSTkit**](https://github.com/ialmodovar/FIRSTkit) was created to be
-used as a companion for introductory statistics courses. It does not
-required any previous knowledge of [**R**](https://www.r-project.org/).
-**FIRSTkit** was made with the purpose to be used as companion to
-introductory statistics and data sciences courses. Unlike most Shiny-App
-that are create for basic analysis, **FIRSTkit** is indented to be a
-companion in introductory courses. Most web-based application are
-created as a alternative tool for data analysis rather than teaching.
-This will allow first time users, or users who have low interest in
-**R** programming to perform statistical analysis and be successful in
+[**FIRSTkit**](https://github.com/ialmodovar/FIRSTkit) was created to be used as a companion for introductory statistics courses. It does not required any previous knowledge of [**R**](https://www.r-project.org/).
+**FIRSTkit** was made with the purpose to be used as companion to introductory statistics and data sciences courses. Unlike most Shiny-App that are create for basic data analysis, **FIRSTkit** is indented to be a
+companion in introductory courses. Most web-based application are created as a alternative tool for data analysis rather than teaching. This will allow first time users, or users who have low interest in **R** programming to perform statistical analysis and be successful in
 their courses.
 
 ## Data Input/Upload
 
-**FIRSTkit** allow the user to upload dataset in the following
-extensions *.csv, .txt, .xls, xlsx*. Users can input their own values
-for a quick analysis. **FIRSTkit** also can read files from Google
-Sheets, this is because it uses the **R** package googlesheets. If
-missing values are present, **FIRSTkit** will automatically remove them,
-because **FIRSTkit** functions uses the **R** argument *na.rm=TRUE*
-whenever is possible.
+**FIRSTkit** allow the user to upload dataset in the following extensions *.csv, .txt, .xls, xlsx*. Users can input their own values for a quick analysis. **FIRSTkit** also can read files from Google Sheets, this is because it uses the **R** package googlesheets. If missing values are present, **FIRSTkit** will automatically remove them, because **FIRSTkit** functions uses the **R** argument *na.rm=TRUE* whenever is possible.
 
 ## Modules
 
-Our software is create to be use in introductory statistics classes.
-Therefore, **FIRSTkit** consist in topics cover in this course. The
-topics that are cover in **FIRSTkit**
+Our software is create to be use in introductory statistics classes. Therefore, **FIRSTkit** consist in topics cover in this course. The topics that are cover in **FIRSTkit**
 
 1)  Descriptive Statistics
 2)  Introduction to Probability Theory
@@ -61,239 +46,192 @@ As a descriptive tools, **FIRSTkit** allow to compute location and
 dispersion summary. It also allow graphical display to be used in
 descriptive statistics
 
--   **Location measurements**
-    -   **Mean**: The sample mean is defined to be, $$
-        \bar{x}= \frac{1}{n}\sum^n_{i=1}x_i
-        $$
+#### **Location measurements**
 
-    -   **Trimmed Mean**: This mean is computed after discarding given
-        parts of a probability distribution or sample at the high and
-        low end, and typically discarding an equal amount of both. This
-        number of points to be discarded is usually given as a
-        percentage of the total number of points, but may also be given
-        as a fixed number of points.
-
-         1) Find the number of observations $n$.
-         2) Reorder the $X_i$ from the smallest to the largest.
-         3) Find lower case $p$ proportion trimmed.
-         4) Compute $np$. If $np$ is an integer use $k=np$ and trim $k$ observations at both ends. The remaining observations is $n-2k$. The trimmed mean is defined as,
-         $$
-         \bar{x}_{k} = \frac{X_{k+1}+X_{k+2}+…+X_{n-k}}{n-2k} 
-        $$
-    -   **Median**: Middle value separating the greater and lesser
-        halves of a data set. The sample median is defined as,
+- **Mean**: The sample mean is defined to be, 
 $$
+\bar{x}= \frac{1}{n}\sum^n_{i=1}x_i
+$$
+- **Trimmed Mean**: This mean is computed after discarding given parts of a probability distribution or sample at the high and low end, and typically discarding an equal amount of both. This number of points to be discarded is usually given as a percentage of the total number of points, but may also be given as a fixed number of points.
+
+1) Find the number of observations $n$.
+2) Reorder the $X_i$ from the smallest to the largest.
+3) Find lower case $p$ proportion trimmed.
+4) Compute $np$. If $np$ is an integer use $k=np$ and trim $k$ observations at both ends. The remaining observations is $n-2k$. The trimmed mean is defined as,
+$$
+\bar{x}_{k} = \frac{X_{k+1}+X_{k+2}+…+X_{n-k}}{n-2k} 
+$$
+
+- **Median**: Middle value separating the greater and lesser halves of a data set. The sample median is defined as,
+$$ 
 M = X_{(0.5 \times n)} =
 \begin{cases}
 \frac{X_{(n/2)}+X_{(n/2)+1}}{2} & \mbox{if $n$ is even} \\
 X_{(n+1)/2} & \mbox{if $n$ is odd}
-\end{cases}
+\end{cases} 
 $$ 
 
-+ **Geometric Mean**: The geometric mean of a non-negative data set
+- **Geometric Mean**: The geometric mean of a non-negative data set
 is always at most their arithmetic mean. The geometric mean is defined
-as, $$
+as, 
+$$
 g = \left(\prod^n_{i=1}x_i\right)^{1/n}
-$$ + **Dispersion summary** 
+$$ 
 
-+ **Standard Deviation**: is a measure of
+#### **Measurements for Dispersion** 
+
+- **Standard Deviation**: is a measure of
 the amount of variation or dispersion of a set of values. The sample
-standard deviation is defined as, $$
+standard deviation is defined as, 
+$$
 s = \sqrt{\frac{1}{n-1}\sum^n_{i=1}(x_i-\bar{x})^2}
-$$ + **Variance**: is the expectation of the squared deviation of a
+$$ 
+
+- **Variance**: is the expectation of the squared deviation of a
 random variable from its mean. Informally, it measures how far a set of
-numbers is spread out from their average value. $$
+numbers is spread out from their average value. 
+$$
 s^2 = \frac{1}{n-1}\sum^n_{i=1}(x_i-\bar{x})^2
-$$ + **Inter-quartile range (IQR)**: difference between 75th and 25th
-percentiles. The IQR is defined as $$
+$$ 
+- **Inter-quartile range (IQR)**: difference between 75th and 25th
+percentiles. The IQR is defined as 
+$$
 IQR = X_{(0.75 n)}- X_{(0.25 n)}
-$$ + **Median Absolute Deviation (MAD)**: Compute the median absolute
+$$ 
+
+- **Median Absolute Deviation (MAD)**: Compute the median absolute
 deviation, i.e., the (lo-/hi-) median of the absolute deviations from
 the median, and (by default) adjust by a factor for asymptotically
-normal consistency. $$
+normal consistency. 
+$$
 MAD = \mbox{median}_i(|X_i-\mbox{median}(X_i)|)
-$$ + **Range**: the difference between minimum and maximum of all the
+$$ 
+- **Range**: the difference between minimum and maximum of all the
 given arguments. 
 $$
 R = \max X_i - \min X_i
 $$
--   Univariate graphical display
-    -   **Box-plot**: Graphical tool to depicting groups of numerical
-        data through their quantiles. Box plots may also have lines
-        extending from the boxes (whiskers) indicating variability
-        outside the upper and lower quantiles, hence the terms
-        box-and-whisker plot and box-and-whisker diagram. Outliers may
-        be plotted as individual points.
-    -   **Histogram**: Graphical approximation of the distribution of
-        numerical variable
-    -   **Stem-and-leaf plot**: is a technique similar to a histogram,
-        to assist in visualizing the shape of a distribution.
-    -   **Density plot**: Graphical representation of the distribution
-        of a numerical variable. It uses a smooth estimating to show the
-        probability density function of the variable.
-    -   **Bar Graph**: Graphical tool that presents categorical data
-        with rectangular bars with heights or lengths proportional to
-        the values that they represent.
-    -   **Scatter plot (two variables)**: Graphical display that shows
-        the relationship between two numerical variables $(x,y)$.
++   **Data visualization**
+- **Box-plot**: Graphical tool to depicting groups of numerical data through their quantiles. Box plots may also have lines extending from the boxes (whiskers) indicating variability outside the upper and lower quantiles, hence the terms box-and-whisker plot and box-and-whisker diagram. Outliers may be plotted as individual points.
+- **Histogram**: Graphical approximation of the distribution of numerical variable
+- **Stem-and-leaf plot**: is a technique similar to a histogram, to assist in visualizing the shape of a distribution.
+- **Density plot**: Graphical representation of the distribution of a numerical variable. It uses a smooth estimating to show the probability density function of the variable.
+- **Bar Graph**: Graphical tool that presents categorical data with rectangular bars with heights or lengths proportional to the values that they represent.
+- **Scatter plot (two variables)**: Graphical display that shows the relationship between two numerical variables $(x,y)$.
 
-### **Probability Theory and Distribution functions**
+## **Probability Theory and probability distribution functions**
 
--   Probability Events
-    -   For a given set of events, we can compute the union,
-        intersection, independence of these events. The solutions are
-        display using a Venn Diagram and for the conditional probability
-        a Bayes tree diagram.
--   Bayes tree diagram required the input of a prior probability,
-    false-positive, and true positive. $$
-    P(A|B) = \frac{P(B|A)P(A)}{P(B)} = \frac{P(B|A)P(A)}{P(B|A^c)P(A^c)+P(B|A)P(A)}
-    $$
--   Distribution functions
-    -   **Binomial Distribution**: The binomial distribution arise from
-        $n$ independent Bernoulli experiments. The parameters of the
-        Binomial distribution are $n$ and $p$, the first is the number
-        of experiment and $p$ the probability of success. In statistics
-        course notations, the probability mass function (pmf) is given
-        by $X\sim \mbox{Binomial}(n,p)$, $$
-         f(x|n,p) = {n \choose x} p^{x} (1-p)^{n-x}; x \in \{0,1,\ldots,n\}; p \in [0,1]
-        $$
-    -   **Poisson Distribution**: Named after the French Mathematician
-        Sim'eon Denis Poisson (1781-1840). Involve observing discrete
-        events in a continuous \`\`interval'' of time, length or space.
-        But we are not dealing with a interval in a mathematical sense.
-        A random variable in a Poisson process is $X$, the number of
-        occurrences of the event in a interval of size $s$ units. A
-        random variable $X$ is Poisson with average
-        $\lambda$,probability mass function given by $$
-        f(x|\lambda) = \frac{e^{-\lambda} \lambda^x}{x!}; x \in\{0,1,2,3,\ldots,\}; \lambda >0
-        $$
-    -   **Normal Distribution**: The normal distribution plays a central
-        role in introductory statistics courses. The normal distribution
-        and distributions associated with it are very tractable
-        analytically. The normal distribution have the familiar
-        bell-shaped, symmetric and makes it appealing to model
-        populations. The central limit theorem, the normal distribution
-        can be used to approximate others distributions for large
-        samples. A random variable $X \sim N(\mu,\sigma^2)$, in here
-        $\mu$ is the mean and $\sigma^2$ is the variance, the pdf its
-        given by $$
-        f(x|\mu,\sigma^2) = \frac{1}{\sqrt{2\pi \sigma^2}} \exp\left\{-\frac{(x-\mu)^2}{2\sigma^2} \right\} \mbox{ for all } x\in \mathbb{R}; \mu \in \mathbb{R}; \sigma > 0
-        $$
++ **Probability Events**: For a given set of events, we can compute the union, intersection, independence of these events. The solutions are display using a Venn Diagram.
++ **Conditional Probability**: Bayes tree diagram required the input of a prior probability, false-positive, and true positive. For any two set $A$ and $B$, the conditional probability is computed as follow
+$$
+P(A|B) = \frac{P(B|A)P(A)}{P(B)} = \frac{P(B|A)P(A)}{P(B|A^c)P(A^c)+P(B|A)P(A)}
+$$
+
+### **Probability distributions functions**
+
+#### **Discrete distributions functions**
+
+- **Binomial Distribution**: The binomial distribution arise from $n$ independent Bernoulli experiments. The parameters of the Binomial distribution are $n$ and $p$, the first is the number of experiment and $p$ the probability of success. In statistics courses if a random variable $X\sim \mbox{Binomial}(n,p)$, then probability mass function (pmf) is given by 
+$$
+\mathbb{P}(X=x) = f(x|n,p) = {n \choose x} p^{x} (1-p)^{n-x}; x \in \{0,1,\ldots,n\}; p \in [0,1]
+$$
+- **Poisson Distribution**:  Involve observing discrete events in a continuous \`\`interval'' of time, length or space. But we are not dealing with a interval in a mathematical sense. A random variable in a Poisson process is $X$, the number of occurrences of the event in a interval of size $s$ units. a random variable $X\sim \mbox{Poisson}(\lambda)$, then probability mass function (pmf) is given by 
+$$
+ \mathbb{P}(X=x)=f(x|\lambda) = \frac{e^{-\lambda} \lambda^x}{x!}; x \in\{0,1,2,3,\ldots,\}; \lambda >0
+$$
+
+- **Geometric Distribution**: The probability distribution of the number $X$ of Bernoulli trials needed to get one success. A random variable $X\sim \mbox{Geometric}(p)$, then pmf is given by 
+$$
+\mathbb{P}(X=x) = f(x|p) =  p (1-p)^{x-1}; x \in \{1,2,3,\ldots\}; p \in (0,1]
+$$
+
+#### **Continuous distributions functions**
+
+- **Normal Distribution**: The normal distribution plays a central role in introductory statistics courses. The normal distribution and distributions associated with it are very tractable analytically. The normal distribution have the familiar bell-shaped, symmetric and makes it appealing to model populations. The central limit theorem, the normal distribution can be used to approximate others distributions for large samples. A random variable $X \sim N(\mu,\sigma^2)$, in here $\mu$ is the mean and $\sigma^2$ is the variance, the probability density functions (pdf) is given by 
+$$
+f(x|\mu,\sigma^2) = \frac{1}{\sqrt{2\pi \sigma^2}} \exp\left\{-\frac{(x-\mu)^2}{2\sigma^2} \right\} \mbox{ for all } x\in \mathbb{R}; \mu \in \mathbb{R}; \sigma > 0
+$$
     -   **Chi-Squared Distribution**:
-    -   **Student's** $t$ distribution:
-    -   **Snedecor's** $F$ distribution:
+    -   **Student's $t$ distribution**:
+    -   **Snedecor's $F$ distribution**:
 
 ### **Inference statistics**
 
--   **One-Sample Inference**
-    -   **One-Sample *t*-test for a population mean** $\mu$: If you have
-        a continuous data and your data is a random sample from a normal
-        population. Then, the one-sample $t$-test is a statistical
-        hypothesis test that can be used to determine whether an unknown
-        population mean is different from a specific value. $$
-        H_0: \mu = \mu_0 \mbox{ against } H_1: \mu \neq \mu_0
-        $$
-    -   **Wilcoxon signed-ranked test a location parameter**: When you
-        cannot safely assume normality, you can perform a nonparametric
-        test that does not assume normality $$
-        H_0: M = M_0 \mbox{ against } H_1: M \neq M_0
-        $$ Also, if your sample sizes are very small, you might need to
-        consider this non-parametric approach.
-    -   **One-Sample** $\chi^2$-test for the population variance
-        $\sigma^2$: If you have a continuous data and your data is a
-        random sample from a normal population. Then, the one-sample
-        $\chi^2$ test for the variance is a statistical hypothesis test
-        that can be used to determine whether an unknown population
-        variance is different from a specific value. $$
-        H_0: \sigma^2 = \sigma^2_0 \mbox{ against } H_1: \sigma^2 \neq \sigma^2_0,
-        $$ Note that this test can also be used for a standard
-        deviation, $$
-        H_0: \sigma = \sigma_0 \mbox{ against } H_1: \sigma \neq \sigma_0,
-        $$
-    -   **One-Sample test for a population proportion**: Performs an
-        exact test of a simple null hypothesis about the probability of
-        success in a Bernoulli experiment. $$
-        H_0: p = p_0 \mbox{ against } H_1: p \neq p_0
-        $$
--   **Two-Sample Inference**
-    -   Two-Sample $t$-test for means comparison: The two-sample
-        $t$-test is used to determine if two population means are equal.
-        The data may either be paired or not paired.
+####**One-Sample Inference**
+-**One-Sample *t*-test for a population mean** $\mu$: If you have a continuous data and your data is a random sample from a normal population. Then, the one-sample $t$-test is a statistical hypothesis test that can be used to determine whether an unknown population mean is different from a specific value. 
+$$ 
+H_0: \mu = \mu_0 \mbox{ against } H_1: \mu \neq \mu_0 
+$$
+- **Wilcoxon signed-ranked test a location parameter**: When you cannot safely assume normality, you can perform a nonparametric test that does not assume normality 
+$$
+H_0: M = M_0 \mbox{ against } H_1: M \neq M_0
+$$ Also, if your sample size IS very small, you might need to consider this non-parametric approach.
+- **One-Sample** $\chi^2$-test for the population variance $\sigma^2$: If you have a continuous data and your data is a
+random sample from a normal population. Then, the one-sample $\chi^2$ test for the variance is a statistical hypothesis test that can be used to determine whether an unknown population variance is different from a specific value. 
+$$
+H_0: \sigma^2 = \sigma^2_0 \mbox{ against } H_1: \sigma^2 \neq \sigma^2_0,
+$$ 
+Note that this test can also be used for a standard deviation, 
+$$
+H_0: \sigma = \sigma_0 \mbox{ against } H_1: \sigma \neq \sigma_0,
+$$
+-**One-Sample test for a population proportion**: Performs an exact test of a simple null hypothesis about the probability of success in a Bernoulli experiment. 
+$$
+H_0: p = p_0 \mbox{ against } H_1: p \neq p_0
+$$
+- **Two-Sample Inference**
+- Two-Sample $t$-test for means comparison: The two-sample $t$-test is used to determine if two population means are equal. The data may either be paired or not paired.
 
-        -   Dependent $t$-test for paired samples: This test is used
-            when the samples are dependent; that is, when there is only
-            one sample that has been tested twice (repeated measures) or
-            when there are two samples that have been matched or
-            \`\`paired''. The $t$-statistic is calculated as $$
-            t = \frac{\bar{X}-\delta_0}{S_D/\sqrt{n}},
-            $$ where $\bar{X}$ are the average and $S_D$ standard
-            deviation of the differences between all pairs. $\delta_0$
-            its the value under the null hypothesis, i.e., want to test
-            whether the average of the difference is significantly
-            different. The degree of freedom used is $n-1$, where $n$
-            represents the number of pairs.
-        -   **Independent two** $t$-test for the comparison of two
-            means: This test is used when the samples are independent;
-            that is, when there are two sample that are been tested. The
-            variances of the two samples may be assumed to be equal or
-            unequal. If we assumed (by default) constant variance, i.e.,
-            both samples have equal variances, then the $t$-statistic is
-            calculated as $$
-            t = \frac{\bar{X}_1-\bar{X}_2-\delta_0}{\sqrt{S^2_p\left(\frac{1}{n_1} +\frac{1}{n_2}\right)}},
-            $$ where $S^2_p$ is the pooled variance. $$
+- Dependent $t$-test for paired samples: This test is used
+when the samples are dependent; that is, when there is only
+one sample that has been tested twice (repeated measures) or when there are two samples that have been matched or ''paired''. The $t$-statistic is calculated as 
+$$
+t = \frac{\bar{X}-\delta_0}{S_D/\sqrt{n}},
+$$ 
+where $\bar{X}$ are the average and $S_D$ standard deviation of the differences between all pairs. $\delta_0$ its the value under the null hypothesis, i.e., want to test whether the average of the difference is significantly different. The degree of freedom used is $n-1$, where $n$ represents the number of pairs.
+-   **Independent Samples** $t$-test for the comparison of two means: This test is used when the samples are independent; that is, when there are two sample that are been tested. The variances of the two samples may be assumed to be equal or unequal. If we assumed (by default) constant variance, i.e., both samples have equal variances, then the $t$-statistic is calculated as 
+$$
+t = \frac{\bar{X}_1-\bar{X}_2-\delta_0}{\sqrt{S^2_p\left(\frac{1}{n_1} +\frac{1}{n_2}\right)}},
+$$ 
+where $S^2_p$ is the pooled variance,i.e., 
+$$
             S^2_p = \frac{(n_1-1)S^2_1+ (n_2-1)S^2_2}{n_1+n_2-2}
-            $$
+$$
+- Wilcoxon-Mann-Whitney to compare Two Location
 
-    -   Wilcoxon-Mann-Whitney to compare Two Location
+- Two-Sample *F* Test to compare Two Variance: If you have a continuous data and your data is a random sample from a normal population. Then, the two-sample $F$-test for the comparison of two variance is a statistical hypothesis test that can be used to determine whether two unknown population variance are different from a specific value. 
+$$
+H_0: \sigma^2_1 = \sigma^2_2 \mbox{ against } H_1: \sigma^2_1 \neq \sigma^2_2
+$$
 
-    -   Two-Sample *F* Test to compare Two Variance: If you have a
-        continuous data and your data is a random sample from a normal
-        population. Then, the two-sample $F$-test for the comparison of
-        two variance is a statistical hypothesis test that can be used
-        to determine whether two unknown population variance are
-        different from a specific value. $$
-        H_0: \sigma^2_1 = \sigma^2_2 \mbox{ against } H_1: \sigma^2_1 \neq \sigma^2_2
-        $$
-
-    -   Two-Sample proportion test
+-   Two-Sample proportion test
 -   Three or more Sample Inference
-    -   **One-Way Analysis of Variance (ANOVA)** If you have a
-        continuous data and your data is a random sample from a normal
-        population. Then, the ANOVA is a statistical hypothesis test
-        that can be used to determine whether an unknown population mean
-        is different from a specific value. $$
-        H_0: \mu_1 = \mu_2 = \cdots = \mu_k \mbox{ against } H_1: \mbox{ at least one of them is different}
-        $$
-    -   **Kruskal-Wallis Rank Sum test**: If your sample sizes are very
-        small, you might not be able to test for normality. When you
-        cannot safely assume normality, you can perform a nonparametric
-        test that does not assume normality $$
-        H_0: M_1 = M_2 = \cdots = M_k \mbox{ against } H_1: \mbox{ at least one of them is different}
-        $$
--   $\chi^2$-association test:
+    -   **One-Way Analysis of Variance (ANOVA)** If you have a continuous data and your data is a random sample from a normal population. Then, the ANOVA is a statistical hypothesis test that can be used to determine whether an unknown population mean is different from a specific value.
+    
+$$ 
+H_0: \mu_1 = \mu_2 = \cdots = \mu_k \mbox{ against } H_1: \mbox{ at least one of them is different}
+$$
+    -   **Kruskal-Wallis Rank Sum test**: If your sample sizes are very small, you might not be able to test for normality. When you cannot safely assume normality, you can perform a nonparametric test that does not assume normality
+
+$$
+H_0: M_1 = M_2 = \cdots = M_k \mbox{ against } H_1: \mbox{ at least one of them is different}
+$$
+
+-$\chi^2$-association test:
 
 ### **Linear Regression**
 
-Fit a linear regression model, (either simple or multiple) linear
-regression. Suppose we have a dependent variable $Y$ and multiple
-regressors $x_1,\ldots, x_p$. The linear regression accepted in
-*FIRSTkit* assumed the following structure, $$
+Fit a linear regression model, (either simple or multiple) linear regression. Suppose we have a dependent variable $Y$ and multiple regressors $x_1,\ldots, x_p$. The linear regression accepted in *FIRSTkit* assumed the following structure, 
+$$
 Y_i = \beta_0+\sum^p_{j=1}\beta_j x_{ij}+\varepsilon_i
-$$ where $Y_i \sim N(\beta_0+\sum^p_{j=1}\beta_j x_{ij},\sigma^2)$ and
-$\varepsilon_i \sim N(0,\sigma^2)$. In the linear regression the
-parameters have the following roles, $\beta_0$ is the $y$-intercept.
-While $\beta_1,\ldots, \beta_p$ are the slope associated with each of
-the regressors.
+$$ where $Y_i \sim N(\beta_0+\sum^p_{j=1}\beta_j x_{ij},\sigma^2)$ 
+and $\varepsilon_i \sim N(0,\sigma^2)$. In the linear regression the parameters have the following roles, $\beta_0$ is the $y$-intercept. While $\beta_1,\ldots, \beta_p$ are the slope associated with each of the regressors.
 
 ## Authors
 
--   [Israel A. Almodóvar-Rivera](https://github.com/ialmodovar/) is an
-    Assistant Professor in the Department of Mathematical Sciences at
-    University of Puerto Rico at Mayag"uez.
+-   [Israel A. Almodóvar-Rivera](https://github.com/ialmodovar/) is an Assistant Professor in the Department of Mathematical Sciences at University of Puerto Rico at Mayag"uez.
 
--   [Ranjan Maitra](https://www.stat.iastate.edu/people/ranjan-maitra)
-    is an Professor in the Department of Statistics at Iowa State
-    University.
+-   [Ranjan Maitra](https://www.stat.iastate.edu/people/ranjan-maitra) is an Professor in the Department of Statistics at Iowa State University.
 
 If you have any question or want to report something, or you want to
 contribute in this project you can send a message to

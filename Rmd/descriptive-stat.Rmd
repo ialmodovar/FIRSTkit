@@ -1,5 +1,4 @@
 ---
-title: "Descriptive Statistics"
 output: html_document
 runtime: shiny
 ---
@@ -105,6 +104,7 @@ sidebarLayout(
                       Histogram = "Histogram", 
                       Density = "Density", 
                       Bar = "Bar",
+                      "Stem-and-Leaf" = "Stem-and-Leaf",
                       ScatterPlot = "ScatterPlot")),
     checkboxInput("show.points", "Display points (Boxplot only)", FALSE)
     ),
@@ -139,10 +139,14 @@ sidebarLayout(
  #    updateSelectInput(session, "variable", choices = var.opts)
  #    updateSelectInput(session, "group", choices = var.opts)
  #  })
-  
-output$plots <- renderUI({
-    plotlyOutput("pp")
-  })
+#   
+ output$plots <- renderUI({
+   if(input$plot.type=="Stem-and-Leaf"){
+     plotOutput("stem")
+   } else{
+     plotlyOutput("pp")
+   }
+   })
 
 d <- reactive({  
   if(!is.null(input$file1)){
@@ -227,16 +231,18 @@ output$baralpha <- renderUI({
   ##plotting function using ggplot2
 output$pp <- renderPlotly({
  if(!is.null(input$file1)| !is.null(input$file2)){
-    obj<-list(data=d(),
-               variable=input$variable,
-               group=input$group)
+    
+   obj<-list(data=d(),
+            variable=input$variable,
+            group=input$group)
 
     plot.obj<-obj
     
     plot.type<-switch(input$plot.type,
-                      "Boxplot" = geom_boxplot(alpha=input$alpha),
-                      "Histogram" = geom_histogram(alpha=input$alpha,position="identity"),
-                      "Density" =	geom_density(alpha=input$alpha),
+  "Boxplot" = geom_boxplot(alpha=input$alpha),
+  "Histogram" = geom_histogram(alpha=input$alpha,
+                               position="identity"),
+"Density" =	geom_density(alpha=input$alpha),
                       "Bar" =	geom_bar(position="dodge"),
                       "ScatterPlot" = geom_point()
     )
@@ -244,7 +250,7 @@ output$pp <- renderPlotly({
     if((input$plot.type=="Boxplot")|input$plot.type=="ScatterPlot")	{	
       if(input$plot.type=="Boxplot"){
       p<-ggplot(plot.obj$data,
-                aes_string(
+                aes(
                   x 		= plot.obj$group,
                   y 		= plot.obj$variable,
                   fill 	= plot.obj$group 
@@ -257,7 +263,7 @@ output$pp <- renderPlotly({
       }
       } else{
           p<-ggplot(plot.obj$data,
-                aes_string(
+                aes(
                   x 		= plot.obj$group,
                   y 		= plot.obj$variable,
                   fill 	= plot.obj$group,
@@ -269,7 +275,7 @@ output$pp <- renderPlotly({
     } else {
       
       p<-ggplot(plot.obj$data,
-                aes_string(
+                aes(
                   x 		= plot.obj$variable,
                   fill 	= plot.obj$group,
                   group 	= plot.obj$group
@@ -284,22 +290,22 @@ output$pp <- renderPlotly({
       y 		= input$variable
     )  + .theme 
     ggplotly(p)
-  
+
   }
   
   })
 
 output$stem <- renderPlot({
-##  sc <- 1
 
   data <- d()
+  sc <- 1
   variable <- input$variable
-  group <- input$group
+ # group <- input$group
 tmp <- capture.output(stem(data[,variable],scale = sc))
 
 stemdf <- data.frame(tmp,
                      rr=1:length(tmp))
-ggplot(stemdf)+ geom_text(aes(x=rr, y=0, label=tmp),
+p <- ggplot(stemdf)+ geom_text(aes(x=rr, y=0, label=tmp),
                           size=max(10/sc,3), hjust=0) + 
   coord_flip()+ theme_classic() + 
   scale_x_discrete(breaks=NULL)+ xlab("")+
@@ -310,7 +316,7 @@ ggplot(stemdf)+ geom_text(aes(x=rr, y=0, label=tmp),
         panel.grid=element_blank(), 
         axis.line=element_blank(),
         legend.position = "none")
-
+p
 })
 
 ```

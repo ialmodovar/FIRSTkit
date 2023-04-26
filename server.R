@@ -8,38 +8,76 @@ shinyServer(function(input, output, session) {
       sliderInput("alpha","Significance level \\(\\alpha \\)",
                   min = 0,
                   max = 1,
-                  value = 0.05,step=0.001)
+                  value = 0.05,
+                  step=0.001)
     )
   )
   })
 
   ## Modules
   
-  output$FIRSTkitData <- renderUI({
-    inclRmd("./Rmd/data_input.Rmd")
+#   output$FIRSTkitData <- renderUI({
+#     inclRmd("./Rmd/data_input.Rmd")
+#   })
+#   
+  output$intro <- renderUI({
+    
+    withMathJax(HTML(readLines(rmarkdown::render(input = "./Rmd/introduction.Rmd",
+                                                 output_format = rmarkdown::html_fragment(),
+                                                 quiet = TRUE
+    ))))
   })
   
-  output$intro <- renderUI({
-    inclRmd("./Rmd/introduction.Rmd")
-  })
   output$descriptive <- renderUI({
-	  inclRmd("./Rmd/descriptive-stat.Rmd")
+    withMathJax(HTML(readLines(rmarkdown::render(input = "./Rmd/descriptive-stat.Rmd",
+                                                 output_format = rmarkdown::html_fragment(),
+                                                 quiet = TRUE
+    ))))
 	})
-  output$BayesTreeDiagram <- renderUI({
-    withMathJax(inclRmd("./Rmd/Bayes_Tree_Diagram.Rmd"))
+  output$VennDiagram <- renderUI({
+    withMathJax(HTML(readLines(rmarkdown::render(input = "./Rmd/PT_Venn_Diagram.Rmd",
+                                                 output_format = rmarkdown::html_fragment(),
+                                                 quiet = TRUE
+    ))))
   })
-	
+  output$BayesTreeDiagram <- renderUI({
+    withMathJax(HTML(readLines(rmarkdown::render(input = "./Rmd/Bayes_Tree_Diagram.Rmd",
+                                                 output_format = rmarkdown::html_fragment(),
+                                                 quiet = TRUE
+    ))))
+  })
+  output$ProbDistFnt <- renderUI({
+    withMathJax(HTML(readLines(rmarkdown::render(input = "./Rmd/Distributions_Functions.Rmd",
+                                                 output_format = rmarkdown::html_fragment(),
+                                                 quiet = TRUE
+    ))))
+  })
 	 output$OneSample <- renderUI({
-	 withMathJax(inclRmd("./Rmd/One_Sample_Inference.Rmd"))
+	   withMathJax(HTML(readLines(rmarkdown::render(input = "./Rmd/One_Sample_Inference.Rmd",
+	                                                output_format = rmarkdown::html_fragment(),
+	                                                quiet = TRUE
+	   ))))
 	 })
 	 output$TwoSample <- renderUI({
-	   withMathJax(inclRmd("./Rmd/Two_Sample_Inference.Rmd"))
+	   withMathJax(HTML(readLines(rmarkdown::render(input = "./Rmd/Two_Sample_Inference.Rmd",
+	                                                output_format = rmarkdown::html_fragment(),
+	                                                quiet = TRUE
+	   ))))
+	   
 	 })
-	output$kSample <- renderUI({
-	   withMathJax(inclRmd("./Rmd/Three_Sample_or_more_Inference.Rmd"))
+	output$kSamples <- renderUI({
+	  withMathJax(HTML(readLines(rmarkdown::render(input = "./Rmd/Three_Sample_or_more_Inference.Rmd",
+	                                               output_format = rmarkdown::html_fragment(),
+	                                               quiet = TRUE
+	  ))))
+	  
 	 })
-	
+
 	 output$slr <- renderUI({
-	   withMathJax(inclRmd("./Rmd/SLR.Rmd"))
+	   withMathJax(HTML(readLines(rmarkdown::render(input = "./Rmd/SLR.Rmd",
+	                                                output_format = rmarkdown::html_fragment(),
+	                                                quiet = TRUE
+	   ))))
+#	   withMathJax(inclRmd("./Rmd/SLR.Rmd"))
 	 })
 })

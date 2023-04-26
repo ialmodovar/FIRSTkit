@@ -1,0 +1,100 @@
+
+
+
+<!-- This Shiny App performs a simple and multiple linear regression. The user can upload (or input) the dataset of interest. User will obtain estimates of the parameters in the model. Also confidence intervals (CI), the default is 95% CI, as well $p$-value. We can check for the assumptions of normality based on the quantile-quantile plot, assumption of constant variance and linearity. -->
+<!-- ### Simple Linear regression -->
+<!-- Obtain a fitted model of the simple linear regression: -->
+<!-- \[ -->
+<!-- Y_i = \beta_0+\beta_1 x_i+\varepsilon_i -->
+<!-- \] -->
+<!-- where $Y_i \sim N(\beta_0+\beta_1 x_i,\sigma^2)$ and $\varepsilon_i \sim N(0,\sigma^2)$. -->
+<!-- To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html). -->
+<div class="row">
+<div class="col-sm-4">
+<form class="well" role="complementary">
+<b>Data:</b>
+<div class="form-group shiny-input-container">
+<label class="control-label" id="x-label" for="x">x</label>
+<input id="x" type="text" class="form-control" value placeholder="Enter values separated by a comma, e.g. 1, 2, 3, etc."></input>
+</div>
+<div class="form-group shiny-input-container">
+<label class="control-label" id="y-label" for="y">y</label>
+<input id="y" type="text" class="form-control" value placeholder="Enter values separated by a comma, e.g. 4,5,6, etc."></input>
+</div>
+<div class="form-group shiny-input-container">
+<label class="control-label" id="alpha-label" for="alpha">alpha</label>
+<input id="alpha" type="text" class="form-control" value="0.05" placeholder="Significance level"></input>
+</div>
+<hr />
+<b>Plot:</b>
+<div class="form-group shiny-input-container">
+<label class="control-label" id="xlab-label" for="xlab">Axis labels:</label>
+<input id="xlab" type="text" class="form-control" value="x" placeholder="x label"></input>
+</div>
+<div class="form-group shiny-input-container">
+<label class="control-label shiny-label-null" for="ylab" id="ylab-label"></label>
+<input id="ylab" type="text" class="form-control" value="y" placeholder="y label"></input>
+</div>
+<div class="form-group shiny-input-container">
+<div class="checkbox">
+<label>
+<input id="se" type="checkbox" checked="checked"></input>
+<span>Add confidence interval around the regression line</span>
+</label>
+</div>
+</div>
+</form>
+</div>
+<div class="col-sm-8" role="main">
+<div class="tabbable">
+<ul class="nav nav-tabs" data-tabsetid="4661">
+<li class="active">
+<a href="#tab-4661-1" data-toggle="tab" data-bs-toggle="tab" data-value="Data">Data</a>
+</li>
+<li>
+<a href="#tab-4661-2" data-toggle="tab" data-bs-toggle="tab" data-value="Summary">Summary</a>
+</li>
+<li>
+<a href="#tab-4661-3" data-toggle="tab" data-bs-toggle="tab" data-value="Regression plot">Regression plot</a>
+</li>
+<li>
+<a href="#tab-4661-4" data-toggle="tab" data-bs-toggle="tab" data-value="Residuals">Residuals</a>
+</li>
+</ul>
+<div class="tab-content" data-tabsetid="4661">
+<div class="tab-pane active" data-value="Data" id="tab-4661-1">
+<div class="datatables html-widget html-widget-output shiny-report-size html-fill-item-overflow-hidden html-fill-item" id="tbl" style="width:100%;height:auto;"></div>
+</div>
+<div class="tab-pane" data-value="Summary" id="tab-4661-2">
+<br />
+<b>Sample means of variables</b>
+<div id="data" class="shiny-html-output"></div>
+<br />
+<b>Estimates of the slope and intercept</b>
+<div id="parameters" class="shiny-html-output"></div>
+<br />
+<b>Table Output</b>
+<div id="tableoutput" class="shiny-html-output"></div>
+</div>
+<div class="tab-pane" data-value="Regression plot" id="tab-4661-3">
+<div class="plotly html-widget html-widget-output shiny-report-size shiny-report-theme html-fill-item-overflow-hidden html-fill-item" id="plot" style="width:100%;height:400px;"></div>
+</div>
+<div class="tab-pane" data-value="Residuals" id="tab-4661-4">
+<br />
+<b>Fitted values vs Residuals</b>
+<div class="plotly html-widget html-widget-output shiny-report-size shiny-report-theme html-fill-item-overflow-hidden html-fill-item" id="diagnostic1" style="width:100%;height:400px;"></div>
+<br />
+<b>QQ-Plot</b>
+<div class="plotly html-widget html-widget-output shiny-report-size shiny-report-theme html-fill-item-overflow-hidden html-fill-item" id="diagnostic3" style="width:100%;height:400px;"></div>
+<br />
+<b>Fitted values vs Studentized Residuals</b>
+<div class="plotly html-widget html-widget-output shiny-report-size shiny-report-theme html-fill-item-overflow-hidden html-fill-item" id="diagnostic2" style="width:100%;height:400px;"></div>
+<br />
+<b>QQ-Plot (Studentized Residuals)</b>
+<div class="plotly html-widget html-widget-output shiny-report-size shiny-report-theme html-fill-item-overflow-hidden html-fill-item" id="diagnostic4" style="width:100%;height:400px;"></div>
+<br />
+</div>
+</div>
+</div>
+</div>
+</div>

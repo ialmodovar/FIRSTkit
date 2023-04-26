@@ -1,5 +1,4 @@
 ---
-title: "Multi-sample Inference and Analysis of Variance"
 output: html_document
 runtime: shiny
 ---
@@ -38,7 +37,7 @@ sidebarLayout(
   sidebarPanel(
     selectInput(
       inputId = "datachoice",
-      label = "Data (Input some data or upload a file)",
+      label = "Data",
       choices = c("Upload file","Upload .xls/.xslx file"),
       multiple = FALSE,
       selected = NULL
@@ -74,25 +73,28 @@ sidebarLayout(
     fileInput('file2', 'Choose .xls/.xlsx file',accept = c(".xlsx",".xls"))
     
     ),
-    selectInput('type', 'Please select Sums of Squares type',
-                    c(I = 'type1', II = 'type2', III = 'type3'), 'type3'),
-#    textInput("mu0","\\(  H_0:\\mu_1=\\mu_2 = \\cdots = \\mu_k \\)",value="0",placeholder="Indicate the true value for the difference of location of interest"),
-#        textInput("sigma0","\\(  H_0:\\sigma_1=\\sigma_2 = \\cdots = \\sigma_k \\)",value="0",placeholder="Indicate the true value for the difference of dispersion of interest"),
+    selectInput('type', 'Sums of Squares Type',
+                    c(I = 'type1', II = 'type2', III = 'type3'), 'type1'),
+ ##   textInput("mu0","\\(  H_0:\\mu_1=\\mu_2 = \\cdots = \\mu_k \\)",value="0",placeholder="Indicate the true value for the difference of location of interest"),
+##        textInput("sigma0","\\(  H_0:\\sigma_1=\\sigma_2 = \\cdots = \\sigma_k \\)",value="0",placeholder="Indicate the true value for the difference of dispersion of interest"),
     uiOutput('var'),
     ),
       mainPanel(
         tabsetPanel(type = "tabs",
-        tabPanel("Groups Summaries",
-        tableOutput("GroupsDescription")),
-        tabPanel("Location Summary",
+#        tabPanel("Groups Summaries",
+#        tableOutput("GroupsDescription")),
+        tabPanel("Location Inference",
+withMathJax(),
         h4('Analysis of Variance Table'),
         tableOutput('aovSummary'),
+withMathJax(),
         h4('Kruskal-Wallis Rank Sum Test'),
-        tableOutput('KWSummary')
-                 ),
-        tabPanel("Dispersion Summary",
-                 h4("Bartlett test for homogeneity of variances"),
-                 uiOutput("BartlettSummary"))
+        tableOutput('KWSummary')),
+        tabPanel("Dispersion Inference",
+        h4("Bartlett test for homogeneity of variances"),
+        uiOutput("BartlettSummary"),
+        h4("Fligner-Killeen test for homogeneity of variances"),
+        uiOutput("FlignerSummary"))
         )
   )
 )
@@ -123,41 +125,39 @@ d <- reactive({
 })
 
 output$var <- renderUI({
-          list (selectInput("dvar", "Please Pick The Dependent Variable", choices = names(d()),selected = NULL),
-                selectInput("ivar", "Please Pick The Independent Variable", choices = names(d()),selected = NULL)#,
+list(selectInput("dvar", "Response (y)", choices = names(d()),selected = NULL),
+selectInput("ivar", "Fixed-effects ", choices = names(d()),selected = NULL)#,
 #                actionButton("submit", "Submit")
 )
 })
 
-output$GroupsDescription <- renderTable({
-  d2 <- d()
-  xbars <- with(data=d2,tapply(input$dvar,input$ivar,mean,na.rm=TRUE))
-  sds <- with(data=d2,tapply(input$dvar,input$ivar,sd,na.rm=TRUE))
-  nks <- with(data=d2,table(input$ivar))
-  
-  dpt <- cbind(nks,xbars,sds)
-  colnames(dpt) <- c("\\( n \\)","\\( \\bar{x} \\)", "\\( s \\)")
-  dpt
-},rownames=TRUE,colnames=TRUE)
+# output$GroupsDescription <- renderTable({
+#   d2 <- d()
+#   xbars <- with(data=d2,tapply(input$dvar,input$ivar,mean,na.rm=TRUE))
+#   sds <- with(data=d2,tapply(input$dvar,input$ivar,sd,na.rm=TRUE))
+#   nks <- with(data=d2,table(input$ivar))
+#   
+#   dpt <- cbind(nks,xbars,sds)
+#   colnames(dpt) <- c("\\( n \\)","\\( \\bar{x} \\)", "\\( s \\)")
+#   dpt
+# },rownames=TRUE,colnames=TRUE)
 
 output$aovSummary <- renderTable({
-
 #        if(input$submit > 0){
-          if(input$type == 'type1'){
-        return(isolate(anova(lm(as.formula(paste(input$dvar,"~",input$ivar,collapse="")), data =d()))))
-          }
-          if(input$type == 'type2'){
-            return(isolate(Anova(lm(as.formula(paste(input$dvar,"~",input$ivar,collapse="")), data =d()), 
-                           Type = "II", test.statistic = "F")))
-          }
-          if(input$type == 'type3'){
-            isolate(
-              fit <- aov(lm(as.formula(paste(input$dvar,"~",input$ivar,collapse="")), data =d()))
-            )
-            return(drop1(fit, ~ . , test = 'F'))
-    #      }
-        }
-      },rownames=TRUE)
+if(input$type == 'type1'){
+return(isolate(anova(lm(as.formula(paste(input$dvar,"~",input$ivar,collapse="")), data =d()))))
+}
+if(input$type == 'type2'){
+return(isolate(Anova(lm(as.formula(paste(input$dvar,"~",input$ivar,collapse="")), data =d()), Type = "II", test.statistic = "F")))
+}
+if(input$type == 'type3'){
+isolate(
+fit <- aov(lm(as.formula(paste(input$dvar,"~",input$ivar,collapse="")), data =d()))
+)
+return(drop1(fit, ~ . , test = 'F'))
+#      }
+}
+},rownames=TRUE)
       
 output$KWSummary <- renderTable({
 
@@ -169,7 +169,7 @@ output$KWSummary <- renderTable({
                              fit$statistic,
                              "<0.001")
           }
-          colnames(XX) <- c("DF","X2-statistic","Pr(>X2)")
+          colnames(XX) <- c("$$ DF $$","$$ X^2-$$ statistic","$$ \\mathbb{P}(>X^2)$$")
           rownames(XX) <- "Kruskal-Wallis"
           XX
 #
@@ -186,12 +186,29 @@ output$BartlettSummary <- renderTable({
                              fit$statistic,
                              "<0.001")
           }
-          colnames(XX) <- c("DF","X2-statistic","Pr(>X2)")
+          colnames(XX) <- c("$$ DF $$","$$ X^2-$$ statistic","$$ \\mathbb{P}(>X^2)$$")
           rownames(XX) <- "Bartlett"
           XX
   #      }
       },rownames = TRUE,colnames = TRUE)
 
+output$FlignerSummary <- renderTable({
+  #      if(input$submit > 0){
+        
+          fit <- fligner.test(as.formula(paste(input$dvar,"~",input$ivar,collapse="")), data =d())
+          if(fit$p.value >= 0.001){
+          XX <- cbind(fit$parameter, fit$statistic, fit$p.value)
+          } else{
+            XX <- data.frame(fit$parameter,
+                             fit$statistic,
+                             "<0.001")
+          }
+          colnames(XX) <- c("$$ DF $$","$$ X^2-$$ statistic","$$ \\mathbb{P}(>X^2)$$")
+          rownames(XX) <- "Fligner-Killeen"
+          XX
+  #      }
+      },rownames = TRUE,colnames = TRUE)
+
+
 ```
 
-This *Shiny App* is made with the purpose to be free and educational. It comes without guarantee.

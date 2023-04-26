@@ -1,22 +1,21 @@
 ---
-title: "Distribution Functions"
 output: html_document
 runtime: shiny
 ---
 
-```{r setup, include=FALSE}
+```{r interface-distributions-functions, echo=FALSE,message=FALSE,warning=FALSE}
+library("plotly")
+library("dplyr")
 
-library(dplyr)
-library(ggplot2)
-library(mixdist)
-##  withMathJax(),
   sidebarLayout(
     sidebarPanel(
       selectInput(
         inputId = "distribution",
         label = "Distribution:",
-        choices = c("Binomial", "Poisson","Chi-square", 
-                    "Normal", "Student t","Snedecor F"),
+        choices = c("Binomial","Poisson","Geometric",
+                    "Hypergeometric",
+                    "Normal","Chi-square", "Student-t",
+                    "Snedecor-F"),
         multiple = FALSE,
         selected = "Normal"
       ),
@@ -24,19 +23,32 @@ library(mixdist)
       conditionalPanel(
         condition = "input.distribution == 'Binomial'",
         numericInput("n_binomial", "Number of trials \\(n\\):",
-                     value = 20, min = 0, step = 1),
+                     value = 10, min = 0, step = 1
+        ),
         numericInput("p_binomial", "Probability of success \\(p\\):",
-                     value = 0.5, min = 0, max = 1, step = 0.01)
+                     value = 0.5, min = 0, max = 1, step = 0.001
+        )
       ),
       conditionalPanel(
         condition = "input.distribution == 'Chi-square'",
-        numericInput("df_chisquare", "Degrees of freedom \\(df\\):",
-                     value = 1, min = 1, step = 1)
+        numericInput("df_chisq", "Degrees of freedom \\(df\\):",
+                     value = 1, min = 1, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Snedecor-F'",
+        numericInput("df1_f", "Degrees of freedom \\(df_1\\):",
+                     value = 10, min = 1, step = 1
+        ),
+        numericInput("df2_f", "Degrees of freedom \\(df_2\\):",
+                     value = 5, min = 1, step = 1
+        )
       ),
       conditionalPanel(
         condition = "input.distribution == 'Normal'",
         numericInput("mean_normal", "Mean \\(\\mu\\):",
-                     value = 0, step = 1),
+                     value = 0, step = 1
+        ),
         radioButtons(
           inputId = "variance_sd",
           label = NULL,
@@ -61,694 +73,671 @@ library(mixdist)
       conditionalPanel(
         condition = "input.distribution == 'Poisson'",
         numericInput("lambda_poisson", "Rate \\(\\lambda\\):",
-                     value = 1, min = 1, step = 1
+                     value = 4, min = 1, step = 1
         )
       ),
       conditionalPanel(
-        condition = "input.distribution == 'Student t'",
-        numericInput("df_student", "Degrees of freedom \\(df\\):",
-                     value = 10, min = 1, step = 1
+        condition = "input.distribution == 'Student-t'",
+        numericInput("df_t", "Degrees of freedom \\(df\\):",
+                     value = 3, min = 1, step = 1
         )
       ),
       conditionalPanel(
-        condition = "input.distribution == 'Snedecor F'",
-        numericInput("df1_f", "Degrees of Freedom (Numerator)",
-                     value = 10, min = 1, step = 1
-        ),
-        numericInput("df2_f", "Degrees of Freedom (Denominator)",
-                     value = 10, min = 1, step = 1
-        ),
+        condition = "input.distribution == 'Geometric'",
+        numericInput("p_geom", "Probability of success \\(p\\):",
+                     value = 0.5, min = 0, max = 1, step = 0.001,
+        )
       ),
+      
+      conditionalPanel(
+        condition = "input.distribution == 'Hypergeometric'",
+        numericInput("n_hypergeometric", "Sample size \\(n\\):",
+                     value = 50, min = 0, step = 1
+        ),
+        numericInput("N_hypergeometric", "Total number of objects \\(N\\):",
+                     value = 100, min = 0, step = 1
+        ),
+        numericInput("M_hypergeometric", "Number of successes \\(M\\):",
+                     value = 25, min = 0, step = 1
+        )
+      ),
+      
+      hr(),
       conditionalPanel(
         condition = "input.distribution == 'Binomial'",
         radioButtons(
-          inputId = "lower_tail_binomial",
+          inputId = "tail_binomial",
           label = NULL,
           choices = c(
-            "Lower tail: \\(P(X \\leq x)\\)" = "lower.tail",
-            "Upper tail: \\(P(X > x)\\)" = "upper.tail",
-            "Interval: \\(P(a \\leq X \\leq b)\\)" = "interval"
+            "\\(\\mathbb{P}(X \\leq x)\\)" = "lower.tail",
+            "\\(\\mathbb{P}(X > x)\\)" = "upper.tail",
+            "\\(\\mathbb{P}(a \\leq X \\leq b)\\)" = "two.sided"
           )
         )
       ),
       conditionalPanel(
         condition = "input.distribution == 'Chi-square'",
         radioButtons(
-          inputId = "lower_tail_chisquare",
+          inputId = "tail_chisq",
           label = NULL,
           choices = c(
-            "Lower tail: \\(P(X \\leq x)\\)" = "lower.tail",
-            "Upper tail: \\(P(X > x)\\)" = "upper.tail",
-            "Interval: \\(P(a \\leq X \\leq b)\\)" = "interval"
+            "\\(\\mathbb{P}(X \\leq x)\\)" = "lower.tail",
+            "\\(\\mathbb{P}(X > x)\\)" = "upper.tail",
+            "\\(\\mathbb{P}(a \\leq X \\leq b)\\)" = "two.sided"
+          )
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Snedecor-F'",
+        radioButtons(
+          inputId = "tail_f",
+          label = NULL,
+          choices = c(
+            "\\(\\mathbb{P}(X \\leq x)\\)" = "lower.tail",
+            "\\(\\mathbb{P}(X > x)\\)" = "upper.tail",
+            "\\(\\mathbb{P}(a \\leq X \\leq b)\\)" = "two.sided"
           )
         )
       ),
       conditionalPanel(
         condition = "input.distribution == 'Normal'",
         radioButtons(
-          inputId = "lower_tail_normal",
+          inputId = "tail_normal",
           label = NULL,
           choices = c(
-            "Lower tail: \\(P(X \\leq x)\\)" = "lower.tail",
-            "Upper tail: \\(P(X > x)\\)" = "upper.tail",
-            "Interval: \\(P(a \\leq X \\leq b)\\)" = "interval"
+            "\\(\\mathbb{P}(X \\leq x)\\)" = "lower.tail",
+            "\\(\\mathbb{P}(X > x)\\)" = "upper.tail",
+            "\\(\\mathbb{P}(a \\leq X \\leq b)\\)" = "two.sided"
           )
         )
       ),
       conditionalPanel(
         condition = "input.distribution == 'Poisson'",
         radioButtons(
-          inputId = "lower_tail_poisson",
+          inputId = "tail_poisson",
           label = NULL,
           choices = c(
-            "Lower tail: \\(P(X \\leq x)\\)" = "lower.tail",
-            "Upper tail: \\(P(X > x)\\)" = "upper.tail",
-            "Interval: \\(P(a \\leq X \\leq b)\\)" = "interval"
+            "\\(\\mathbb{P}(X \\leq x)\\)" = "lower.tail",
+            "\\(\\mathbb{P}(X > x)\\)" = "upper.tail",
+            "\\(\\mathbb{P}(a \\leq X \\leq b)\\)" = "two.sided"
           )
         )
       ),
       conditionalPanel(
-        condition = "input.distribution == 'Student t'",
+        condition = "input.distribution == 'Student-t'",
         radioButtons(
-          inputId = "lower_tail_student",
+          inputId = "tail_studentt",
           label = NULL,
           choices = c(
-            "Lower tail: \\(P(X \\leq x)\\)" = "lower.tail",
-            "Upper tail: \\(P(X > x)\\)" = "upper.tail",
-            "Interval: \\(P(a \\leq X \\leq b)\\)" = "interval"
+            "\\(\\mathbb{P}(X \\leq x)\\)" = "lower.tail",
+            "\\(\\mathbb{P}(X > x)\\)" = "upper.tail",
+            "\\(\\mathbb{P}(a \\leq X \\leq b)\\)" = "two.sided"
           )
         )
       ),
-      
       conditionalPanel(
-        condition = "input.distribution == 'Snedecor F'",
+        condition = "input.distribution == 'Geometric'",
         radioButtons(
-          inputId = "lower_tail_f",
+          inputId = "tail_geom",
           label = NULL,
           choices = c(
-            "Lower tail: \\(P(X \\leq x)\\)" = "lower.tail",
-            "Upper tail: \\(P(X > x)\\)" = "upper.tail",
-            "Interval: \\(P(a \\leq X \\leq b)\\)" = "interval"
+            "\\(\\mathbb{P}(X \\leq x)\\)" = "lower.tail",
+            "\\(\\mathbb{P}(X > x)\\)" = "upper.tail",
+            "\\(\\mathbb{P}(a \\leq X \\leq b)\\)" = "two.sided"
           )
         )
       ),
-      
       conditionalPanel(
-        condition = "input.distribution == 'Binomial' && input.lower_tail_binomial == 'lower.tail'",
-        numericInput("x1_binomial", "x:",
-                     value = 8, min = 0, step = 1
+        condition = "input.distribution == 'Hypergeometric'",
+        radioButtons(
+          inputId = "tail_hypergeometric",
+          label = NULL,
+          choices = c(
+            "\\(\\mathbb{P}(X \\leq x)\\)" = "lower.tail",
+            "\\(\\mathbb{P}(X > x)\\)" = "upper.tail",
+            "\\(\\mathbb{P}(a \\leq X \\leq b)\\)" = "two.sided"
+          )
         )
       ),
-      conditionalPanel(
-        condition = "input.distribution == 'Binomial' && input.lower_tail_binomial == 'upper.tail'",
-        numericInput("x2_binomial", "x:",
-                     value = 8, min = 0, step = 1
-        )
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Binomial' && input.lower_tail_binomial == 'interval'",
-        numericInput("a_binomial", "a:",
-                     value = 8, min = 0, step = 1
-        ),
-        numericInput("b_binomial", "b: \\( (a \\leq b) \\)",
-                     value = 12, min = 0, step = 1
-        )
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Chi-square' && input.lower_tail_chisquare == 'lower.tail'",
-        numericInput("x1_chisquare", "x:",
-                     value = 9.6, min = 0, step = 1
-        )
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Chi-square' && input.lower_tail_chisquare == 'upper.tail'",
-        numericInput("x2_chisquare", "x:",
-                     value = 9.6, min = 0, step = 1
-        )
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Chi-square' && input.lower_tail_chisquare == 'interval'",
-        numericInput("a_chisquare", "a:",
-                     value = 9.6, min = 0, step = 1
-        ),
-        numericInput("b_chisquare", "b: \\( (a \\leq b) \\)",
-                     value = 14.4, min = 0, step = 1
-        )
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Normal' && input.lower_tail_normal == 'lower.tail'",
-        numericInput("x1_normal", "x:",
-                     value = 1, step = 1
-        )
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Normal' && input.lower_tail_normal == 'upper.tail'",
-        numericInput("x2_normal", "x:",
-                     value = 1, step = 1
-        )
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Normal' && input.lower_tail_normal == 'interval'",
-        numericInput("a_normal", "a:",
-                     value = -1, step = 1
-        ),
-        numericInput("b_normal", "b: \\( (a \\leq b) \\)",
-                     value = 1, step = 1
-        )
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Poisson' && input.lower_tail_poisson == 'lower.tail'",
-        numericInput("x1_poisson", "x:",
-                     value = 6, min = 0, step = 1
-        )
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Poisson' && input.lower_tail_poisson == 'upper.tail'",
-        numericInput("x2_poisson", "x:",
-                     value = 6, min = 0, step = 1
-        )
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Poisson' && input.lower_tail_poisson == 'interval'",
-        numericInput("a_poisson", "a:",
-                     value = 6, min = 0, step = 1
-        ),
-        numericInput("b_poisson", "b: \\( (a \\leq b) \\)",
-                     value = 10, min = 0, step = 1
-        )
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Student t' && input.lower_tail_student == 'lower.tail'",
-        numericInput("x1_student", "x:",
-                     value = 1, step = 1
-        )
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Student t' && input.lower_tail_student == 'upper.tail'",
-        numericInput("x2_student", "x:",
-                     value = 1, step = 1
-        )
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Student t' && input.lower_tail_student == 'interval'",
-        numericInput("a_student", "a:",
-                     value = -1, step = 1
-        ),
-        numericInput("b_student", "b: \\( (a \\leq b) \\)",
-                     value = 1, step = 1
-        )
-      ),
-      
-      conditionalPanel(
-        condition = "input.distribution == 'Snedecor F' && input.lower_tail_f == 'lower.tail'",
-        numericInput("x1_f", "x:",
-                     value = 1, step = 1)
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Snedecor F' && input.lower_tail_f == 'upper.tail'",
-        numericInput("x2_f", "x:",
-                     value = 1, step = 1
-        )
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Snedecor F' && input.lower_tail_f == 'interval'",
-        numericInput("a_f", "a:",
-                     value = 0, step = 1
-        ),
-        numericInput("b_f", "b: \\( (a \\leq b) \\)",
-                     value = 1, step = 1
-        )
-      ),
-      
       hr(),
+      conditionalPanel(
+        condition = "input.distribution == 'Binomial' && input.tail_binomial == 'lower.tail'",
+        numericInput("x1_binomial", "x:",
+                     value = 5, min = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Binomial' && input.tail_binomial == 'upper.tail'",
+        numericInput("x2_binomial", "x:",
+                     value = 5, min = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Binomial' && input.tail_binomial == 'two.sided'",
+        numericInput("a_binomial", "a",
+                     value = 3, min = 0, step = 1
+        ),
+        numericInput("b_binomial", "b \\( (a \\leq b) \\)",
+                     value = 11, min = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Chi-square' && input.tail_chisq == 'lower.tail'",
+        numericInput("x1_chisq", "x:",
+                     value = 3, min = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Chi-square' && input.tail_chisq == 'upper.tail'",
+        numericInput("x2_chisq", "x:",
+                     value = 3, min = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Chi-square' && input.tail_chisq == 'two.sided'",
+        numericInput("a_chisq", "a",
+                     value = 2, min = 0, step = 1
+        ),
+        numericInput("b_chisq", "b \\( (a \\leq b) \\)",
+                     value = 11, min = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Snedecor-F' && input.tail_f == 'lower.tail'",
+        numericInput("x1_f", "x:",
+                     value = 2, min = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Snedecor-F' && input.tail_f == 'upper.tail'",
+        numericInput("x2_f", "x:",
+                     value = 2, min = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Snedecor-F' && input.tail_f == 'two.sided'",
+        numericInput("a_f", "a",
+                     value = 2, min = 0, step = 1
+        ),
+        numericInput("b_f", "b \\( (a \\leq b) \\)",
+                     value = 11, min = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Normal' && input.tail_normal == 'lower.tail'",
+        numericInput("x1_normal", "x:",
+                     value = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Normal' && input.tail_normal == 'upper.tail'",
+        numericInput("x2_normal", "x:",
+                     value = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Normal' && input.tail_normal == 'two.sided'",
+        numericInput("a_normal", "a:",
+                     value = -3, step = 1
+        ),
+        numericInput("b_normal", "b \\( (a \\leq b) \\)",
+                     value = 3, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Poisson' && input.tail_poisson == 'lower.tail'",
+        numericInput("x1_poisson", "x:",
+                     value = 2, min = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Poisson' && input.tail_poisson == 'upper.tail'",
+        numericInput("x2_poisson", "x:",
+                     value = 2, min = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Poisson' && input.tail_poisson == 'two.sided'",
+        numericInput("a_poisson", "a",
+                     value = 2, min = 0, step = 1
+        ),
+        numericInput("b_poisson", "b \\( (a \\leq b) \\)",
+                     value = 5, min = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Geometric' && input.tail_geom == 'lower.tail'",
+        helpText("Number of failures before the \\(1^{st}\\) success"),
+        numericInput("x1_geom", "x:",
+                     value = 1, min = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Geometric' && input.tail_geom == 'upper.tail'",
+        helpText("Number of failures before the \\(1^{st}\\) success"),
+        numericInput("x2_geom", "x:",
+                     value = 1, min = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Geometric' && input.tail_geom == 'two.sided'",
+        helpText("Number of failures before the \\(1^{st}\\) success"),
+        numericInput("a_geom", "a",
+                     value = 2, min = 0, step = 1
+        ),
+        numericInput("b_geom", "b: \\( (a \\leq b) \\)",
+                     value = 5, min = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Student-t' && input.tail_studentt == 'lower.tail'",
+        numericInput("x1_t", "x:",
+                     value = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Student-t' && input.tail_studentt == 'upper.tail'",
+        numericInput("x2_t", "x:",
+                     value = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Student-t' && input.tail_studentt == 'two.sided'",
+        numericInput("a_t", "a",
+                     value = -3, step = 1
+        ),
+        numericInput("b_t", "b \\( (a \\leq b) \\)",
+                     value = 3, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Hypergeometric' && input.tail_hypergeometric == 'lower.tail'",
+        numericInput("x1_hypergeometric", "x:",
+                     value = 3, min = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Hypergeometric' && input.tail_hypergeometric == 'upper.tail'",
+        numericInput("x2_hypergeometric", "x:",
+                     value = 3, min = 0, step = 1
+        )
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Hypergeometric' && input.tail_hypergeometric == 'two.sided'",
+        numericInput("a_hypergeometric", "a",
+                     value = 2, min = 0, step = 1
+        ),
+        numericInput("b_hypergeometric", "b \\( (a \\leq b) \\)",
+                     value = 5, min = 0, step = 1
+        )
+      ),
+      hr()
     ),
     
     # Show a plot of the generated distribution
     mainPanel(
       br(),
-      uiOutput("results_distribution"),
+      conditionalPanel(
+        condition = "input.distribution == 'Binomial'",
+        plotlyOutput("binomialPlot")
+      ),
+   conditionalPanel(
+     condition = "input.distribution == 'Poisson'",
+     plotlyOutput("PoissonPlot")
+   ),
+   conditionalPanel(
+     condition = "input.distribution == 'Geometric'",
+     plotlyOutput("geometricPlot")
+   ),
+   conditionalPanel(
+     condition = "input.distribution == 'Hypergeometric'",
+     plotlyOutput("HypergeometricPlot")
+   ),
+      conditionalPanel(
+        condition = "input.distribution == 'Chi-square' ",
+        plotOutput("chiSquarePlot")
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Snedecor-F'",
+        plotOutput("SnedecorFPlot")
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Normal'",
+        plotOutput("normalPlot")
+      ),
+      conditionalPanel(
+        condition = "input.distribution == 'Student-t'",        
+        plotOutput("StudenttPlot")
+      ),
       br(),
-      conditionalPanel(
-        condition = "input.distribution == 'Binomial' && input.lower_tail_binomial == 'lower.tail'",
-        plotOutput("binomialPlot_lower")
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Binomial' && input.lower_tail_binomial == 'upper.tail'",
-        plotOutput("binomialPlot_upper")
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Binomial' && input.lower_tail_binomial == 'interval'",
-        plotOutput("binomialPlot_interval")
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Chi-square' && input.lower_tail_chisquare == 'lower.tail'",
-        plotOutput("chisquarePlot_lower")
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Chi-square' && input.lower_tail_chisquare == 'upper.tail'",
-        plotOutput("chisquarePlot_upper")
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Chi-square' && input.lower_tail_chisquare == 'interval'",
-        plotOutput("chisquarePlot_interval")
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Normal' && input.lower_tail_normal == 'lower.tail'",
-        plotOutput("normalPlot_lower")
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Normal' && input.lower_tail_normal == 'upper.tail'",
-        plotOutput("normalPlot_upper")
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Normal' && input.lower_tail_normal == 'interval'",
-        plotOutput("normalPlot_interval")
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Poisson' && input.lower_tail_poisson == 'lower.tail'",
-        plotOutput("poissonPlot_lower")
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Poisson' && input.lower_tail_poisson == 'upper.tail'",
-        plotOutput("poissonPlot_upper")
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Poisson' && input.lower_tail_poisson == 'interval'",
-        plotOutput("poissonPlot_interval")
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Student t' && input.lower_tail_student == 'lower.tail'",
-        plotOutput("studentPlot_lower")
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Student t' && input.lower_tail_student == 'upper.tail'",
-        plotOutput("studentPlot_upper")
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Student t' && input.lower_tail_student == 'interval'",
-        plotOutput("studentPlot_interval")
-      ),
-      
-      conditionalPanel(
-        condition = "input.distribution == 'Snedecor F' && input.lower_tail_f == 'lower.tail'",
-        plotOutput("FPlot_lower")
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Snedecor F' && input.lower_tail_f == 'upper.tail'",
-        plotOutput("FPlot_upper")
-      ),
-      conditionalPanel(
-        condition = "input.distribution == 'Snedecor F' && input.lower_tail_f == 'interval'",
-        plotOutput("FPlot_interval")
-      ),
+   uiOutput("results_distribution"),
+      br()
     )
   )
 
-output$results_distribution <- renderUI({
-     if (input$distribution == "Binomial") {
+  output$results_distribution <- renderUI({
+    if  (input$distribution == "Binomial") {
       withMathJax(
-        paste0("\\(X \\sim Binomial(n = \\)", " ", input$n_binomial, ", ", "\\(p = \\)", " ", input$p_binomial, "\\()\\)","and ", case_when(
-          input$lower_tail_binomial == "lower.tail" ~ paste0("\\(P(X \\leq \\)", " ", input$x1_binomial, "\\()\\)", " ", "\\( = \\)", " ", round(pbinom(input$x1_binomial, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE), 4)),
-          input$lower_tail_binomial == "upper.tail" ~ paste0("\\(P(X > \\)", " ", input$x2_binomial, "\\()\\)", " ", "\\( = \\)", " ", round(pbinom(input$x2_binomial, size = input$n_binomial, prob = input$p_binomial, lower.tail = FALSE), 4)),
-          input$lower_tail_binomial == "interval" ~ paste0("\\(P(\\)", input$a_binomial, " ", "\\(\\leq X\\leq \\)", " ", input$b_binomial, "\\()\\)", " ", "\\( = \\)", " ", ifelse(input$a_binomial > input$b_binomial, "a must be less than or equal to b", round(pbinom(input$b_binomial, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE) - pbinom(input$a_binomial - 1, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE), 4)))
+        paste0("\\(X \\sim \\mbox{Binomial}(n = \\)", " ", input$n_binomial, ", ", "\\(p = \\)", " ", input$p_binomial, "\\()\\)", " and ", case_when(
+          input$tail_binomial == "lower.tail" ~ paste0("\\( \\mathbb{P}(X \\leq \\)", " ", input$x1_binomial, "\\()\\)", " ", "\\( = \\)", " ", round(pbinom(input$x1_binomial, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE), 4)),
+          input$tail_binomial == "upper.tail" ~ paste0("\\(\\mathbb{P}(X > \\)", " ", input$x2_binomial, "\\()\\)", " ", "\\( = \\)", " ", round(pbinom(input$x2_binomial, size = input$n_binomial, prob = input$p_binomial, lower.tail = FALSE), 4)),
+          input$tail_binomial == "two.sided" ~ paste0("\\(\\mathbb{P}(\\)", input$a_binomial, " ", "\\(\\leq X\\leq \\)", " ", input$b_binomial, "\\()\\)", " ", "\\( = \\)", " ", ifelse(input$a_binomial > input$b_binomial, "a must be less than or equal to b", round(pbinom(input$b_binomial, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE) - pbinom(input$a_binomial - 1, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE), 4)))
+        ))
+      )
+    }else if (input$distribution == "Poisson") {
+      withMathJax(
+        paste0("\\(X \\sim \\mbox{Poisson}(\\lambda = \\)", " ", input$lambda_poisson, "\\()\\)", " and ", case_when(
+          input$tail_poisson == "lower.tail" ~ paste0("\\(\\mathbb{P}(X \\leq \\)", " ", input$x1_poisson, "\\()\\)", " ", "\\( = \\)", " ", round(ppois(input$x1_poisson, lambda = input$lambda_poisson, lower.tail = TRUE), 4)),
+          input$tail_poisson == "upper.tail" ~ paste0("\\(\\mathbb{P}(X > \\)", " ", input$x2_poisson, "\\()\\)", " ", "\\( = \\)", " ", round(ppois(input$x2_poisson, lambda = input$lambda_poisson, lower.tail = FALSE), 4)),
+          input$tail_poisson == "two.sided" ~ paste0("\\(\\mathbb{P}(\\)", input$a_poisson, " ", "\\(\\leq X\\leq \\)", " ", input$b_poisson, "\\()\\)", " ", "\\( = \\)", " ", ifelse(input$a_poisson > input$b_poisson, "a must be less than or equal to b", round(ppois(input$b_poisson, lambda = input$lambda_poisson, lower.tail = TRUE) - ppois(input$a_poisson - 1, lambda = input$lambda_poisson, lower.tail = TRUE), 4)))
+        ))
+      )
+    }  else if (input$distribution == "Geometric") {
+      withMathJax(
+        paste0("\\(X \\sim \\mbox{Geometric}(p = \\)", " ", input$p_geom, "\\()\\)", " and ", case_when(
+          input$tail_geom == "lower.tail" ~ paste0("\\(\\mathbb{P}(X \\leq \\)", " ", input$x1_geom, "\\()\\)", " ", "\\( = \\)", " ", round(pgeom(input$x1_geom, prob = input$p_geom, lower.tail = TRUE), 4)),
+          input$tail_geom == "upper.tail" ~ paste0("\\(\\mathbb{P}(X > \\)", " ", input$x2_geom, "\\()\\)", " ", "\\( = \\)", " ", round(pgeom(input$x2_geom, prob = input$p_geom, lower.tail = FALSE), 4)),
+          input$tail_geom == "two.sided" ~ paste0("\\(\\mathbb{P}(\\)", input$a_geom, " ", "\\(\\leq X\\leq \\)", " ", input$b_geom, "\\()\\)", " ", "\\( = \\)", " ", ifelse(input$a_geom > input$b_geom, "a must be less than or equal to b", round(pgeom(input$b_geom, prob = input$p_geom, lower.tail = TRUE) - pgeom(input$a_geom - 1, prob = input$p_geom, lower.tail = TRUE), 4)))
+        ))
+      )
+    } else if (input$distribution == "Hypergeometric") {
+      withMathJax(
+        paste0("\\(X \\sim \\mbox{Hypergeometric}(n = \\)", " ", input$n_hypergeometric, ", ", "\\(N = \\)", " ", input$N_hypergeometric, ", ", "\\(M = \\)", " ", input$M_hypergeometric, "\\()\\)", " and ", case_when(
+          input$tail_hypergeometric == "lower.tail" ~ paste0("\\(\\mathbb{P}(X \\leq \\)", " ", input$x1_hypergeometric, "\\()\\)", " ", "\\( = \\)", " ", round(phyper(input$x1_hypergeometric, m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric, lower.tail = TRUE), 4)),
+          input$tail_hypergeometric == "upper.tail" ~ paste0("\\(\\mathbb{P}(X > \\)", " ", input$x2_hypergeometric, "\\()\\)", " ", "\\( = \\)", " ", round(phyper(input$x2_hypergeometric, m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric, lower.tail = FALSE), 4)),
+          input$tail_hypergeometric == "two.sided" ~ paste0("\\( \\mathbb{P}(\\)", input$a_hypergeometric, " ", "\\(\\leq X\\leq \\)", " ", input$b_hypergeometric, "\\()\\)", " ", "\\( = \\)", " ", ifelse(input$a_hypergeometric > input$b_hypergeometric, "a must be less than or equal to b", round(phyper(input$b_hypergeometric, m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric, lower.tail = TRUE) - phyper(input$a_hypergeometric - 1, m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric, lower.tail = TRUE), 4)))
         ))
       )
     } else if (input$distribution == "Chi-square") {
       withMathJax(
-        paste0("\\(X \\sim \\chi^2(df = \\)", " ", input$df_chisquare, "\\()\\)", " and ", case_when(
-          input$lower_tail_chisquare == "lower.tail" ~ paste0("\\(P(X \\leq \\)", " ", input$x1_chisquare, "\\()\\)", " ", "\\( = \\)", " ", round(pchisq(input$x1_chisquare, df = input$df_chisquare, lower.tail = TRUE), 4)),
-          input$lower_tail_chisquare == "upper.tail" ~ paste0("\\(P(X > \\)", " ", input$x2_chisquare, "\\()\\)", " ", "\\( = \\)", " ", round(pchisq(input$x2_chisquare, df = input$df_chisquare, lower.tail = FALSE), 4)),
-          input$lower_tail_chisquare == "interval" ~ paste0("\\(P(\\)", input$a_chisquare, " ", "\\(\\leq X\\leq \\)", " ", input$b_chisquare, "\\()\\)", " ", "\\( = \\)", " ", ifelse(input$a_chisquare > input$b_chisquare, "a must be less than or equal to b", round(pchisq(input$b_chisquare, df = input$df_chisquare, lower.tail = TRUE) - pchisq(input$a_chisquare, df = input$df_chisquare, lower.tail = TRUE), 4)))
+        paste0("\\(X \\sim \\chi^2(\\)", " ", input$df_chisq, "\\()\\)", " and ", case_when(
+          input$tail_chisq == "lower.tail" ~ paste0("\\(\\mathbb{P}(X \\leq \\)", " ", input$x1_chisq, "\\()\\)", " ", "\\( = \\)", " ", round(pchisq(input$x1_chisq, df = input$df_chisq, lower.tail = TRUE), 4)),
+          input$tail_chisq == "upper.tail" ~ paste0("\\(\\mathbb{P}(X > \\)", " ", input$x2_chisq, "\\()\\)", " ", "\\( = \\)", " ", round(pchisq(input$x2_chisq, df = input$df_chisq, lower.tail = FALSE), 4)),
+          input$tail_chisq == "two.sided" ~ paste0("\\(\\mathbb{P}(\\)", input$a_chisq, " ", "\\(\\leq X\\leq \\)", " ", input$b_chisq, "\\()\\)", " ", "\\( = \\)", " ", ifelse(input$a_chisq > input$b_chisq, "a must be less than or equal to b", round(pchisq(input$b_chisq, df = input$df_chisq, lower.tail = TRUE) - pchisq(input$a_chisq, df = input$df_chisq, lower.tail = TRUE), 4)))
+        ))
+      )
+    } else if (input$distribution == "Snedecor-F") {
+      withMathJax(
+        paste0("\\(X \\sim F(\\)", input$df1_f, ", ", input$df2_f, "\\()\\)", ", ", case_when(
+          input$tail_f == "lower.tail" ~ paste0("\\(\\mathbb{P}(X \\leq \\)", " ", input$x1_f, "\\()\\)", " ", "\\( = \\)", " ", round(pf(input$x1_f, df1 = input$df1_f, df2 = input$df2_f, lower.tail = TRUE), 4)),
+          input$tail_f == "upper.tail" ~ paste0("\\(\\mathbb{P} (X > \\)", " ", input$x2_f, "\\()\\)", " ", "\\( = \\)", " ", round(pf(input$x2_f, df1 = input$df1_f, df2 = input$df2_f, lower.tail = FALSE), 4)),
+          input$tail_f == "two.sided" ~ paste0("\\(\\mathbb{P}(\\)", input$a_f, " ", "\\(\\leq X\\leq \\)", " ", input$b_f, "\\()\\)", " ", "\\( = \\)", " ", ifelse(input$a_f > input$b_f, "a must be less than or equal to b", round(pf(input$b_f, df1 = input$df1_f, df = input$df2_f, lower.tail = TRUE) - pf(input$a_f, df1 = input$df1_f, df = input$df2_f, lower.tail = TRUE), 4)))
         ))
       )
     } else if (input$distribution == "Normal") {
       withMathJax(
-        paste0("\\(X \\sim Normal(\\mu = \\)", " ", input$mean_normal, ", ", ifelse(input$variance_sd == "variance_true", paste0("\\(\\sigma^2 = \\)", " ", input$variance_normal), paste0("\\(\\sigma^2 = \\)", " ", input$sd_normal^2)), "\\()\\)", " and ", case_when(
-          input$lower_tail_normal == "lower.tail" ~ paste0("\\(P(X \\leq \\)", " ", input$x1_normal, "\\()\\)", " ", "\\( = \\)", " ", "\\(P(Z \\leq \\)", " ", "\\((\\)", input$x1_normal, " ", "\\(-\\)", " ", input$mean_normal, "\\()\\)", " ", "\\(/\\)", " ", ifelse(input$variance_sd == "variance_true", round(sqrt(input$variance_normal), 2), input$sd_normal), "\\()\\)", " ", "\\( = \\)", " ", "\\(P(Z \\leq \\)", " ", round((input$x1_normal - input$mean_normal) / ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), 2), "\\()\\)", " ", "\\( = \\)", " ", round(pnorm(input$x1_normal, mean = input$mean_normal, sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), lower.tail = TRUE), 4)),
-          input$lower_tail_normal == "upper.tail" ~ paste0("\\(P(X > \\)", " ", input$x2_normal, "\\()\\)", " ", "\\( = \\)", " ", "\\(P(Z > \\)", " ", "\\((\\)", input$x2_normal, " ", "\\(-\\)", " ", input$mean_normal, "\\()\\)", " ", "\\(/\\)", " ", ifelse(input$variance_sd == "variance_true", round(sqrt(input$variance_normal), 2), input$sd_normal), "\\()\\)", " ", "\\( = \\)", " ", "\\(P(Z > \\)", " ", round((input$x2_normal - input$mean_normal) / ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), 2), "\\()\\)", " ", "\\( = \\)", " ", round(pnorm(input$x2_normal, mean = input$mean_normal, sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), lower.tail = FALSE), 4)),
-          input$lower_tail_normal == "interval" ~ paste0("\\(P(\\)", input$a_normal, " ", "\\(\\leq X\\leq \\)", " ", input$b_normal, "\\()\\)", " ", "\\( = \\)", " ", "\\(P(\\)", "\\((\\)", input$a_normal, " ", "\\(-\\)", " ", input$mean_normal, "\\()\\)", " ", "\\(/\\)", " ", ifelse(input$variance_sd == "variance_true", round(sqrt(input$variance_normal), 2), input$sd_normal), "\\()\\)", " ", "\\(\\leq Z\\leq \\)", " ", "\\((\\)", input$b_normal, " ", "\\(-\\)", " ", input$mean_normal, "\\()\\)", " ", "\\(/\\)", " ", ifelse(input$variance_sd == "variance_true", round(sqrt(input$variance_normal), 2), input$sd_normal), "\\()\\)", " ", "\\( = \\)", " ","\\(P(\\)", round((input$a_normal - input$mean_normal) / ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), 2), " ", "\\(\\leq Z\\leq \\)", " ", round((input$b_normal - input$mean_normal) / ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), 2), "\\()\\)", " ", "\\( = \\)", " ", ifelse(input$a_normal > input$b_normal, "a must be less than or equal to b", round(pnorm(input$b_normal, mean = input$mean_normal, sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), lower.tail = TRUE) - pnorm(input$a_normal, mean = input$mean_normal, sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), lower.tail = TRUE), 4)))
+        paste0("\\(X \\sim \\mbox{Normal}(\\mu = \\)", " ", input$mean_normal, ", ", ifelse(input$variance_sd == "variance_true", paste0("\\(\\sigma^2 = \\)", " ", input$variance_normal), paste0("\\(\\sigma^2 = \\)", " ", input$sd_normal^2)), "\\()\\)", " and ", case_when(
+          input$tail_normal == "lower.tail" ~ paste0("\\( \\mathbb{P}(X \\leq \\)", " ", input$x1_normal, "\\()\\)", " ", "\\( = \\)", " ", round(pnorm(input$x1_normal, mean = input$mean_normal, sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), lower.tail = TRUE), 4)),
+          input$tail_normal == "upper.tail" ~ paste0("\\(\\mathbb{P}(X > \\)", " ", input$x2_normal, "\\()\\)", " ", "\\( = \\)", " ", round(pnorm(input$x2_normal, mean = input$mean_normal, sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), lower.tail = FALSE), 4)),
+          input$tail_normal == "two.sided" ~ paste0("\\(\\mathbb{P}(\\)", input$a_normal, " ", "\\(\\leq X\\leq \\)", " ", input$b_normal, "\\()\\)", " ", "\\( = \\)", " ",  ifelse(input$a_normal > input$b_normal, "a must be less than or equal to b", round(pnorm(input$b_normal, mean = input$mean_normal, sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), lower.tail = TRUE) - pnorm(input$a_normal, mean = input$mean_normal, sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), lower.tail = TRUE), 4)))
         ))
       )
-    } else if (input$distribution == "Poisson") {
+    } else if (input$distribution == "Student-t") {
       withMathJax(
-        paste0("\\(X \\sim Poisson(\\lambda = \\)", " ", input$lambda_poisson, "\\()\\)", " and ", case_when(
-          input$lower_tail_poisson == "lower.tail" ~ paste0("\\(P(X \\leq \\)", " ", input$x1_poisson, "\\()\\)", " ", "\\( = \\)", " ", round(ppois(input$x1_poisson, lambda = input$lambda_poisson, lower.tail = TRUE), 4)),
-          input$lower_tail_poisson == "upper.tail" ~ paste0("\\(P(X > \\)", " ", input$x2_poisson, "\\()\\)", " ", "\\( = \\)", " ", round(ppois(input$x2_poisson, lambda = input$lambda_poisson, lower.tail = FALSE), 4)),
-          input$lower_tail_poisson == "interval" ~ paste0("\\(P(\\)", input$a_poisson, " ", "\\(\\leq X\\leq \\)", " ", input$b_poisson, "\\()\\)", " ", "\\( = \\)", " ", ifelse(input$a_poisson > input$b_poisson, "a must be less than or equal to b", round(ppois(input$b_poisson, lambda = input$lambda_poisson, lower.tail = TRUE) - ppois(input$a_poisson - 1, lambda = input$lambda_poisson, lower.tail = TRUE), 4)))
+        paste0("\\(X \\sim t(\\)",input$df_t, "\\()\\)", " and ", case_when(
+          input$tail_studentt == "lower.tail" ~ paste0("\\(\\mathbb{P}(X \\leq \\)", " ", input$x1_t, "\\()\\)", " ", "\\( = \\)", " ", round(pt(input$x1_t, df = input$df_t, lower.tail = TRUE), 4)),
+          input$tail_studentt == "upper.tail" ~ paste0("\\(\\mathbb{P}(X > \\)", " ", input$x2_t, "\\()\\)", " ", "\\( = \\)", " ", round(pt(input$x2_t, df = input$df_t, lower.tail = FALSE), 4)),
+          input$tail_studentt == "two.sided" ~ paste0("\\(\\mathbb{P}(\\)", input$a_t, " ", "\\(\\leq X\\leq \\)", " ", input$b_t, "\\()\\)", " ", "\\( = \\)", " ", ifelse(input$a_t > input$b_t, "a must be less than or equal to b", round(pt(input$b_t, df = input$df_t, lower.tail = TRUE) - pt(input$a_t, df = input$df_t, lower.tail = TRUE), 4)))
         ))
       )
-    } else if (input$distribution == "Student t") {
-      withMathJax(
-        paste0("\\(X \\sim t_{df = }\\)", " ", input$df_student, "\\()\\)", " and ", case_when(
-          input$lower_tail_student == "lower.tail" ~ paste0("\\(P(X \\leq \\)", " ", input$x1_student, "\\()\\)", " ", "\\( = \\)", " ", round(pt(input$x1_student, df = input$df_student, lower.tail = TRUE), 4)),
-          input$lower_tail_student == "upper.tail" ~ paste0("\\(P(X > \\)", " ", input$x2_student, "\\()\\)", " ", "\\( = \\)", " ", round(pt(input$x2_student, df = input$df_student, lower.tail = FALSE), 4)),
-          input$lower_tail_student == "interval" ~ paste0("\\(P(\\)", input$a_student, " ", "\\(\\leq X\\leq \\)", " ", input$b_student, "\\()\\)", " ", "\\( = \\)", " ", ifelse(input$a_student > input$b_student, "a must be less than or equal to b", round(pt(input$b_student, df = input$df_student, lower.tail = TRUE) - pt(input$a_student, df = input$df_student, lower.tail = TRUE), 4)))
-        ))
-      )
-    } else if (input$distribution == "F") {
-      withMathJax(
-        paste0("\\(X \\sim F_{df1 = }\\)", " ", input$df1_f, "\\()\\)", " and ", case_when(
-          input$lower_tail_f == "lower.tail" ~ paste0("\\(P(X \\leq \\)", " ", input$x1_f, "\\()\\)", " ", "\\( = \\)", " ", round(pf(input$x1_f, df1 = input$df1_f,df2=input$df2_f ,lower.tail = TRUE), 4)),
-          input$lower_tail_f == "upper.tail" ~ paste0("\\(P(X > \\)", " ", input$x2_f, "\\()\\)", " ", "\\( = \\)", " ", round(pf(input$x1_f, df1 = input$df1_f,df2=input$df2_f, lower.tail = FALSE), 4)),
-          input$lower_tail_f == "interval" ~ paste0("\\(P(\\)", input$a_f, " ", "\\(\\leq X\\leq \\)", " ", input$b_f, "\\()\\)", " ", "\\( = \\)", " ", ifelse(input$a_f > input$b_f, "a must be less than or equal to b", round(pf(input$b_f, df1 = input$df1_f,df2=input$df2_f, lower.tail = TRUE) - pf(input$a_f, df1 = input$df1_f,df2=input$df2_f , lower.tail = TRUE), 4)))
-        ))
-      )  
     } else {
-      print("loading...")
+
     }
-  })
-output$binomialPlot_lower <- renderPlot({
-    p <- data.frame(heads = qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = FALSE):qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE), prob = dbinom(x = qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = FALSE):qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE), size = input$n_binomial, prob = input$p_binomial)) %>%
-      mutate(Heads = ifelse(heads <= input$x1_binomial, "2", "Other")) %>%
-      ggplot(aes(x = factor(heads), y = prob, fill = Heads)) +
-      geom_col() +
-      geom_text(
-        aes(label = round(prob, 3), y = prob + 0.005),
-        position = position_dodge(0.9),
-        size = 3,
-        vjust = 0
-      ) +
-      theme_minimal() +
-      theme(legend.position = "none") +
-      ggtitle(paste0(input$distribution, " distribution: Binomial(", input$n_binomial, ", ", input$p_binomial, ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Probability mass function") +
-      xlab("x")
-    p
-  })
-output$binomialPlot_upper <- renderPlot({
-    p <- data.frame(heads = qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = FALSE):qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE), prob = dbinom(x = qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = FALSE):qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE), size = input$n_binomial, prob = input$p_binomial)) %>%
-      mutate(Heads = ifelse(heads > input$x2_binomial, "2", "other")) %>%
-      ggplot(aes(x = factor(heads), y = prob, fill = Heads)) +
-      geom_col() +
-      geom_text(
-        aes(label = round(prob, 3), y = prob + 0.005),
-        position = position_dodge(0.9),
-        size = 3,
-        vjust = 0
-      ) +
-      theme_minimal() +
-      theme(legend.position = "none") +
-      ggtitle(paste0(input$distribution, " distribution: Binomial(", input$n_binomial, ", ", input$p_binomial, ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Probability mass function") +
-      xlab("x")
-    p
-  })
-output$binomialPlot_interval <- renderPlot({
-    p <- data.frame(heads = qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = FALSE):qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE), prob = dbinom(x = qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = FALSE):qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE), size = input$n_binomial, prob = input$p_binomial)) %>%
-      mutate(Heads = ifelse(heads >= input$a_binomial & heads <= input$b_binomial, "2", "other")) %>%
-      ggplot(aes(x = factor(heads), y = prob, fill = Heads)) +
-      geom_col() +
-      geom_text(
-        aes(label = round(prob, 3), y = prob + 0.005),
-        position = position_dodge(0.9),
-        size = 3,
-        vjust = 0
-      ) +
-      theme_minimal() +
-      theme(legend.position = "none") +
-      ggtitle(paste0(input$distribution, " distribution: Binomial(", input$n_binomial, ", ", input$p_binomial, ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Probability mass function") +
-      xlab("x")
-    p
   })
   
-
-output$chisquarePlot_lower <- renderPlot({
-    funcShaded <- function(x) {
-      y <- dchisq(x, df = input$df_chisquare)
-      y[x > input$x1_chisquare] <- NA
-      return(y)
-    }
-    p <- ggplot(data.frame(x = c(qchisq(0.99999, df = input$df_chisquare, lower.tail = FALSE), qchisq(0.99999, df = input$df_chisquare, lower.tail = TRUE))), aes(x = x)) +
-      stat_function(fun = dchisq, args = list(df = input$df_chisquare)) +
-      stat_function(fun = funcShaded, geom = "area", alpha = 0.8) +
-      theme_minimal() +
-      ggtitle(paste0(input$distribution, " distribution: Chi(", input$df_chisquare, ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Density") +
-      xlab("x")
-    p
-  })
-output$chisquarePlot_upper <- renderPlot({
-    funcShaded <- function(x) {
-      y <- dchisq(x, df = input$df_chisquare)
-      y[x < input$x2_chisquare] <- NA
-      return(y)
-    }
-    p <- ggplot(data.frame(x = c(qchisq(0.99999, df = input$df_chisquare, lower.tail = FALSE), qchisq(0.99999, df = input$df_chisquare, lower.tail = TRUE))), aes(x = x)) +
-      stat_function(fun = dchisq, args = list(df = input$df_chisquare)) +
-      stat_function(fun = funcShaded, geom = "area", alpha = 0.8) +
-      theme_minimal() +
-      ggtitle(paste0(input$distribution, " distribution: Chi^2(", input$df_chisquare, ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Density") +
-      xlab("x")
-    p
-  })
-output$chisquarePlot_interval <- renderPlot({
-    funcShaded <- function(x) {
-      y <- dchisq(x, df = input$df_chisquare)
-      y[x < input$a_chisquare | x > input$b_chisquare] <- NA
-      return(y)
-    }
-   p <- ggplot(data.frame(x = c(qchisq(0.99999, df = input$df_chisquare, lower.tail = FALSE), qchisq(0.99999, df = input$df_chisquare, lower.tail = TRUE))), aes(x = x)) +
-      stat_function(fun = dchisq, args = list(df = input$df_chisquare)) +
-      stat_function(fun = funcShaded, geom = "area", alpha = 0.8) +
-      theme_minimal() +
-      ggtitle(paste0(input$distribution, " distribution: Chi^2(", input$df_chisquare, ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Density") +
-      xlab("x")
-    p
-  })
+##**************************
+##* Discrete distributions
+##**************************
   
-
-output$normalPlot_lower <- renderPlot({
-    funcShaded <- function(x) {
-      y <- dnorm(x,
-                 mean = input$mean_normal,
-                 sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal)
-      )
-      y[x > input$x1_normal] <- NA
-      return(y)
+output$binomialPlot <- renderPlotly({
+    if(input$tail_binomial=="lower.tail"){
+      df <- data.frame(x = qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = FALSE):qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE), prob = dbinom(x = qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = FALSE):qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE), size = input$n_binomial, prob = input$p_binomial)) %>%
+        mutate(X = ifelse(x <= input$x1_binomial, "2", "Other")) 
+    } else if(input$tail_binomial=="upper.tail"){
+      df <- data.frame(x = qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = FALSE):qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE), prob = dbinom(x = qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = FALSE):qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE), size = input$n_binomial, prob = input$p_binomial)) %>%
+        mutate(X = ifelse(x > input$x2_binomial, "2", "other")) 
+    } else if(input$tail_binomial=="two.sided"){
+      df <- data.frame(x = qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = FALSE):qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE), prob = dbinom(x = qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = FALSE):qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = TRUE), size = input$n_binomial, prob = input$p_binomial)) %>%
+        mutate(X = ifelse((x >= input$a_binomial) & (x <= input$b_binomial), "2", "other")) 
     }
-    p <- ggplot(data.frame(x = c(qnorm(0.99999, mean = input$mean_normal, sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), lower.tail = FALSE), qnorm(0.99999, mean = input$mean_normal, sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), lower.tail = TRUE))), aes(x = x)) +
-      stat_function(fun = dnorm, args = list(
-        mean = input$mean_normal,
-        sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal)
-      )) +
-      stat_function(fun = funcShaded, geom = "area", alpha = 0.8) +
-      theme_minimal() +
-      ggtitle(paste0(input$distribution, " distribution: Normal(", input$mean_normal, ", ", ifelse(input$variance_sd == "variance_true", input$variance_normal, (input$sd_normal^2)), ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Density") +
-      xlab("x")
-    p
-  })
-output$normalPlot_upper <- renderPlot({
-    funcShaded <- function(x) {
-      y <- dnorm(x,
-                 mean = input$mean_normal,
-                 sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal)
-      )
-      y[x < input$x2_normal] <- NA
-      return(y)
-    }
-    p <- ggplot(data.frame(x = c(qnorm(0.99999, mean = input$mean_normal, sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), lower.tail = FALSE), qnorm(0.99999, mean = input$mean_normal, sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), lower.tail = TRUE))), aes(x = x)) +
-      stat_function(fun = dnorm, args = list(
-        mean = input$mean_normal,
-        sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal)
-      )) +
-      stat_function(fun = funcShaded, geom = "area", alpha = 0.8) +
-      theme_minimal() +
-      ggtitle(paste0(input$distribution, " distribution: Normal(", input$mean_normal, ", ", ifelse(input$variance_sd == "variance_true", input$variance_normal, (input$sd_normal^2)), ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Density") +
-      xlab("x")
-    p
-  })
-output$normalPlot_interval <- renderPlot({
-    funcShaded <- function(x) {
-      y <- dnorm(x,
-                 mean = input$mean_normal,
-                 sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal)
-      )
-      y[x < input$a_normal | x > input$b_normal] <- NA
-      return(y)
-    }
-    p <- ggplot(data.frame(x = c(qnorm(0.99999, mean = input$mean_normal, sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), lower.tail = FALSE), qnorm(0.99999, mean = input$mean_normal, sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal), lower.tail = TRUE))), aes(x = x)) +
-      stat_function(fun = dnorm, args = list(
-        mean = input$mean_normal,
-        sd = ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal)
-      )) +
-      stat_function(fun = funcShaded, geom = "area", alpha = 0.8) +
-      theme_minimal() +
-      ggtitle(paste0(input$distribution, " distribution: Normal(", input$mean_normal, ", ", ifelse(input$variance_sd == "variance_true", input$variance_normal, (input$sd_normal^2)), ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Density") +
-      xlab("x")
-    p
-  })
-  
-output$poissonPlot_lower <- renderPlot({
-    p <- data.frame(heads = qpois(0.99999, lambda = input$lambda_poisson, lower.tail = FALSE):qpois(0.99999, lambda = input$lambda_poisson, lower.tail = TRUE), prob = dpois(x = qpois(0.99999, lambda = input$lambda_poisson, lower.tail = FALSE):qpois(0.99999, lambda = input$lambda_poisson, lower.tail = TRUE), lambda = input$lambda_poisson)) %>%
-      mutate(Heads = ifelse(heads <= input$x1_poisson, "2", "Other")) %>%
-      ggplot(aes(x = factor(heads), y = prob, fill = Heads)) +
+  df$x <- as.factor(df$x)
+    p <-  ggplot(data=df, aes(x = x, y = prob, fill = X,color=X))  +  
       geom_col() +
       geom_text(
-        aes(label = round(prob, 3), y = prob + 0.005),
+        aes(label = round(prob, 4), y = prob + 0.005),
         position = position_dodge(0.9),
         size = 3,
-        vjust = 0
-      ) +
-      theme_minimal() +
-      theme(legend.position = "none") +
-      ggtitle(paste0(input$distribution, " distribution: Poisson(", input$lambda_poisson, ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Probability mass function") +
-      xlab("x")
-    p
+        vjust = 0)+
+      scale_fill_manual(values = c("#656565","#ffffff"))+
+      scale_color_manual(values=c("#000000","#000000"))+
+      theme_bw() +
+      theme(legend.position = "none",
+            plot.title = element_text(face = "bold", hjust = 0.5)) +
+      ggtitle(paste0("Binomial(", input$n_binomial, ", ", input$p_binomial, ")")) +
+      labs(x= "x",y = "Probability Mass Function")
+    ggplotly(p)
   })
-output$poissonPlot_upper <- renderPlot({
-    p <- data.frame(heads = qpois(0.99999, lambda = input$lambda_poisson, lower.tail = FALSE):qpois(0.99999, lambda = input$lambda_poisson, lower.tail = TRUE), prob = dpois(x = qpois(0.99999, lambda = input$lambda_poisson, lower.tail = FALSE):qpois(0.99999, lambda = input$lambda_poisson, lower.tail = TRUE), lambda = input$lambda_poisson)) %>%
-      mutate(Heads = ifelse(heads > input$x2_poisson, "2", "other")) %>%
-      ggplot(aes(x = factor(heads), y = prob, fill = Heads)) +
-      geom_col() +
-      geom_text(
-        aes(label = round(prob, 3), y = prob + 0.005),
-        position = position_dodge(0.9),
-        size = 3,
-        vjust = 0
-      ) +
-      theme_minimal() +
-      theme(legend.position = "none") +
-      ggtitle(paste0(input$distribution, " distribution: Poisson(", input$lambda_poisson, ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Probability mass function") +
-      xlab("x")
-    p
-  })
-output$poissonPlot_interval <- renderPlot({
-    p <- data.frame(heads = qpois(0.99999, lambda = input$lambda_poisson, lower.tail = FALSE):qpois(0.99999, lambda = input$lambda_poisson, lower.tail = TRUE), prob = dpois(x = qpois(0.99999, lambda = input$lambda_poisson, lower.tail = FALSE):qpois(0.99999, lambda = input$lambda_poisson, lower.tail = TRUE), lambda = input$lambda_poisson)) %>%
-      mutate(Heads = ifelse(heads >= input$a_poisson & heads <= input$b_poisson, "2", "other")) %>%
-      ggplot(aes(x = factor(heads), y = prob, fill = Heads)) +
-      geom_col() +
-      geom_text(
-        aes(label = round(prob, 3), y = prob + 0.005),
-        position = position_dodge(0.9),
-        size = 3,
-        vjust = 0
-      ) +
-      theme_minimal() +
-      theme(legend.position = "none") +
-      ggtitle(paste0(input$distribution, " distribution: Poisson(", input$lambda_poisson, ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Probability mass function") +
-      xlab("x")
-    p
-  })
+
+output$PoissonPlot <- renderPlotly({
+  if(input$tail_poisson=="lower.tail"){
+    df <- data.frame(x = qpois(0.99999, lambda = input$lambda_poisson, lower.tail = FALSE):qpois(0.99999, lambda = input$lambda_poisson, lower.tail = TRUE), prob = dpois(x = qpois(0.99999, lambda = input$lambda_poisson, lower.tail = FALSE):qpois(0.99999, lambda = input$lambda_poisson, lower.tail = TRUE), lambda = input$lambda_poisson)) %>%
+      mutate(X = ifelse(x <= input$x1_poisson, "Interest", "other")) 
+  } else if(input$tail_poisson=="upper.tail"){
+    df <- data.frame(x = qpois(0.99999, lambda = input$lambda_poisson, lower.tail = FALSE):qpois(0.99999, lambda = input$lambda_poisson, lower.tail = TRUE), prob = dpois(x = qpois(0.99999, lambda = input$lambda_poisson, lower.tail = FALSE):qpois(0.99999, lambda = input$lambda_poisson, lower.tail = TRUE), lambda = input$lambda_poisson)) %>%
+      mutate(X = ifelse(x > input$x2_poisson, "Interest", "other")) 
+  } else if(input$tail_poisson=="two.sided"){
+    df <- data.frame(x = qpois(0.99999, lambda = input$lambda_poisson, lower.tail = FALSE):qpois(0.99999, lambda = input$lambda_poisson, lower.tail = TRUE), prob = dpois(x = qpois(0.99999, lambda = input$lambda_poisson, lower.tail = FALSE):qpois(0.99999, lambda = input$lambda_poisson, lower.tail = TRUE), lambda = input$lambda_poisson)) %>%
+      mutate(X = ifelse(x >= input$a_poisson & x <= input$b_poisson, "Interest", "other")) 
+  }
   
-output$studentPlot_lower <- renderPlot({
-    funcShaded <- function(x) {
-      y <- dt(x, df = input$df_student)
-      y[x > input$x1_student] <- NA
-      return(y)
-    }
-    p <- ggplot(data.frame(x = c(qt(0.99999, df = input$df_student, lower.tail = FALSE), qt(0.99999, df = input$df_student, lower.tail = TRUE))), aes(x = x)) +
-      stat_function(fun = dt, args = list(df = input$df_student)) +
-      stat_function(fun = funcShaded, geom = "area", alpha = 0.8) +
-      theme_minimal() +
-      ggtitle(paste0(input$distribution, " distribution: t(", input$df_student, ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Density") +
-      xlab("x")
-    p
-  })
-output$studentPlot_upper <- renderPlot({
-    funcShaded <- function(x) {
-      y <- dt(x, df = input$df_student)
-      y[x < input$x2_student] <- NA
-      return(y)
-    }
-    p <- ggplot(data.frame(x = c(qt(0.99999, df = input$df_student, lower.tail = FALSE), qt(0.99999, df = input$df_student, lower.tail = TRUE))), aes(x = x)) +
-      stat_function(fun = dt, args = list(df = input$df_student)) +
-      stat_function(fun = funcShaded, geom = "area", alpha = 0.8) +
-      theme_minimal() +
-      ggtitle(paste0(input$distribution, " distribution: t(", input$df_student, ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Density") +
-      xlab("x")
-    p
-  })
-output$studentPlot_interval <- renderPlot({
-    funcShaded <- function(x) {
-      y <- dt(x, df = input$df_student)
-      y[x < input$a_student | x > input$b_student] <- NA
-      return(y)
-    }
-    p <- ggplot(data.frame(x = c(qt(0.99999, df = input$df_student, lower.tail = FALSE), qt(0.99999, df = input$df_student, lower.tail = TRUE))), aes(x = x)) +
-      stat_function(fun = dt, args = list(df = input$df_student)) +
-      stat_function(fun = funcShaded, geom = "area", alpha = 0.8) +
-      theme_minimal() +
-      ggtitle(paste0(input$distribution, " distribution: t(", input$df_student, ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Density") +
-      xlab("x")
-    p
-  })
+  df$x <- as.factor(df$x)
+  p <-  ggplot(data=df,aes(x = x, y = prob, fill = X,color=X))  +  
+    geom_col() +
+    geom_text(
+      aes(label = round(prob, 4), y = prob + 0.005),
+      position = position_dodge(0.9),
+      size = 3,
+      vjust = 0)+
+    scale_fill_manual(values = c("#656565","#ffffff"))+
+    scale_color_manual(values=c("#000000","#000000"))+
+    theme_bw() +
+    theme(legend.position = "none",
+          plot.title = element_text(face = "bold", hjust = 0.5)) +
+    ggtitle(paste0("Poisson(", input$lambda_poisson, ")")) +
+    labs(x= "x",y = "Probability Mass Function")
+  ggplotly(p) 
+})
 
-output$FPlot_lower <- renderPlot({
-    funcShaded <- function(x) {
-      y <- df(x, df1 = input$df1_f,df2 = input$df2_f)
-      y[x > input$x1_f] <- NA
-      return(y)
-    }
-    p <- ggplot(data.frame(x = c(qf(0.99999, df1 = input$df1_f,df2=input$df2_f, lower.tail = FALSE), qf(0.99999, df1 = input$df1_f,df2=input$df2_f, lower.tail = TRUE))), aes(x = x)) +
-      stat_function(fun = df, args = list(df1 = input$df1_f,df2=input$df2_f)) +
-      stat_function(fun = funcShaded, geom = "area", alpha = 0.8) +
-      theme_minimal() +
-      ggtitle(paste0(input$distribution, " distribution: f(", input$df1_f,",",input$df2_f, ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Density") +
-      xlab("x")
-    p
-  })
-output$FPlot_upper <- renderPlot({
-    funcShaded <- function(x) {
-      y <- df(x, df1 = input$df1_f,df2 = input$df2_f)
-      y[x < input$x2_f] <- NA
-      return(y)
-    }
-    p <- ggplot(data.frame(x = c(qf(0.99999, df1 = input$df1_f,df2=input$df2_f, lower.tail = FALSE), qf(0.99999, df1 = input$df1_f,df2=input$df2_f, lower.tail = TRUE))), aes(x = x)) +
-      stat_function(fun = df, args = list(df1 = input$df1_f,df2=input$df2_f)) +
-      stat_function(fun = funcShaded, geom = "area", alpha = 0.8) +
-      theme_minimal() +
-      ggtitle(paste0(input$distribution, " distribution: f(", input$df1_f,",",input$df2_f, ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Density") +
-      xlab("x")
-    p
-  })
-output$FPlot_interval <- renderPlot({
-    funcShaded <- function(x) {
-      y <- df(x, df1 = input$df1_f,df2 = input$df2_f)
-      y[x < input$a_f | x > input$b_f] <- NA
-      return(y)
-    }
-    p <- ggplot(data.frame(x = c(qf(0.99999, df1 = input$df1_f,df2=input$df2_f, lower.tail = FALSE), qf(0.99999, df1 = input$df1_f,df2=input$df2_f, lower.tail = TRUE))), aes(x = x)) +
-      stat_function(fun = df, args = list(df1 = input$df1_f,df2=input$df2_f)) +
-      stat_function(fun = funcShaded, geom = "area", alpha = 0.8) +
-      theme_minimal() +
-      ggtitle(paste0(input$distribution, " distribution: f(", input$df1_f,",",input$df2_f, ")")) +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
-      ylab("Density") +
-      xlab("x")
-    p
-    
-  })
+output$geometricPlot <- renderPlotly({
+  if(input$tail_geom=="lower.tail"){
+    df <-  data.frame(x = 0:(input$p_geom + (5 * sqrt((1 - input$p_geom) / (input$p_geom^2)))), prob = dgeom(x = 0:( input$p_geom+ (5 * sqrt((1 - input$p_geom) / (input$p_geom^2)))), prob = input$p_geom)) %>%
+      mutate(X = ifelse(x <= input$x1_geom,"2", "Other")) 
+  } else if(input$tail_geom=="upper.tail"){
+    df <-  data.frame(x = 0:(input$p_geom + (5 * sqrt((1 - input$p_geom) / (input$p_geom^2)))), prob = dgeom(x = 0:( input$p_geom+ (5 * sqrt((1 - input$p_geom) / (input$p_geom^2)))), prob = input$p_geom)) %>%
+      mutate(X = ifelse(x > input$x2_geom, "2", "other")) 
+  } else if(input$tail_geom=="two.sided"){
+    df <-  data.frame(x = 0:(input$p_geom + (5 * sqrt((1 - input$p_geom) / (input$p_geom^2)))), prob = dgeom(x = 0:( input$p_geom+ (5 * sqrt((1 - input$p_geom) / (input$p_geom^2)))), prob = input$p_geom)) %>%
+      mutate(X = ifelse(x >= input$a_geom & x <= input$b_geom, "2", "other"))
+  }
+  df$x <- as.factor(df$x)
+  p <-  ggplot(data=df, aes(x = x, y = prob, fill = X,color=X))  +  
+    geom_col() +
+    geom_text(
+      aes(label = round(prob, 4), y = prob + 0.005),
+      position = position_dodge(0.9),
+      size = 3,
+      vjust = 0)+
+    scale_fill_manual(values = c("#656565","#ffffff"))+
+    scale_color_manual(values=c("#000000","#000000"))+
+    theme_bw() +
+    theme(legend.position = "none",
+          plot.title = element_text(face = "bold", hjust = 0.5)) +
+    ggtitle(paste0("Geometric(", input$p_geom, ")")) +
+    labs(x= "x",y = "Probability Mass Function")
+  ggplotly(p)
+})
 
+output$HypergeometricPlot <- renderPlotly({
+  if(input$tail_hypergeometric=="lower.tail"){
+    df <- data.frame(x = qhyper(0.99999, m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric, lower.tail = FALSE):qhyper(0.99999, m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric, lower.tail = TRUE), prob = dhyper(x = qhyper(0.99999, m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric, lower.tail = FALSE):qhyper(0.99999, m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric, lower.tail = TRUE), m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric)) %>%
+      mutate(X = ifelse(x <= input$x1_hypergeometric, "2", "Other")) 
+  } else if(input$tail_hypergeometric=="upper.tail"){
+df <- data.frame(x = qhyper(0.99999, m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric, lower.tail = FALSE):qhyper(0.99999, m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric, lower.tail = TRUE), prob = dhyper(x = qhyper(0.99999, m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric, lower.tail = FALSE):qhyper(0.99999, m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric, lower.tail = TRUE), m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric)) %>%
+  mutate(X = ifelse(x > input$x2_hypergeometric, "2", "other")) 
+    } else if(input$tail_hypergeometric=="two.sided"){
+      df <- data.frame(x = qhyper(0.99999, m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric, lower.tail = FALSE):qhyper(0.99999, m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric, lower.tail = TRUE), prob = dhyper(x = qhyper(0.99999, m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric, lower.tail = FALSE):qhyper(0.99999, m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric, lower.tail = TRUE), m = input$M_hypergeometric, n = (input$N_hypergeometric - input$M_hypergeometric), k = input$n_hypergeometric)) %>%
+        mutate(X = ifelse(x >= input$a_hypergeometric & x <= input$b_hypergeometric, "2", "other"))
+  }
+  df$x <- as.factor(df$x)
+  p <-  ggplot(data=df, aes(x = x, y = prob, fill = X,color=X))  +  
+    geom_col() +
+    geom_text(
+      aes(label = round(prob, 4), y = prob + 0.005),
+      position = position_dodge(0.9),
+      size = 3,
+      vjust = 0)+
+    scale_fill_manual(values = c("#656565","#ffffff"))+
+    scale_color_manual(values=c("#000000","#000000"))+
+    theme_bw() +
+    theme(legend.position = "none",
+          plot.title = element_text(face = "bold", hjust = 0.5)) +
+    ggtitle(paste0("Hypergeometric(", input$n_hypergeometric,",",input$M_hypergeometric, ",", input$N_hypergeometric, ")")) +
+    labs(x= "x",y = "Probability Mass Function")
+  ggplotly(p)
+})
+  
+##****************************
+##* Continuous distribution
+##****************************
+
+output$normalPlot <- renderPlot({
+  mean <- input$mean_normal
+  sigma <- ifelse(input$variance_sd == "variance_true", sqrt(input$variance_normal), input$sd_normal)
+  dt <- data.frame(x= qnorm(c(1-0.9999,0.9999), 
+                            mean = mean, 
+                            sd = sigma))
+  shaded <- switch(input$tail_normal,
+                   "lower.tail" = stat_function(fun = dnorm,
+                                                args = list(mean=mean,sd = sigma), 
+                                                xlim = c(2*qnorm(1-0.99999,mean=mean,sd = sigma),input$x1_normal),
+                                                geom = "area"),
+                   "upper.tail" = stat_function(fun = dnorm,
+                                                args = list(mean=mean,sd = sigma), 
+                                                xlim = c(input$x2_normal,qnorm(0.99999,mean=mean,sd = sigma)),
+                                                geom = "area"),
+                   "two.sided" = stat_function(fun = dnorm,args = list(mean=mean,sd = sigma), 
+                                               xlim = c(input$a_normal,input$b_normal),
+                                               geom = "area"))
+  
+  p <- ggplot(data=dt, aes(x = x)) +
+    stat_function(fun = dnorm,args = list(mean=mean,sd = sigma)) +
+    theme_bw() +
+    ggtitle(paste("Normal(",mean,",",sigma,")",sep="")) +
+    theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
+    ylab("Probability Density Function") +
+    xlim(dt$x)+
+    xlab("x")
+  p <- p +shaded
+  
+  p
+  
+})
+
+output$chiSquarePlot <- renderPlot({
+  df <- input$df_chisq
+  dt <- data.frame(x= qchisq(c(1-0.9999,0.9999), 
+                            df=df))
+  shaded <- switch(input$tail_chisq,
+                   "lower.tail" = stat_function(fun = dchisq,
+                                                args = list(df=df), 
+                                                xlim = c(qchisq(1-0.9999,df=df),input$x1_chisq),
+                                                geom = "area"),
+                   "upper.tail" = stat_function(fun = dchisq,
+                                                args = list(df=df), 
+                                                xlim = c(input$x2_chisq,qchisq(0.9999,df=df)),
+                                                geom = "area"),
+                   "two.sided" = stat_function(fun = dchisq,
+                                               args = list(df=df), 
+                                               xlim = c(input$a_chisq,input$b_chisq),
+                                               geom = "area"))
+  
+  p <- ggplot(data=dt, aes(x = x)) +
+    stat_function(fun = dchisq,args = list(df=df)) +
+    theme_bw() +
+    ggtitle(paste("Chi2(",df,")",sep="")) +
+    theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
+    ylab("Probability Density Function") +
+    xlim(dt$x)+
+    xlab("x")
+  p <- p +shaded
+  
+  p
+  
+})
+
+output$StudenttPlot <- renderPlot({
+  df <- input$df_t
+  dt2 <- function(x,df) {dt(x , df = df)}
+  dt1 <- data.frame(x= qt(c(1-0.999,0.999), df=df))
+  shaded <- switch(input$tail_studentt,
+                   "lower.tail" = stat_function(fun = dt2,
+                                                args = list(df=df), 
+                                                xlim = c(qt(1-0.999,df=df),input$x1_t),
+                                                geom = "area"),
+                   "upper.tail" = stat_function(fun = dt2,
+                                                args = list(df=df), 
+                                                xlim = c(input$x2_t,qt(0.999,df=df)),
+                                                geom = "area"),
+                   "two.sided" = stat_function(fun = dt2,
+                                               args = list(df=df), 
+                                               xlim = c(input$a_t,input$b_t),
+                                               geom = "area"))
+  
+  p <- ggplot(data=dt1, aes(x = x)) +
+    stat_function(fun = dt2,args = list(df=df)) +
+    theme_bw() +
+    ggtitle(paste("Student-t(",df,")",sep="")) +
+    theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
+    ylab("Probability Density Function") +
+    ##xlim(dt$x)+
+    xlab("x")
+  p <- p + shaded
+  
+  p
+  
+})
+
+output$SnedecorFPlot <- renderPlot({
+  df1 <- input$df1_f
+  df2 <- input$df2_f
+  d.f <- function(x,df1,df2) {df(x , df1 = df1,df2=df2)}
+  dt1 <- data.frame(x= qf(c(1-0.999,0.999), df1=df1,df2=df2))
+  shaded <- switch(input$tail_f,
+                   "lower.tail" = stat_function(fun = d.f,
+                                                args = list(df1=df1,df2=df2), 
+                                                xlim = c(qf(1-0.999,df1=df1,df2=df2),input$x1_f),
+                                                geom = "area"),
+                   "upper.tail" = stat_function(fun = d.f,
+                                                args = list(df1=df1,df2=df2), 
+                                                xlim = c(input$x2_f,qf(0.999,df1=df1,df2=df2)),
+                                                geom = "area"),
+                   "two.sided" = stat_function(fun = d.f,
+                                               args = list(df1=df1,df2=df2), 
+                                               xlim = c(input$a_f,input$b_f),
+                                               geom = "area"))
+  
+  p <- ggplot(data=dt1, aes(x = x)) +
+    stat_function(fun = d.f,args = list(df1=df1,df2=df2)) +
+    theme_bw() +
+    ggtitle(paste("Snedecor-F(",df1,",",df2,")",sep="")) +
+    theme(plot.title = element_text(face = "bold", hjust = 0.5)) +
+    ylab("Probability Density Function") +
+    ##xlim(dt$x)+
+    xlab("x")
+  p <- p + shaded
+  
+  p
+  
+})
 ```
 

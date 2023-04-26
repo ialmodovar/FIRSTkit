@@ -1,0 +1,328 @@
+
+
+
+<div id="section-introduction" class="section level1">
+<h1>Introduction</h1>
+<p><a href="https://github.com/ialmodovar/FIRSTkit"><strong>FIRSTkit</strong></a>
+was created to be used as a companion for introductory statistics
+courses. It does not required any previous knowledge of <a href="https://www.r-project.org/"><strong>R</strong></a>.
+<strong>FIRSTkit</strong> was made with the purpose to be used as
+companion to introductory statistics and data sciences courses. Unlike
+most Shiny-App that are create for basic data analysis,
+<strong>FIRSTkit</strong> is indented to be a companion in introductory
+courses. Most web-based application are created as a alternative tool
+for data analysis rather than teaching. This will allow first time
+users, or users who have low interest in <strong>R</strong> programming
+to perform statistical analysis and be successful in their courses.</p>
+<div id="section-data-inputupload" class="section level2">
+<h2>Data Input/Upload</h2>
+<p><strong>FIRSTkit</strong> allow the user to upload dataset in the
+following extensions <em>.csv, .txt, .xls, xlsx</em>. Users can input
+their own values for a quick analysis. <strong>FIRSTkit</strong> also
+can read files from Google Sheets, this is because it uses the
+<strong>R</strong> package googlesheets. If missing values are present,
+<strong>FIRSTkit</strong> will automatically remove them, because
+<strong>FIRSTkit</strong> functions uses the <strong>R</strong> argument
+<em>na.rm=TRUE</em> whenever is possible.</p>
+</div>
+<div id="section-modules" class="section level2">
+<h2>Modules</h2>
+<p>Our software is create to be use in introductory statistics classes.
+Therefore, <strong>FIRSTkit</strong> consist in topics cover in this
+course. The topics that are cover in <strong>FIRSTkit</strong></p>
+<ol style="list-style-type: decimal">
+<li>Descriptive Statistics</li>
+<li>Introduction to Probability Theory</li>
+<li>Introduction to Distribution Function</li>
+<li>Statistical Inference</li>
+<li>Simple and Multiple Linear regression.</li>
+</ol>
+<div id="section-descriptive-statistics" class="section level3">
+<h3><strong>Descriptive statistics</strong></h3>
+<p>As a descriptive tools, <strong>FIRSTkit</strong> allow to compute
+location and dispersion summary. It also allow graphical display to be
+used in descriptive statistics</p>
+<div id="section-location-measurements" class="section level4">
+<h4><strong>Location measurements</strong></h4>
+<ul>
+<li><strong>Mean</strong>: The sample mean is defined to be, <span class="math display">\[
+\bar{x}= \frac{1}{n}\sum^n_{i=1}x_i
+\]</span></li>
+<li><strong>Trimmed Mean</strong>: This mean is computed after
+discarding given parts of a probability distribution or sample at the
+high and low end, and typically discarding an equal amount of both. This
+number of points to be discarded is usually given as a percentage of the
+total number of points, but may also be given as a fixed number of
+points.</li>
+</ul>
+<ol style="list-style-type: decimal">
+<li>Find the number of observations <span class="math inline">\(n\)</span>.</li>
+<li>Reorder the <span class="math inline">\(X_i\)</span> from the
+smallest to the largest.</li>
+<li>Find lower case <span class="math inline">\(p\)</span> proportion
+trimmed.</li>
+<li>Compute <span class="math inline">\(np\)</span>. If <span class="math inline">\(np\)</span> is an integer use <span class="math inline">\(k=np\)</span> and trim <span class="math inline">\(k\)</span> observations at both ends. The
+remaining observations is <span class="math inline">\(n-2k\)</span>. The
+trimmed mean is defined as, <span class="math display">\[
+\bar{x}_{k} = \frac{X_{k+1}+X_{k+2}+…+X_{n-k}}{n-2k}
+\]</span></li>
+</ol>
+<ul>
+<li><p><strong>Median</strong>: Middle value separating the greater and
+lesser halves of a data set. The sample median is defined as, <span class="math display">\[
+M = X_{(0.5 \times n)} =
+\begin{cases}
+\frac{X_{(n/2)}+X_{(n/2)+1}}{2} &amp; \mbox{if $n$ is even} \\
+X_{(n+1)/2} &amp; \mbox{if $n$ is odd}
+\end{cases}
+\]</span></p></li>
+<li><p><strong>Geometric Mean</strong>: The geometric mean of a
+non-negative data set is always at most their arithmetic mean. The
+geometric mean is defined as, <span class="math display">\[
+g = \left(\prod^n_{i=1}x_i\right)^{1/n}
+\]</span></p></li>
+</ul>
+</div>
+<div id="section-measurements-for-dispersion" class="section level4">
+<h4><strong>Measurements for Dispersion</strong></h4>
+<ul>
+<li><p><strong>Standard Deviation</strong>: is a measure of the amount
+of variation or dispersion of a set of values. The sample standard
+deviation is defined as, <span class="math display">\[
+s = \sqrt{\frac{1}{n-1}\sum^n_{i=1}(x_i-\bar{x})^2}
+\]</span></p></li>
+<li><p><strong>Variance</strong>: is the expectation of the squared
+deviation of a random variable from its mean. Informally, it measures
+how far a set of numbers is spread out from their average value. <span class="math display">\[
+s^2 = \frac{1}{n-1}\sum^n_{i=1}(x_i-\bar{x})^2
+\]</span></p></li>
+<li><p><strong>Inter-quartile range (IQR)</strong>: difference between
+75th and 25th percentiles. The IQR is defined as <span class="math display">\[
+IQR = X_{(0.75 n)}- X_{(0.25 n)}
+\]</span></p></li>
+<li><p><strong>Median Absolute Deviation (MAD)</strong>: Compute the
+median absolute deviation, i.e., the (lo-/hi-) median of the absolute
+deviations from the median, and (by default) adjust by a factor for
+asymptotically normal consistency. <span class="math display">\[
+MAD = \mbox{median}_i(|X_i-\mbox{median}(X_i)|)
+\]</span></p></li>
+<li><p><strong>Range</strong>: the difference between minimum and
+maximum of all the given arguments. <span class="math display">\[
+R = \max X_i - \min X_i
+\]</span></p></li>
+<li><p><strong>Data visualization</strong></p></li>
+<li><p><strong>Box-plot</strong>: Graphical tool to depicting groups of
+numerical data through their quantiles. Box plots may also have lines
+extending from the boxes (whiskers) indicating variability outside the
+upper and lower quantiles, hence the terms box-and-whisker plot and
+box-and-whisker diagram. Outliers may be plotted as individual
+points.</p></li>
+<li><p><strong>Histogram</strong>: Graphical approximation of the
+distribution of numerical variable</p></li>
+<li><p><strong>Stem-and-leaf plot</strong>: is a technique similar to a
+histogram, to assist in visualizing the shape of a
+distribution.</p></li>
+<li><p><strong>Density plot</strong>: Graphical representation of the
+distribution of a numerical variable. It uses a smooth estimating to
+show the probability density function of the variable.</p></li>
+<li><p><strong>Bar Graph</strong>: Graphical tool that presents
+categorical data with rectangular bars with heights or lengths
+proportional to the values that they represent.</p></li>
+<li><p><strong>Scatter plot (two variables)</strong>: Graphical display
+that shows the relationship between two numerical variables <span class="math inline">\((x,y)\)</span>.</p></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="section-probability-theory-and-probability-distribution-functions" class="section level2">
+<h2><strong>Probability Theory and probability distribution
+functions</strong></h2>
+<ul>
+<li><strong>Probability Events</strong>: For a given set of events, we
+can compute the union, intersection, independence of these events. The
+solutions are display using a Venn Diagram.</li>
+<li><strong>Conditional Probability</strong>: Bayes tree diagram
+required the input of a prior probability, false-positive, and true
+positive. For any two set <span class="math inline">\(A\)</span> and
+<span class="math inline">\(B\)</span>, the conditional probability is
+computed as follow <span class="math display">\[
+P(A|B) = \frac{P(B|A)P(A)}{P(B)} =
+\frac{P(B|A)P(A)}{P(B|A^c)P(A^c)+P(B|A)P(A)}
+\]</span></li>
+</ul>
+<div id="section-probability-distributions-functions" class="section level3">
+<h3><strong>Probability distributions functions</strong></h3>
+<div id="section-discrete-distributions-functions" class="section level4">
+<h4><strong>Discrete distributions functions</strong></h4>
+<ul>
+<li><p><strong>Binomial Distribution</strong>: The binomial distribution
+arise from <span class="math inline">\(n\)</span> independent Bernoulli
+experiments. The parameters of the Binomial distribution are <span class="math inline">\(n\)</span> and <span class="math inline">\(p\)</span>, the first is the number of experiment
+and <span class="math inline">\(p\)</span> the probability of success.
+In statistics courses if a random variable <span class="math inline">\(X\sim \mbox{Binomial}(n,p)\)</span>, then
+probability mass function (pmf) is given by <span class="math display">\[
+\mathbb{P}(X=x) = f(x|n,p) = {n \choose x} p^{x} (1-p)^{n-x}; x \in
+\{0,1,\ldots,n\}; p \in [0,1]
+\]</span></p></li>
+<li><p><strong>Poisson Distribution</strong>: Involve observing discrete
+events in a continuous ``interval’’ of time, length or space. But we are
+not dealing with a interval in a mathematical sense. A random variable
+in a Poisson process is <span class="math inline">\(X\)</span>, the
+number of occurrences of the event in a interval of size <span class="math inline">\(s\)</span> units. a random variable <span class="math inline">\(X\sim \mbox{Poisson}(\lambda)\)</span>, then
+probability mass function (pmf) is given by <span class="math display">\[
+\mathbb{P}(X=x)=f(x|\lambda) = \frac{e^{-\lambda} \lambda^x}{x!}; x
+\in\{0,1,2,3,\ldots,\}; \lambda &gt;0
+\]</span></p></li>
+<li><p><strong>Geometric Distribution</strong>: The probability
+distribution of the number <span class="math inline">\(X\)</span> of
+Bernoulli trials needed to get one success. A random variable <span class="math inline">\(X\sim \mbox{Geometric}(p)\)</span>, then pmf is
+given by <span class="math display">\[
+\mathbb{P}(X=x) = f(x|p) =  p (1-p)^{x-1}; x \in \{1,2,3,\ldots\}; p \in
+(0,1]
+\]</span></p></li>
+</ul>
+</div>
+<div id="section-continuous-distributions-functions" class="section level4">
+<h4><strong>Continuous distributions functions</strong></h4>
+<ul>
+<li><strong>Normal Distribution</strong>: The normal distribution plays
+a central role in introductory statistics courses. The normal
+distribution and distributions associated with it are very tractable
+analytically. The normal distribution have the familiar bell-shaped,
+symmetric and makes it appealing to model populations. The central limit
+theorem, the normal distribution can be used to approximate others
+distributions for large samples. A random variable <span class="math inline">\(X \sim N(\mu,\sigma^2)\)</span>, in here <span class="math inline">\(\mu\)</span> is the mean and <span class="math inline">\(\sigma^2\)</span> is the variance, the probability
+density functions (pdf) is given by <span class="math display">\[
+f(x|\mu,\sigma^2) = \frac{1}{\sqrt{2\pi \sigma^2}}
+\exp\left\{-\frac{(x-\mu)^2}{2\sigma^2} \right\} \mbox{ for all } x\in
+\mathbb{R}; \mu \in \mathbb{R}; \sigma &gt; 0
+\]</span>
+<ul>
+<li><strong>Chi-Squared Distribution</strong>:</li>
+<li><strong>Student’s <span class="math inline">\(t\)</span>
+distribution</strong>:</li>
+<li><strong>Snedecor’s <span class="math inline">\(F\)</span>
+distribution</strong>:</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="section-inference-statistics" class="section level3">
+<h3><strong>Inference statistics</strong></h3>
+<p>####<strong>One-Sample Inference</strong> -<strong>One-Sample
+<em>t</em>-test for a population mean</strong> <span class="math inline">\(\mu\)</span>: If you have a continuous data and
+your data is a random sample from a normal population. Then, the
+one-sample <span class="math inline">\(t\)</span>-test is a statistical
+hypothesis test that can be used to determine whether an unknown
+population mean is different from a specific value. <span class="math display">\[
+H_0: \mu = \mu_0 \mbox{ against } H_1: \mu \neq \mu_0
+\]</span> - <strong>Wilcoxon signed-ranked test a location
+parameter</strong>: When you cannot safely assume normality, you can
+perform a nonparametric test that does not assume normality <span class="math display">\[
+H_0: M = M_0 \mbox{ against } H_1: M \neq M_0
+\]</span> Also, if your sample size IS very small, you might need to
+consider this non-parametric approach. - <strong>One-Sample</strong>
+<span class="math inline">\(\chi^2\)</span>-test for the population
+variance <span class="math inline">\(\sigma^2\)</span>: If you have a
+continuous data and your data is a random sample from a normal
+population. Then, the one-sample <span class="math inline">\(\chi^2\)</span> test for the variance is a
+statistical hypothesis test that can be used to determine whether an
+unknown population variance is different from a specific value. <span class="math display">\[
+H_0: \sigma^2 = \sigma^2_0 \mbox{ against } H_1: \sigma^2 \neq
+\sigma^2_0,
+\]</span> Note that this test can also be used for a standard deviation,
+<span class="math display">\[
+H_0: \sigma = \sigma_0 \mbox{ against } H_1: \sigma \neq \sigma_0,
+\]</span> -<strong>One-Sample test for a population proportion</strong>:
+Performs an exact test of a simple null hypothesis about the probability
+of success in a Bernoulli experiment. <span class="math display">\[
+H_0: p = p_0 \mbox{ against } H_1: p \neq p_0
+\]</span> - <strong>Two-Sample Inference</strong> - Two-Sample <span class="math inline">\(t\)</span>-test for means comparison: The
+two-sample <span class="math inline">\(t\)</span>-test is used to
+determine if two population means are equal. The data may either be
+paired or not paired.</p>
+<ul>
+<li><p>Dependent <span class="math inline">\(t\)</span>-test for paired
+samples: This test is used when the samples are dependent; that is, when
+there is only one sample that has been tested twice (repeated measures)
+or when there are two samples that have been matched or ‘’paired’’. The
+<span class="math inline">\(t\)</span>-statistic is calculated as <span class="math display">\[
+t = \frac{\bar{X}-\delta_0}{S_D/\sqrt{n}},
+\]</span> where <span class="math inline">\(\bar{X}\)</span> are the
+average and <span class="math inline">\(S_D\)</span> standard deviation
+of the differences between all pairs. <span class="math inline">\(\delta_0\)</span> its the value under the null
+hypothesis, i.e., want to test whether the average of the difference is
+significantly different. The degree of freedom used is <span class="math inline">\(n-1\)</span>, where <span class="math inline">\(n\)</span> represents the number of
+pairs.</p></li>
+<li><p><strong>Independent Samples</strong> <span class="math inline">\(t\)</span>-test for the comparison of two means:
+This test is used when the samples are independent; that is, when there
+are two sample that are been tested. The variances of the two samples
+may be assumed to be equal or unequal. If we assumed (by default)
+constant variance, i.e., both samples have equal variances, then the
+<span class="math inline">\(t\)</span>-statistic is calculated as <span class="math display">\[
+t = \frac{\bar{X}_1-\bar{X}_2-\delta_0}{\sqrt{S^2_p\left(\frac{1}{n_1}
++\frac{1}{n_2}\right)}},
+\]</span> where <span class="math inline">\(S^2_p\)</span> is the pooled
+variance,i.e., <span class="math display">\[
+        S^2_p = \frac{(n_1-1)S^2_1+ (n_2-1)S^2_2}{n_1+n_2-2}
+\]</span></p></li>
+<li><p>Wilcoxon-Mann-Whitney to compare Two Location</p></li>
+<li><p>Two-Sample <em>F</em> Test to compare Two Variance: If you have a
+continuous data and your data is a random sample from a normal
+population. Then, the two-sample <span class="math inline">\(F\)</span>-test for the comparison of two variance
+is a statistical hypothesis test that can be used to determine whether
+two unknown population variance are different from a specific value.
+<span class="math display">\[
+H_0: \sigma^2_1 = \sigma^2_2 \mbox{ against } H_1: \sigma^2_1 \neq
+\sigma^2_2
+\]</span></p></li>
+<li><p>Two-Sample proportion test</p></li>
+<li><p>Three or more Sample Inference</p>
+<ul>
+<li><strong>One-Way Analysis of Variance (ANOVA)</strong> If you have a
+continuous data and your data is a random sample from a normal
+population. Then, the ANOVA is a statistical hypothesis test that can be
+used to determine whether an unknown population mean is different from a
+specific value.</li>
+</ul></li>
+</ul>
+<p><span class="math display">\[
+H_0: \mu_1 = \mu_2 = \cdots = \mu_k \mbox{ against } H_1: \mbox{ at
+least one of them is different}
+\]</span> - <strong>Kruskal-Wallis Rank Sum test</strong>: If your
+sample sizes are very small, you might not be able to test for
+normality. When you cannot safely assume normality, you can perform a
+nonparametric test that does not assume normality</p>
+<p><span class="math display">\[
+H_0: M_1 = M_2 = \cdots = M_k \mbox{ against } H_1: \mbox{ at least one
+of them is different}
+\]</span></p>
+<p>-<span class="math inline">\(\chi^2\)</span>-association test:</p>
+</div>
+<div id="section-linear-regression" class="section level3">
+<h3><strong>Linear Regression</strong></h3>
+<p>Fit a linear regression model, (either simple or multiple) linear
+regression. Suppose we have a dependent variable <span class="math inline">\(Y\)</span> and multiple regressors <span class="math inline">\(x_1,\ldots, x_p\)</span>. The linear regression
+accepted in <em>FIRSTkit</em> assumed the following structure, <span class="math display">\[
+Y_i = \beta_0+\sum^p_{j=1}\beta_j x_{ij}+\varepsilon_i
+\]</span> where <span class="math inline">\(Y_i \sim
+N(\beta_0+\sum^p_{j=1}\beta_j x_{ij},\sigma^2)\)</span> and <span class="math inline">\(\varepsilon_i \sim N(0,\sigma^2)\)</span>. In the
+linear regression the parameters have the following roles, <span class="math inline">\(\beta_0\)</span> is the <span class="math inline">\(y\)</span>-intercept. While <span class="math inline">\(\beta_1,\ldots, \beta_p\)</span> are the slope
+associated with each of the regressors.</p>
+</div>
+</div>
+<div id="section-authors" class="section level2">
+<h2>Authors</h2>
+<ul>
+<li><p><a href="https://github.com/ialmodovar/">Israel A.
+Almodóvar-Rivera</a> is an Assistant Professor in the Department of
+Mathematical Sciences at University of Puerto Rico at
+Mayag”uez.</p></li>
+<li><p><a href="https://www.stat.iastate.edu/people/ranjan-maitra">Ranjan
+Maitra</a> is an Professor in the Department of Statistics at Iowa State
+University.</p></li>
+</ul>
+<p>If you have any question or want to report something, or you want to
+contribute in this project you can send a message to <a href="mailto:israel.almodovar@upr.edu" class="email"><em>israel.almodovar@upr.edu</em></a> or <a href="mailto:maitra@iastate.edu" class="email"><em>maitra@iastate.edu</em></a>.</p>
+</div>
+</div>

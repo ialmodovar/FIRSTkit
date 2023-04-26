@@ -3,27 +3,28 @@ shinyUI(
   withMathJax(
     navbarPage(
       theme = shinytheme("flatly"), collapsible = TRUE,
-      
       tags$head(tags$style(HTML('.navbar-static-top {background-color: green;}',
                                 '.navbar-default .navbar-nav>.active>a {background-color: green;}'))),
-      
       title = "FIRSTkit",
-      tabPanel(title="Data",uiOutput("FIRSTkitData")),
+      tabPanel(title="Data",
+               uiOutput("FIRSTkitData")),
       tabPanel(title = "Descriptive Statistics",
                uiOutput("descriptive")),
       navbarMenu("Probability Theory",
-                 tabPanel("Introduction to Probability"),
+                 tabPanel("Venn Diagram",
+                          uiOutput("VennDiagram")),
                  tabPanel("Conditional Probability",
                           uiOutput("BayesTreeDiagram")),
-                 tabPanel("Probability Distribution Functions")
+                 tabPanel("Probability Distribution Functions",
+                          uiOutput("ProbDistFnt"))
       ),
       navbarMenu("Inference",
                  tabPanel("One-Sample",
                           uiOutput("OneSample")),
-                 tabPanel("Two-Sample",
+                 tabPanel("Two-Samples",
                           uiOutput("TwoSample")),
-                 tabPanel("Three-Sample or more",
-                          uiOutput("kSample"))
+                 tabPanel("K-Samples",
+                          uiOutput("kSamples"))
       ),
       tabPanel("Linear Regression", 
                uiOutput("slr")),

@@ -1,0 +1,38 @@
+---
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r input-regression, echo=FALSE,message=FALSE,warning=FALSE}
+library("dplyr")
+
+sidebarLayout(
+  sidebarPanel(
+    selectInput(
+      inputId = "datachoice",
+      label = "Data",
+      choices = c("Upload file","Upload .xls/.xslx file","Input data"),
+      multiple = FALSE,
+      selected = NULL##"Input data"
+    ),
+    varSelectInput("variables", "Variable:", mtcars, multiple = TRUE)
+  )
+)
+#fluidPage(
+#varSelectInput("variables", "Variable:", mtcars, multiple = TRUE)#,
+#tableOutput("data")
+#)
+output$data <- renderTable({
+  if (length(input$variables) == 0) return(mtcars)
+      mtcars %>% dplyr::select(!!!input$variables)
+    }, rownames = TRUE)
+  
+```
+
+
