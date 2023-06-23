@@ -12,8 +12,15 @@ library("knitr")
 library("pander")
 
 knitr::opts_chunk$set(echo = TRUE)
+ci.notation <- function(model,alpha= 0.05,digits=3)
+  {
+  ci <- confint(object = model,level=1-alpha)
+apply(ci,1,function(x){
+  paste("(",round(x[1],digits=digits),", ",round(x[2],digits=digits),")",sep="")
+})
+}
+
 ```
-<!-- This Shiny App performs a simple and multiple linear regression. The user can upload (or input) the dataset of interest. User will obtain estimates of the parameters in the model. Also confidence intervals (CI), the default is 95% CI, as well $p$-value. We can check for the assumptions of normality based on the quantile-quantile plot, assumption of constant variance and linearity. -->
 
 <!-- ### Simple Linear regression -->
 
@@ -32,7 +39,7 @@ sidebarLayout(
   tags$b("Data:"),
   textInput("x", "x", value = "", placeholder = "Enter values separated by a comma, e.g. 1, 2, 3, etc."),
    textInput("y", "y", value = "", placeholder = "Enter values separated by a comma, e.g. 4,5,6, etc."),
-  textInput("alpha","alpha",value="0.05",placeholder="Significance level"),
+  numericInput(inputId = "alpha",label = "\\( \\alpha \\)",value = 0.05,min = 0,max = 1,step = 0.001),
 hr(),
 tags$b("Plot:"),
 textInput("xlab", label = "Axis labels:", value = "x", placeholder = "x label"),
@@ -41,190 +48,203 @@ checkboxInput("se", "Add confidence interval around the regression line", TRUE)
 ),
   mainPanel(
     tabsetPanel(type = "tabs",
-    tabPanel("Data", DT::dataTableOutput('tbl')), # Data as datatable
+    tabPanel("Data", 
+             DT::dataTableOutput('tbl')), # Data as datatable
     tabPanel("Summary",
     br(),
     tags$b("Sample means of variables"),
     uiOutput("data"),
     br(),
     tags$b("Estimates of the slope and intercept"),
-                                         uiOutput("parameters"),
-                                         br(),
-                                         tags$b("Table Output"),
-                                         uiOutput("tableoutput")),
-                                tabPanel("Regression plot", plotlyOutput("plot")), # Plot
-                                tabPanel("Residuals",
-                                         br(),
-                                         tags$b("Fitted values vs Residuals"),
-                                         plotlyOutput("diagnostic1"),
-                                         br(),
-                                         tags$b("QQ-Plot"),
-                                         plotlyOutput("diagnostic3"),
-                                         br(),
-                                         tags$b("Fitted values vs Studentized Residuals"),
-                                         plotlyOutput("diagnostic2"),
-                                         br(),
-                                         tags$b("QQ-Plot (Studentized Residuals)"),
-                                         plotlyOutput("diagnostic4"),
-                                         br(),
-                                )
-                  )
-                )
+        uiOutput("parameters"),
+        br(),
+        tags$b("Summary"),
+        tableOutput("tableoutput")),
+        tabPanel("Regression plot", 
+                 plotlyOutput("plot")), # Plot
+    tabPanel("Residuals",
+    br(),
+    tags$b("Fitted values vs Residuals"),
+    plotlyOutput("diagnostic1"),
+    br(),
+    tags$b("QQ-Plot"),
+    plotlyOutput("diagnostic3"),
+    br(),
+    tags$b("Fitted values vs Studentized Residuals"),
+    plotlyOutput("diagnostic2"),
+    br(),
+    tags$b("QQ-Plot (Studentized Residuals)"),
+    plotOutput("diagnostic4"),
+    br(),
+    )
+  )
+)
 )
 ##
-  extract <- function(text) {
-    text <- gsub(" ", "", text)
-    split <- strsplit(text, ",", fixed = FALSE)[[1]]
-    as.numeric(split)
-  }
+extract <- function(text) {
+text <- gsub(" ", "", text)
+split <- strsplit(text, ",", fixed = FALSE)[[1]]
+as.numeric(split)
+}
   
   ## Data output
-  output$tbl <- DT::renderDataTable({
-    y <- extract(input$y)
-    x <- extract(input$x)
-    DT::datatable(data.frame(x, y))
-  })
+output$tbl <- DT::renderDataTable({
+  y <- extract(input$y)
+  x <- extract(input$x)
+  DT::datatable(data.frame(x, y))
+})
   
-  output$data <- renderUI({
-    y <- extract(input$y)
-    x <- extract(input$x)
-    if (anyNA(x) | length(x) < 2 | anyNA(y) | length(y) < 2) {
-      "Invalid input or not enough observations"
-    } else if (length(x) != length(y)) {
-      "Number of observations must be equal for x and y"
-    } else {
-      withMathJax(
-        paste0("$\\bar{x} =$ ", round(mean(x), 3)),
-        br(),
-        paste0("$\\bar{y} =$ ", round(mean(y), 3)),
-        br(),
-        paste0("$n =$ ", length(x))
-      )
+output$data <- renderUI({
+  y <- extract(input$y)
+  x <- extract(input$x)
+  if (anyNA(x) | length(x) < 2 | anyNA(y) | length(y) < 2) {
+    "Invalid input or not enough observations"
+  } else if (length(x) != length(y)) {
+    "Number of observations must be equal for x and y"
+  } else {
+    withMathJax(
+      paste0("$$\\bar{x} =$$ ", round(mean(x), 3)),
+      br(),
+      paste0("$$\\bar{y} =$$ ", round(mean(y), 3)),
+      br(),
+      paste0("$$n =$$ ", length(x))
+    )
     }
   })
   
-  output$parameters <- renderUI({
-    y <- extract(input$y)
-    x <- extract(input$x)
-    if (anyNA(x) | length(x) < 2 | anyNA(y) | length(y) < 2) {
-      "Invalid input or not enough observations"
-    } else if (length(x) != length(y)) {
-      "Number of observations must be equal for x and y"
-    } else {
-      fit <- lm(y ~ x)
-      b0 <- round(fit$coef[["(Intercept)"]], 3)
-      b1 <- round(fit$coef[["x"]], 3)
-      pv <- round(summary(fit)$coef["x","Pr(>|t|)"],digits=3)
-      r2 <- round(summary(fit)$adj.r.squared, digits=3)
-      if(b1 > 0){
-        withMathJax(
-          paste0("$ \\hat{\\beta}_0 = $ ", b0),#,", ", ci.b0),
-          br(),
-          paste0("$ \\hat{\\beta}_1 = $  ", b1),#,", ",ci.b1),
-          br(),
-          paste0("Fitted model: $ \\hat{y} = $ ", b0, " + ", b1, "$ x $")
-        )
-      } 
-      else{
-        withMathJax(
-          paste0("$ \\hat{\\beta}_0 = $ ", b0),
-          br(),
-          paste0("$ \\hat{\\beta}_1 = $  ", b1),
-          br(),
-          paste0("Fitted model: $ \\hat{y} = $ ", b0, b1, "$ x $")
-        ) 
-      }
-    }
-    
-  })
-  
-  output$tableoutput <- renderTable({
-    y <- extract(input$y)
-    x <- extract(input$x)
-    alpha <- as.numeric(input$alpha)
-    fit <- lm(y ~ x)
-    bb <- summary(fit)$coefficients
-    d <- cbind(bb,confint(fit,level=1-alpha))
-    rownames(d) <- c("Intercept","Slope")
-    d
-  },rownames = TRUE)
-  output$summary <- renderPrint({
-    y <- extract(input$y)
-    x <- extract(input$x)
-    fit <- lm(y ~ x)
-    summary(fit)
-  })
-  
-  
-  output$diagnostic1 <- renderPlotly({
-    y <- extract(input$y)
-    x <- extract(input$x)
-    fit <- lm(y ~ x)
-    dat <- data.frame(yhat = fitted(fit), r = residuals(fit))
-    p <- ggplot(dat, aes(x = yhat, y = r)) +
-      geom_point(size=2) +
-      geom_hline(yintercept = 0)+
-      ylab("Residuals") +
-      xlab("Fitted values") +
-      theme_bw()
-    ggplotly(p)
-    
-  })
-  
-  output$diagnostic2 <- renderPlotly({
-    y <- extract(input$y)
-    x <- extract(input$x)
-    fit <- lm(y ~ x)
-    dat <- data.frame(yhat = fitted(fit), r = residuals(fit))
-    ## studentized residuals
-    dat2 <- data.frame(yhat = fitted(fit), r = MASS::studres(fit))
-    p1 <- ggplot(dat2, aes(x = yhat, y = r)) +
-      geom_point(size=2) +
-      geom_hline(yintercept = 0)+
-      ylab("Studentized Residuals") +
-      xlab("Fitted values") +
-      theme_bw()
-    ggplotly(p1)
-    
-  })
-  
-  output$diagnostic3 <- renderPlotly({
-    y <- extract(input$y)
-    x <- extract(input$x)
-    fit <- lm(y ~ x)
-    dat <- data.frame( y = residuals(fit))
-    p <- ggplot(dat, aes(sample = y)) +
-      stat_qq() + stat_qq_line()+ theme_bw()
-    ggplotly(p)
-    
-  })
-  
-  output$diagnostic4 <- renderPlotly({
-    y <- extract(input$y)
-    x <- extract(input$x)
-    fit <- lm(y ~ x)
-    dat <- data.frame( y = MASS::stdres(fit))
-    p <- ggplot(dat, aes(sample = y)) +
-      stat_qq() + stat_qq_line()+ theme_bw()
-    ggplotly(p)
-    
-  })
-  
+# output$parameters <- renderUI({
+#   y <- extract(input$y)
+#   x <- extract(input$x)
+#   if (anyNA(x) | length(x) < 2 | anyNA(y) | length(y) < 2) {
+#     "Invalid input or not enough observations"
+#   } else if (length(x) != length(y)) {
+#     "Number of observations must be equal for x and y"
+#   } else {
+#     fit <- lm(y ~ x)
+#     b0 <- round(fit$coef[["(Intercept)"]], 3)
+#     b1 <- round(fit$coef[["x"]], 3)
+#     pv <- round(summary(fit)$coef["x","Pr(>|t|)"],digits=3)
+#     r2 <- round(summary(fit)$adj.r.squared, digits=3)
+#     if(b1 > 0){
+#       withMathJax(
+#         paste0("\\( \\hat{\\beta}_0 = \\) ", b0),#,", ", ci.b0),
+#         br(),
+#         paste0("$$ \\hat{\\beta}_1 = $$  ", b1),#,", ",ci.b1),
+#         br(),
+#         paste0("Fitted model: $$ \\hat{y} = $$ ", b0, " + ", b1, "$ x $")
+#       )
+#     } 
+#     else{
+#       withMathJax(
+#         paste0("$$ \\hat{\\beta}_0 = $$ ", b0),
+#         br(),
+#         paste0("$$ \\hat{\\beta}_1 = $$  ", b1),
+#         br(),
+#         paste0("Fitted model: $$ \\hat{y} = $$ ", b0, b1, "$$ x $$")
+#       ) 
+#     }
+#   }
+#   
+# })
 
-  output$plot <- renderPlotly({
-    y <- extract(input$y)
-    x <- extract(input$x)
-    fit <- lm(y ~ x)
-    dat <- data.frame(x, y)
-    p <- ggplot(dat, aes(x = x, y = y)) +
-      geom_point() +
-      stat_smooth(method = "lm", se = input$se) +
-      ylab(input$ylab) +
-      xlab(input$xlab) +
-      theme_minimal()
-    ggplotly(p)
-  })
+output$tableoutput <- renderTable({
+  y <- extract(input$y)
+  x <- extract(input$x)
+  alpha <- input$alpha
+  fit <- lm(y ~ x)
+  bb <- round(summary(fit)$coefficients,digits=3)
+  pvals <- bb[,"Pr(>|t|)"]
+  pvals <- ifelse(pvals < 0.001, "<0.001",pvals) 
+bb[,"Pr(>|t|)"] <- pvals
+ci <- ci.notation(model=fit)
+  ##d <- cbind(bb,confint(fit,level=1-alpha))
+lm.sm <- cbind(bb,ci.notation(model=fit))
+colnames(lm.sm)[1:4] <- c("Estimates","SE","$t$-value","$p$-value")
+colnames(lm.sm)[ncol(lm.sm)] <- paste((1-alpha) * 100,"% CI",sep="")
+  rownames(lm.sm) <- paste(rownames(bb),"\\( (\\hat{\\beta}_",0:1,")\\)",sep="") ##rownames(bb)#c("Intercept","Slope")
+  lm.sm
+},rownames = TRUE,digits = 3)
+
+output$summary <- renderPrint({
+  y <- extract(input$y)
+  x <- extract(input$x)
+  fit <- lm(y ~ x)
+  summary(fit)
+})
+
+
+output$diagnostic1 <- renderPlotly({
+  y <- extract(input$y)
+  x <- extract(input$x)
+  fit <- lm(y ~ x)
+  dat <- data.frame(yhat = fitted(fit), r = residuals(fit))
+  p <- ggplot(dat, aes(x = yhat, y = r)) +
+    geom_point(size=2) +
+    geom_hline(yintercept = 0)+
+    ylab("Residuals") +
+    xlab("Fitted values") +
+    theme_bw()
+  ggplotly(p)
   
+})
+
+output$diagnostic2 <- renderPlotly({
+  y <- extract(input$y)
+  x <- extract(input$x)
+  fit <- lm(y ~ x)
+  dat <- data.frame(yhat = fitted(fit), r = residuals(fit))
+  ## studentized residuals
+  dat2 <- data.frame(yhat = fitted(fit), r = MASS::studres(fit))
+  p1 <- ggplot(dat2, aes(x = yhat, y = r)) +
+    geom_point(size=2) +
+    geom_hline(yintercept = 0)+
+    ylab("Studentized Residuals") +
+    xlab("Fitted values") +
+    theme_bw()
+  ggplotly(p1)
+  
+})
+
+output$diagnostic3 <- renderPlotly({
+  y <- extract(input$y)
+  x <- extract(input$x)
+  fit <- lm(y ~ x)
+  dat <- data.frame( y = MASS::stdres(fit))
+  p <- ggplot(dat, aes(sample = y)) +
+    stat_qq() + stat_qq_line()+ theme_bw()
+  
+  ggplotly(p)
+  
+})
+
+output$diagnostic4 <- renderPlot({
+  y <- extract(input$y)
+  x <- extract(input$x)
+  fit <- lm(y ~ x)
+  std.residuals <- MASS::stdres(fit)
+  #dat <- data.frame( x = input$x, y = MASS::stdres(fit))
+  car::qqPlot(std.residuals)
+##  p <- ggplot(dat, aes(sample = y)) +
+##    stat_qq() + stat_qq_line()+ theme_bw()
+##  ggplotly(p)
+  
+})
+
+
+output$plot <- renderPlotly({
+  y <- extract(input$y)
+  x <- extract(input$x)
+  fit <- lm(y ~ x)
+  dat <- data.frame(x, y)
+  p <- ggplot(dat, aes(x = x, y = y)) +
+    geom_point() +
+    stat_smooth(method = "lm", se = input$se) +
+    ylab(input$ylab) +
+    xlab(input$xlab) +
+    theme_minimal()
+  ggplotly(p)
+})
+
 
 
 ```
