@@ -14,30 +14,30 @@
 <b>Data:</b>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x-label" for="x">x</label>
-<input id="x" type="text" class="form-control" value placeholder="Enter values separated by a comma, e.g. 1, 2, 3, etc."></input>
+<input id="x" type="text" class="shiny-input-text form-control" value placeholder="Enter values separated by a comma, e.g. 1, 2, 3, etc."></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="y-label" for="y">y</label>
-<input id="y" type="text" class="form-control" value placeholder="Enter values separated by a comma, e.g. 4,5,6, etc."></input>
+<input id="y" type="text" class="shiny-input-text form-control" value placeholder="Enter values separated by a comma, e.g. 4,5,6, etc."></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="alpha-label" for="alpha">\( \alpha \)</label>
-<input id="alpha" type="number" class="form-control" value="0.05" min="0" max="1" step="0.001"></input>
+<input id="alpha" type="number" class="shiny-input-number form-control" value="0.05" min="0" max="1" step="0.001"></input>
 </div>
 <hr />
 <b>Plot:</b>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="xlab-label" for="xlab">Axis labels:</label>
-<input id="xlab" type="text" class="form-control" value="x" placeholder="x label"></input>
+<input id="xlab" type="text" class="shiny-input-text form-control" value="x" placeholder="x label"></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label shiny-label-null" for="ylab" id="ylab-label"></label>
-<input id="ylab" type="text" class="form-control" value="y" placeholder="y label"></input>
+<input id="ylab" type="text" class="shiny-input-text form-control" value="y" placeholder="y label"></input>
 </div>
 <div class="form-group shiny-input-container">
 <div class="checkbox">
 <label>
-<input id="se" type="checkbox" checked="checked"></input>
+<input id="se" type="checkbox" class="shiny-input-checkbox" checked="checked"></input>
 <span>Add confidence interval around the regression line</span>
 </label>
 </div>
@@ -46,25 +46,25 @@
 </div>
 <div class="col-sm-8" role="main">
 <div class="tabbable">
-<ul class="nav nav-tabs" data-tabsetid="2644">
+<ul class="nav nav-tabs" data-tabsetid="9026">
 <li class="active">
-<a href="#tab-2644-1" data-toggle="tab" data-bs-toggle="tab" data-value="Data">Data</a>
+<a href="#tab-9026-1" data-toggle="tab" data-bs-toggle="tab" data-value="Data">Data</a>
 </li>
 <li>
-<a href="#tab-2644-2" data-toggle="tab" data-bs-toggle="tab" data-value="Summary">Summary</a>
+<a href="#tab-9026-2" data-toggle="tab" data-bs-toggle="tab" data-value="Summary">Summary</a>
 </li>
 <li>
-<a href="#tab-2644-3" data-toggle="tab" data-bs-toggle="tab" data-value="Regression plot">Regression plot</a>
+<a href="#tab-9026-3" data-toggle="tab" data-bs-toggle="tab" data-value="Regression plot">Regression plot</a>
 </li>
 <li>
-<a href="#tab-2644-4" data-toggle="tab" data-bs-toggle="tab" data-value="Residuals">Residuals</a>
+<a href="#tab-9026-4" data-toggle="tab" data-bs-toggle="tab" data-value="Residuals">Residuals</a>
 </li>
 </ul>
-<div class="tab-content" data-tabsetid="2644">
-<div class="tab-pane active" data-value="Data" id="tab-2644-1">
+<div class="tab-content" data-tabsetid="9026">
+<div class="tab-pane active" data-value="Data" id="tab-9026-1">
 <div class="datatables html-widget html-widget-output shiny-report-size html-fill-item-overflow-hidden html-fill-item" id="tbl" style="width:100%;height:auto;"></div>
 </div>
-<div class="tab-pane" data-value="Summary" id="tab-2644-2">
+<div class="tab-pane" data-value="Summary" id="tab-9026-2">
 <br />
 <b>Sample means of variables</b>
 <div id="data" class="shiny-html-output"></div>
@@ -75,10 +75,10 @@
 <b>Summary</b>
 <div id="tableoutput" class="shiny-html-output"></div>
 </div>
-<div class="tab-pane" data-value="Regression plot" id="tab-2644-3">
+<div class="tab-pane" data-value="Regression plot" id="tab-9026-3">
 <div class="plotly html-widget html-widget-output shiny-report-size shiny-report-theme html-fill-item-overflow-hidden html-fill-item" id="plot" style="width:100%;height:400px;"></div>
 </div>
-<div class="tab-pane" data-value="Residuals" id="tab-2644-4">
+<div class="tab-pane" data-value="Residuals" id="tab-9026-4">
 <br />
 <b>Fitted values vs Residuals</b>
 <div class="plotly html-widget html-widget-output shiny-report-size shiny-report-theme html-fill-item-overflow-hidden html-fill-item" id="diagnostic1" style="width:100%;height:400px;"></div>

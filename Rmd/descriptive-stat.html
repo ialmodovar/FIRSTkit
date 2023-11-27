@@ -7,7 +7,7 @@
 <div class="form-group shiny-input-container">
 <label class="control-label" id="datachoice-label" for="datachoice">Data</label>
 <div>
-<select id="datachoice"><option value="Upload file" selected>Upload file</option>
+<select id="datachoice" class="shiny-input-select"><option value="Upload file" selected>Upload file</option>
 <option value="Upload .xlsx/.xls file">Upload .xlsx/.xls file</option>
 <option value="Google Sheets">Google Sheets</option>
 <option value="Input data">Input data</option></select>
@@ -18,7 +18,7 @@
 <div data-display-if="input.datachoice == &#39;Input data&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x-label" for="x">Data</label>
-<input id="x" type="text" class="form-control" value placeholder="Enter values separated by a comma with decimals as points, e.g. 1.2, 3.14, 3.1417, etc."></input>
+<input id="x" type="text" class="shiny-input-text form-control" value placeholder="Enter values separated by a comma with decimals as points, e.g. 1.2, 3.14, 3.1417, etc."></input>
 </div>
 <hr />
 </div>
@@ -29,7 +29,7 @@
 <label class="input-group-btn input-group-prepend">
 <span class="btn btn-default btn-file">
 Browse...
-<input id="file1" name="file1" type="file" style="position: absolute !important; top: -99999px !important; left: -99999px !important;" accept="text/csv,text/comma-separated-values,text/plain,.csv,.txt"></input>
+<input id="file1" class="shiny-input-file" name="file1" type="file" style="position: absolute !important; top: -99999px !important; left: -99999px !important;" accept="text/csv,text/comma-separated-values,text/plain,.csv,.txt"></input>
 </span>
 </label>
 <input type="text" class="form-control" placeholder="No file selected" readonly="readonly"></input>
@@ -42,7 +42,7 @@ Browse...
 <div class="form-group shiny-input-container">
 <div class="checkbox">
 <label>
-<input id="header" type="checkbox" checked="checked"></input>
+<input id="header" type="checkbox" class="shiny-input-checkbox" checked="checked"></input>
 <span>Header</span>
 </label>
 </div>
@@ -107,7 +107,7 @@ Browse...
 <label class="input-group-btn input-group-prepend">
 <span class="btn btn-default btn-file">
 Browse...
-<input id="file2" name="file2" type="file" style="position: absolute !important; top: -99999px !important; left: -99999px !important;" accept=".xlsx,.xls"></input>
+<input id="file2" class="shiny-input-file" name="file2" type="file" style="position: absolute !important; top: -99999px !important; left: -99999px !important;" accept=".xlsx,.xls"></input>
 </span>
 </label>
 <input type="text" class="form-control" placeholder="No file selected" readonly="readonly"></input>
@@ -120,7 +120,7 @@ Browse...
 <div data-display-if="input.datachoice == &#39;Google Sheets&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="gsheets-label" for="gsheets">URL/Key</label>
-<input id="gsheets" type="text" class="form-control" value placeholder="Enter URL or Key"></input>
+<input id="gsheets" type="text" class="shiny-input-text form-control" value placeholder="Enter URL or Key"></input>
 </div>
 <div>
 <button type="submit" class="btn btn-primary">Submit</button>
@@ -130,21 +130,21 @@ Browse...
 <div class="form-group shiny-input-container">
 <label class="control-label" id="variable-label" for="variable">Variable</label>
 <div>
-<select id="variable"></select>
+<select id="variable" class="shiny-input-select"></select>
 <script type="application/json" data-for="variable" data-nonempty>{"plugins":["selectize-plugin-a11y"]}</script>
 </div>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="group-label" for="group">Groups</label>
 <div>
-<select id="group"></select>
+<select id="group" class="shiny-input-select"></select>
 <script type="application/json" data-for="group" data-nonempty>{"plugins":["selectize-plugin-a11y"]}</script>
 </div>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="plot.type-label" for="plot.type">Plot Type:</label>
 <div>
-<select id="plot.type"><option value="Boxplot" selected>Boxplot</option>
+<select id="plot.type" class="shiny-input-select"><option value="Boxplot" selected>Boxplot</option>
 <option value="Histogram">Histogram</option>
 <option value="Density">Density</option>
 <option value="Bar">Bar</option>
@@ -156,7 +156,7 @@ Browse...
 <div class="form-group shiny-input-container">
 <div class="checkbox">
 <label>
-<input id="show.points" type="checkbox"></input>
+<input id="show.points" type="checkbox" class="shiny-input-checkbox"></input>
 <span>Display points (Boxplot only)</span>
 </label>
 </div>
@@ -165,31 +165,31 @@ Browse...
 </div>
 <div class="col-sm-8" role="main">
 <div class="tabbable">
-<ul class="nav nav-tabs" data-tabsetid="6407">
+<ul class="nav nav-tabs" data-tabsetid="6497">
 <li class="active">
-<a href="#tab-6407-1" data-toggle="tab" data-bs-toggle="tab" data-value="Data">
+<a href="#tab-6497-1" data-toggle="tab" data-bs-toggle="tab" data-value="Data">
 <i aria-label="table icon" class="fas fa-table fa-fw" role="presentation"></i>
 Data
 </a>
 </li>
 <li>
-<a href="#tab-6407-2" data-toggle="tab" data-bs-toggle="tab" data-value="Descriptive Statistics">
+<a href="#tab-6497-2" data-toggle="tab" data-bs-toggle="tab" data-value="Descriptive Statistics">
 <i aria-label="rectangle-list icon" class="far fa-rectangle-list fa-fw" role="presentation"></i>
 Descriptive Statistics
 </a>
 </li>
 <li>
-<a href="#tab-6407-3" data-toggle="tab" data-bs-toggle="tab" data-value="Graphical Display">
+<a href="#tab-6497-3" data-toggle="tab" data-bs-toggle="tab" data-value="Graphical Display">
 <i aria-label="bar-chart-o icon" class="far fa-bar-chart-o fa-fw" role="presentation"></i>
 Graphical Display
 </a>
 </li>
 </ul>
-<div class="tab-content" data-tabsetid="6407">
-<div class="tab-pane active" data-icon-class="fas fa-table fa-fw" data-value="Data" id="tab-6407-1">
+<div class="tab-content" data-tabsetid="6497">
+<div class="tab-pane active" data-icon-class="fas fa-table fa-fw" data-value="Data" id="tab-6497-1">
 <div class="datatables html-widget html-widget-output shiny-report-size html-fill-item-overflow-hidden html-fill-item" id="tbl1" style="width:100%;height:auto;"></div>
 </div>
-<div class="tab-pane" data-value="Descriptive Statistics" data-icon-class="far fa-rectangle-list fa-fw" id="tab-6407-2">
+<div class="tab-pane" data-value="Descriptive Statistics" data-icon-class="far fa-rectangle-list fa-fw" id="tab-6497-2">
 <hr />
 <h4>Numerical variables</h4>
 <div id="bartrim" class="shiny-html-output"></div>
@@ -198,7 +198,7 @@ Graphical Display
 <h4>Dispersion Summaries</h4>
 <div id="dispersion" class="shiny-html-output"></div>
 </div>
-<div class="tab-pane" data-value="Graphical Display" data-icon-class="far fa-bar-chart-o fa-fw" id="tab-6407-3">
+<div class="tab-pane" data-value="Graphical Display" data-icon-class="far fa-bar-chart-o fa-fw" id="tab-6497-3">
 <div id="baralpha" class="shiny-html-output"></div>
 <div id="plots" class="shiny-html-output"></div>
 </div>

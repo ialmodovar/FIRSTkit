@@ -7,7 +7,7 @@
 <div class="form-group shiny-input-container">
 <label class="control-label" id="datachoice-label" for="datachoice">Data (Input some data or upload a file)</label>
 <div>
-<select id="datachoice"><option value="Upload file" selected>Upload file</option>
+<select id="datachoice" class="shiny-input-select"><option value="Upload file" selected>Upload file</option>
 <option value="Upload .xls/.xslx file">Upload .xls/.xslx file</option>
 <option value="Input data">Input data</option></select>
 <script type="application/json" data-for="datachoice" data-nonempty>{"plugins":["selectize-plugin-a11y"]}</script>
@@ -17,7 +17,7 @@
 <div data-display-if="input.datachoice == &#39;Input data&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x-label" for="x">Data</label>
-<input id="x" type="text" class="form-control" value placeholder="Enter values separated by a comma with decimals as points, e.g. 3.14, 3.1417, etc."></input>
+<input id="x" type="text" class="shiny-input-text form-control" value placeholder="Enter values separated by a comma with decimals as points, e.g. 3.14, 3.1417, etc."></input>
 </div>
 <hr />
 </div>
@@ -28,7 +28,7 @@
 <label class="input-group-btn input-group-prepend">
 <span class="btn btn-default btn-file">
 Browse...
-<input id="file1" name="file1" type="file" style="position: absolute !important; top: -99999px !important; left: -99999px !important;" multiple="multiple" accept="text/csv,text/comma-separated-values,text/plain,.csv"></input>
+<input id="file1" class="shiny-input-file" name="file1" type="file" style="position: absolute !important; top: -99999px !important; left: -99999px !important;" multiple="multiple" accept="text/csv,text/comma-separated-values,text/plain,.csv"></input>
 </span>
 </label>
 <input type="text" class="form-control" placeholder="No file selected" readonly="readonly"></input>
@@ -41,7 +41,7 @@ Browse...
 <div class="form-group shiny-input-container">
 <div class="checkbox">
 <label>
-<input id="header" type="checkbox" checked="checked"></input>
+<input id="header" type="checkbox" class="shiny-input-checkbox" checked="checked"></input>
 <span>Header</span>
 </label>
 </div>
@@ -100,7 +100,7 @@ Browse...
 <label class="input-group-btn input-group-prepend">
 <span class="btn btn-default btn-file">
 Browse...
-<input id="file2" name="file2" type="file" style="position: absolute !important; top: -99999px !important; left: -99999px !important;" accept=".xlsx,.xls"></input>
+<input id="file2" class="shiny-input-file" name="file2" type="file" style="position: absolute !important; top: -99999px !important; left: -99999px !important;" accept=".xlsx,.xls"></input>
 </span>
 </label>
 <input type="text" class="form-control" placeholder="No file selected" readonly="readonly"></input>
@@ -113,26 +113,26 @@ Browse...
 <div class="form-group shiny-input-container">
 <label class="control-label" id="variable-label" for="variable">Variable</label>
 <div>
-<select id="variable"></select>
+<select id="variable" class="shiny-input-select"></select>
 <script type="application/json" data-for="variable" data-nonempty>{"plugins":["selectize-plugin-a11y"]}</script>
 </div>
 </div>
 <div id="alpha_line" class="shiny-html-output"></div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="mu0-label" for="mu0">\(  H_0:\mu = \mu_0 \)</label>
-<input id="mu0" type="text" class="form-control" value="0" placeholder="Null value for the location"></input>
+<input id="mu0" type="text" class="shiny-input-text form-control" value="0" placeholder="Null value for the location"></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="sigma0-label" for="sigma0">\( H_0:\sigma^2 = \sigma^2_0 \)</label>
-<input id="sigma0" type="text" class="form-control" value="1" placeholder="Null value for the population variance "></input>
+<input id="sigma0" type="text" class="shiny-input-text form-control" value="1" placeholder="Null value for the population variance "></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="p0-label" for="p0">\( H_0: p = p_0 \)</label>
-<input id="p0" type="text" class="form-control" value="0.5" placeholder="Indicate the true value for the proportion of interest"></input>
+<input id="p0" type="text" class="shiny-input-text form-control" value="0.5" placeholder="Indicate the true value for the proportion of interest"></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="nprop-label" for="nprop"> Sample size (\(n \))</label>
-<input id="nprop" type="number" class="form-control" value="50" min="0" step="1"></input>
+<input id="nprop" type="number" class="shiny-input-number form-control" value="50" min="0" step="1"></input>
 </div>
 <hr />
 <div id="propsuccess" class="form-group shiny-input-radiogroup shiny-input-container" role="radiogroup" aria-labelledby="propsuccess-label">
@@ -155,13 +155,13 @@ Browse...
 <div data-display-if="input.propsuccess == &#39;pr&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="p_prop-label" for="p_prop">Proportion of success (\(\hat{p} \))</label>
-<input id="p_prop" type="number" class="form-control" value="0.5" min="0" max="1" step="0.001"></input>
+<input id="p_prop" type="number" class="shiny-input-number form-control" value="0.5" min="0" max="1" step="0.001"></input>
 </div>
 </div>
 <div data-display-if="input.propsuccess == &#39;success&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x_prop-label" for="x_prop">Number of successes(\(x\))</label>
-<input id="x_prop" type="number" class="form-control" value="20" min="0" step="1"></input>
+<input id="x_prop" type="number" class="shiny-input-number form-control" value="20" min="0" step="1"></input>
 </div>
 </div>
 <div class="form-group shiny-input-container">
@@ -172,19 +172,19 @@ Browse...
 </div>
 <div class="col-sm-8" role="main">
 <div class="tabbable">
-<ul class="nav nav-tabs" data-tabsetid="5827">
+<ul class="nav nav-tabs" data-tabsetid="4128">
 <li class="active">
-<a href="#tab-5827-1" data-toggle="tab" data-bs-toggle="tab" data-value="Location Inference">Location Inference</a>
+<a href="#tab-4128-1" data-toggle="tab" data-bs-toggle="tab" data-value="Location Inference">Location Inference</a>
 </li>
 <li>
-<a href="#tab-5827-2" data-toggle="tab" data-bs-toggle="tab" data-value="Dispersion Inference">Dispersion Inference</a>
+<a href="#tab-4128-2" data-toggle="tab" data-bs-toggle="tab" data-value="Dispersion Inference">Dispersion Inference</a>
 </li>
 <li>
-<a href="#tab-5827-3" data-toggle="tab" data-bs-toggle="tab" data-value="Proportion Inference">Proportion Inference</a>
+<a href="#tab-4128-3" data-toggle="tab" data-bs-toggle="tab" data-value="Proportion Inference">Proportion Inference</a>
 </li>
 </ul>
-<div class="tab-content" data-tabsetid="5827">
-<div class="tab-pane active" data-value="Location Inference" id="tab-5827-1">
+<div class="tab-content" data-tabsetid="4128">
+<div class="tab-pane active" data-value="Location Inference" id="tab-4128-1">
 <br />
 <b>One-Sample \( t \) test</b>
 <script>if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);</script>
@@ -193,13 +193,13 @@ Browse...
 <b>Wilcoxon-signed rank test</b>
 <div id="loc" class="shiny-html-output"></div>
 </div>
-<div class="tab-pane" data-value="Dispersion Inference" id="tab-5827-2">
+<div class="tab-pane" data-value="Dispersion Inference" id="tab-4128-2">
 <br />
 <b>One Sample \( \chi^2 \) Variance test</b>
 <script>if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);</script>
 <div id="tableUIvar" class="shiny-html-output"></div>
 </div>
-<div class="tab-pane" data-value="Proportion Inference" id="tab-5827-3">
+<div class="tab-pane" data-value="Proportion Inference" id="tab-4128-3">
 <b>One-Sample Proportion test</b>
 <script>if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);</script>
 <div id="tableUIprop" class="shiny-html-output"></div>

@@ -7,7 +7,7 @@
 <div class="form-group shiny-input-container">
 <label class="control-label" id="distribution-label" for="distribution">Distribution:</label>
 <div>
-<select id="distribution"><option value="Binomial">Binomial</option>
+<select id="distribution" class="shiny-input-select"><option value="Binomial">Binomial</option>
 <option value="Poisson">Poisson</option>
 <option value="Geometric">Geometric</option>
 <option value="Hypergeometric">Hypergeometric</option>
@@ -22,33 +22,33 @@
 <div data-display-if="input.distribution == &#39;Binomial&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="n_binomial-label" for="n_binomial">Number of trials \(n\):</label>
-<input id="n_binomial" type="number" class="form-control" value="10" min="0" step="1"></input>
+<input id="n_binomial" type="number" class="shiny-input-number form-control" value="10" min="0" step="1"></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="p_binomial-label" for="p_binomial">Probability of success \(p\):</label>
-<input id="p_binomial" type="number" class="form-control" value="0.5" min="0" max="1" step="0.001"></input>
+<input id="p_binomial" type="number" class="shiny-input-number form-control" value="0.5" min="0" max="1" step="0.001"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Chi-square&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="df_chisq-label" for="df_chisq">Degrees of freedom \(df\):</label>
-<input id="df_chisq" type="number" class="form-control" value="1" min="1" step="1"></input>
+<input id="df_chisq" type="number" class="shiny-input-number form-control" value="1" min="1" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Snedecor-F&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="df1_f-label" for="df1_f">Degrees of freedom \(df_1\):</label>
-<input id="df1_f" type="number" class="form-control" value="10" min="1" step="1"></input>
+<input id="df1_f" type="number" class="shiny-input-number form-control" value="10" min="1" step="1"></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="df2_f-label" for="df2_f">Degrees of freedom \(df_2\):</label>
-<input id="df2_f" type="number" class="form-control" value="5" min="1" step="1"></input>
+<input id="df2_f" type="number" class="shiny-input-number form-control" value="5" min="1" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Normal&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="mean_normal-label" for="mean_normal">Mean \(\mu\):</label>
-<input id="mean_normal" type="number" class="form-control" value="0" step="1"></input>
+<input id="mean_normal" type="number" class="shiny-input-number form-control" value="0" step="1"></input>
 </div>
 <div id="variance_sd" class="form-group shiny-input-radiogroup shiny-input-container" role="radiogroup" aria-labelledby="variance_sd-label">
 <label class="control-label shiny-label-null" for="variance_sd" id="variance_sd-label"></label>
@@ -71,45 +71,45 @@
 <div data-display-if="input.distribution == &#39;Normal&#39; &amp;&amp; input.variance_sd == &#39;variance_true&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="variance_normal-label" for="variance_normal">Variance \(\sigma^2\):</label>
-<input id="variance_normal" type="number" class="form-control" value="1" min="0" step="1"></input>
+<input id="variance_normal" type="number" class="shiny-input-number form-control" value="1" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Normal&#39; &amp;&amp; input.variance_sd == &#39;variance_false&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="sd_normal-label" for="sd_normal">Standard deviation \(\sigma\):</label>
-<input id="sd_normal" type="number" class="form-control" value="1" min="0" step="1"></input>
+<input id="sd_normal" type="number" class="shiny-input-number form-control" value="1" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Poisson&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="lambda_poisson-label" for="lambda_poisson">Rate \(\lambda\):</label>
-<input id="lambda_poisson" type="number" class="form-control" value="4" min="1" step="1"></input>
+<input id="lambda_poisson" type="number" class="shiny-input-number form-control" value="4" min="1" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Student-t&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="df_t-label" for="df_t">Degrees of freedom \(df\):</label>
-<input id="df_t" type="number" class="form-control" value="3" min="1" step="1"></input>
+<input id="df_t" type="number" class="shiny-input-number form-control" value="3" min="1" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Geometric&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="p_geom-label" for="p_geom">Probability of success \(p\):</label>
-<input id="p_geom" type="number" class="form-control" value="0.5" min="0" max="1" step="0.001"></input>
+<input id="p_geom" type="number" class="shiny-input-number form-control" value="0.5" min="0" max="1" step="0.001"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Hypergeometric&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="n_hypergeometric-label" for="n_hypergeometric">Sample size \(n\):</label>
-<input id="n_hypergeometric" type="number" class="form-control" value="50" min="0" step="1"></input>
+<input id="n_hypergeometric" type="number" class="shiny-input-number form-control" value="50" min="0" step="1"></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="N_hypergeometric-label" for="N_hypergeometric">Total number of objects \(N\):</label>
-<input id="N_hypergeometric" type="number" class="form-control" value="100" min="0" step="1"></input>
+<input id="N_hypergeometric" type="number" class="shiny-input-number form-control" value="100" min="0" step="1"></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="M_hypergeometric-label" for="M_hypergeometric">Number of successes \(M\):</label>
-<input id="M_hypergeometric" type="number" class="form-control" value="25" min="0" step="1"></input>
+<input id="M_hypergeometric" type="number" class="shiny-input-number form-control" value="25" min="0" step="1"></input>
 </div>
 </div>
 <hr />
@@ -317,180 +317,180 @@
 <div data-display-if="input.distribution == &#39;Binomial&#39; &amp;&amp; input.tail_binomial == &#39;lower.tail&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x1_binomial-label" for="x1_binomial">x:</label>
-<input id="x1_binomial" type="number" class="form-control" value="5" min="0" step="1"></input>
+<input id="x1_binomial" type="number" class="shiny-input-number form-control" value="5" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Binomial&#39; &amp;&amp; input.tail_binomial == &#39;upper.tail&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x2_binomial-label" for="x2_binomial">x:</label>
-<input id="x2_binomial" type="number" class="form-control" value="5" min="0" step="1"></input>
+<input id="x2_binomial" type="number" class="shiny-input-number form-control" value="5" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Binomial&#39; &amp;&amp; input.tail_binomial == &#39;two.sided&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="a_binomial-label" for="a_binomial">a</label>
-<input id="a_binomial" type="number" class="form-control" value="3" min="0" step="1"></input>
+<input id="a_binomial" type="number" class="shiny-input-number form-control" value="3" min="0" step="1"></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="b_binomial-label" for="b_binomial">b \( (a \leq b) \)</label>
-<input id="b_binomial" type="number" class="form-control" value="11" min="0" step="1"></input>
+<input id="b_binomial" type="number" class="shiny-input-number form-control" value="11" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Chi-square&#39; &amp;&amp; input.tail_chisq == &#39;lower.tail&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x1_chisq-label" for="x1_chisq">x:</label>
-<input id="x1_chisq" type="number" class="form-control" value="3" min="0" step="1"></input>
+<input id="x1_chisq" type="number" class="shiny-input-number form-control" value="3" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Chi-square&#39; &amp;&amp; input.tail_chisq == &#39;upper.tail&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x2_chisq-label" for="x2_chisq">x:</label>
-<input id="x2_chisq" type="number" class="form-control" value="3" min="0" step="1"></input>
+<input id="x2_chisq" type="number" class="shiny-input-number form-control" value="3" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Chi-square&#39; &amp;&amp; input.tail_chisq == &#39;two.sided&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="a_chisq-label" for="a_chisq">a</label>
-<input id="a_chisq" type="number" class="form-control" value="2" min="0" step="1"></input>
+<input id="a_chisq" type="number" class="shiny-input-number form-control" value="2" min="0" step="1"></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="b_chisq-label" for="b_chisq">b \( (a \leq b) \)</label>
-<input id="b_chisq" type="number" class="form-control" value="11" min="0" step="1"></input>
+<input id="b_chisq" type="number" class="shiny-input-number form-control" value="11" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Snedecor-F&#39; &amp;&amp; input.tail_f == &#39;lower.tail&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x1_f-label" for="x1_f">x:</label>
-<input id="x1_f" type="number" class="form-control" value="2" min="0" step="1"></input>
+<input id="x1_f" type="number" class="shiny-input-number form-control" value="2" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Snedecor-F&#39; &amp;&amp; input.tail_f == &#39;upper.tail&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x2_f-label" for="x2_f">x:</label>
-<input id="x2_f" type="number" class="form-control" value="2" min="0" step="1"></input>
+<input id="x2_f" type="number" class="shiny-input-number form-control" value="2" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Snedecor-F&#39; &amp;&amp; input.tail_f == &#39;two.sided&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="a_f-label" for="a_f">a</label>
-<input id="a_f" type="number" class="form-control" value="2" min="0" step="1"></input>
+<input id="a_f" type="number" class="shiny-input-number form-control" value="2" min="0" step="1"></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="b_f-label" for="b_f">b \( (a \leq b) \)</label>
-<input id="b_f" type="number" class="form-control" value="11" min="0" step="1"></input>
+<input id="b_f" type="number" class="shiny-input-number form-control" value="11" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Normal&#39; &amp;&amp; input.tail_normal == &#39;lower.tail&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x1_normal-label" for="x1_normal">x:</label>
-<input id="x1_normal" type="number" class="form-control" value="0" step="1"></input>
+<input id="x1_normal" type="number" class="shiny-input-number form-control" value="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Normal&#39; &amp;&amp; input.tail_normal == &#39;upper.tail&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x2_normal-label" for="x2_normal">x:</label>
-<input id="x2_normal" type="number" class="form-control" value="0" step="1"></input>
+<input id="x2_normal" type="number" class="shiny-input-number form-control" value="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Normal&#39; &amp;&amp; input.tail_normal == &#39;two.sided&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="a_normal-label" for="a_normal">a:</label>
-<input id="a_normal" type="number" class="form-control" value="-3" step="1"></input>
+<input id="a_normal" type="number" class="shiny-input-number form-control" value="-3" step="1"></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="b_normal-label" for="b_normal">b \( (a \leq b) \)</label>
-<input id="b_normal" type="number" class="form-control" value="3" step="1"></input>
+<input id="b_normal" type="number" class="shiny-input-number form-control" value="3" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Poisson&#39; &amp;&amp; input.tail_poisson == &#39;lower.tail&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x1_poisson-label" for="x1_poisson">x:</label>
-<input id="x1_poisson" type="number" class="form-control" value="2" min="0" step="1"></input>
+<input id="x1_poisson" type="number" class="shiny-input-number form-control" value="2" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Poisson&#39; &amp;&amp; input.tail_poisson == &#39;upper.tail&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x2_poisson-label" for="x2_poisson">x:</label>
-<input id="x2_poisson" type="number" class="form-control" value="2" min="0" step="1"></input>
+<input id="x2_poisson" type="number" class="shiny-input-number form-control" value="2" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Poisson&#39; &amp;&amp; input.tail_poisson == &#39;two.sided&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="a_poisson-label" for="a_poisson">a</label>
-<input id="a_poisson" type="number" class="form-control" value="2" min="0" step="1"></input>
+<input id="a_poisson" type="number" class="shiny-input-number form-control" value="2" min="0" step="1"></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="b_poisson-label" for="b_poisson">b \( (a \leq b) \)</label>
-<input id="b_poisson" type="number" class="form-control" value="5" min="0" step="1"></input>
+<input id="b_poisson" type="number" class="shiny-input-number form-control" value="5" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Geometric&#39; &amp;&amp; input.tail_geom == &#39;lower.tail&#39;" data-ns-prefix>
 <span class="help-block">Number of failures before the \(1^{st}\) success</span>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x1_geom-label" for="x1_geom">x:</label>
-<input id="x1_geom" type="number" class="form-control" value="1" min="0" step="1"></input>
+<input id="x1_geom" type="number" class="shiny-input-number form-control" value="1" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Geometric&#39; &amp;&amp; input.tail_geom == &#39;upper.tail&#39;" data-ns-prefix>
 <span class="help-block">Number of failures before the \(1^{st}\) success</span>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x2_geom-label" for="x2_geom">x:</label>
-<input id="x2_geom" type="number" class="form-control" value="1" min="0" step="1"></input>
+<input id="x2_geom" type="number" class="shiny-input-number form-control" value="1" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Geometric&#39; &amp;&amp; input.tail_geom == &#39;two.sided&#39;" data-ns-prefix>
 <span class="help-block">Number of failures before the \(1^{st}\) success</span>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="a_geom-label" for="a_geom">a</label>
-<input id="a_geom" type="number" class="form-control" value="2" min="0" step="1"></input>
+<input id="a_geom" type="number" class="shiny-input-number form-control" value="2" min="0" step="1"></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="b_geom-label" for="b_geom">b: \( (a \leq b) \)</label>
-<input id="b_geom" type="number" class="form-control" value="5" min="0" step="1"></input>
+<input id="b_geom" type="number" class="shiny-input-number form-control" value="5" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Student-t&#39; &amp;&amp; input.tail_studentt == &#39;lower.tail&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x1_t-label" for="x1_t">x:</label>
-<input id="x1_t" type="number" class="form-control" value="0" step="1"></input>
+<input id="x1_t" type="number" class="shiny-input-number form-control" value="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Student-t&#39; &amp;&amp; input.tail_studentt == &#39;upper.tail&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x2_t-label" for="x2_t">x:</label>
-<input id="x2_t" type="number" class="form-control" value="0" step="1"></input>
+<input id="x2_t" type="number" class="shiny-input-number form-control" value="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Student-t&#39; &amp;&amp; input.tail_studentt == &#39;two.sided&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="a_t-label" for="a_t">a</label>
-<input id="a_t" type="number" class="form-control" value="-3" step="1"></input>
+<input id="a_t" type="number" class="shiny-input-number form-control" value="-3" step="1"></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="b_t-label" for="b_t">b \( (a \leq b) \)</label>
-<input id="b_t" type="number" class="form-control" value="3" step="1"></input>
+<input id="b_t" type="number" class="shiny-input-number form-control" value="3" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Hypergeometric&#39; &amp;&amp; input.tail_hypergeometric == &#39;lower.tail&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x1_hypergeometric-label" for="x1_hypergeometric">x:</label>
-<input id="x1_hypergeometric" type="number" class="form-control" value="3" min="0" step="1"></input>
+<input id="x1_hypergeometric" type="number" class="shiny-input-number form-control" value="3" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Hypergeometric&#39; &amp;&amp; input.tail_hypergeometric == &#39;upper.tail&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="x2_hypergeometric-label" for="x2_hypergeometric">x:</label>
-<input id="x2_hypergeometric" type="number" class="form-control" value="3" min="0" step="1"></input>
+<input id="x2_hypergeometric" type="number" class="shiny-input-number form-control" value="3" min="0" step="1"></input>
 </div>
 </div>
 <div data-display-if="input.distribution == &#39;Hypergeometric&#39; &amp;&amp; input.tail_hypergeometric == &#39;two.sided&#39;" data-ns-prefix>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="a_hypergeometric-label" for="a_hypergeometric">a</label>
-<input id="a_hypergeometric" type="number" class="form-control" value="2" min="0" step="1"></input>
+<input id="a_hypergeometric" type="number" class="shiny-input-number form-control" value="2" min="0" step="1"></input>
 </div>
 <div class="form-group shiny-input-container">
 <label class="control-label" id="b_hypergeometric-label" for="b_hypergeometric">b \( (a \leq b) \)</label>
-<input id="b_hypergeometric" type="number" class="form-control" value="5" min="0" step="1"></input>
+<input id="b_hypergeometric" type="number" class="shiny-input-number form-control" value="5" min="0" step="1"></input>
 </div>
 </div>
 <hr />
