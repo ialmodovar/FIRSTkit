@@ -72,7 +72,7 @@ However, the software can also be installed and run locally.
     
   + *Using base R:*
     + Download the file, uncompressed and navigate to the directory.
-    + Note that the R package **shiny** and **googlesheets4** is needed from CRAN.
+    + Note that the R packages **shiny**, **shinythemes**, **DiagrammeR**, **readODS**, **plotly**, **venn** and **googlesheets4** are needed to be installed from CRAN.
     + Then run **shiny::runApp()**
 
 If you have any questions e-mail *israel.almodovar@upr.edu* or *maitra@iastate.edu* or open an "issue" above (preferred).
