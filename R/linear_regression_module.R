@@ -429,5 +429,3 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
   },digits=4)
   
 }
-
-shinyApp(ui, server)
