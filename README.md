@@ -75,6 +75,14 @@ library("devtools")
 install_github("ialmodovar/FIRSTkit")
 ```
 
+To run FIRSTkit()
+
+```R
+library("FIRSTkit")
+FIRSTkit()
+```
+
+
 If you have any questions e-mail *israel.almodovar@upr.edu* or *maitra@iastate.edu* or open an "issue" above (preferred).
 
 
