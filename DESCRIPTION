@@ -1,0 +1,23 @@
+Package: FIRSTkit
+Type: Package
+Title: First Impressions R-based Statistics Toolkit
+Version: 0.1.0
+Author: Israel A. Almodovar-Rivera and Ranjan Maitra
+Maintainer: Israel Almodovar-Rivera <israel.almodovar@upr.edu>
+Description: A Shiny-based app for learning introductory statistics with modules on descriptive stats, inference, probability, and regression.
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+Imports:
+    shiny,
+    readxl,
+    readODS,
+    googlesheets4,
+    plotly,
+    dplyr,
+    venn,
+    shinythemes,
+    MASS,
+    DiagrammeR,
+    car,
+    ggplot2
