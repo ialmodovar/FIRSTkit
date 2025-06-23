@@ -67,11 +67,6 @@ We have all seen the increasing importance of statistical literacy in almost all
 **FIRSTkit** is designed to be run from the browser and hosted on an institutional Shiny server so that students and users do not have any need form of installation. 
 
 However, the software can also be installed as an R package.
-
-  + *Using RStudio:*
-    + Download the file, uncompressed and navigate to the directory.
-    + Open the file ui.R.
-    + Click on "Run App" 
     
 The package can be installed via the devtools package:
 
