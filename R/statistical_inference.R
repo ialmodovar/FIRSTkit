@@ -320,7 +320,6 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                      )
                                                    ),
                                                    hr(),
-                                                   tags$b("One-Sample Proportion test"),
                                                    uiOutput("tableUIprop_all"),
                                                    textInput("p0", label = withMathJax("\\( H_0: p = p_0 \\)"), value = "0.5",
                                                              placeholder = "Indicate the null value for the proportion"))
@@ -390,6 +389,56 @@ tabPanel("Two Sample Inference",
                                   ),
                                   textInput("p0", label = withMathJax("\\( H_0: p_1 - p_2 = p_0 \\)"),
                                             value = "0", placeholder = "Enter null difference in proportions")
+                         )
+             )
+           )
+         )
+),
+tabPanel(title = "Three samples or more inference",
+         sidebarLayout(
+           sidebarPanel(
+             uiOutput('var'),
+             selectInput('type', 'Sums of Squares Type',
+                         c(I = 'type1', II = 'type2', III = 'type3'), 'type1'),
+             sliderInput("alpha", "Significance level \\(\\alpha\\)",
+                         min = 0, max = 1, value = 0.05, step = 0.001)
+           ),
+           mainPanel(
+             tabsetPanel(type = "tabs",
+                         tabPanel("Location Inference",
+                                  withMathJax(),
+                                  fluidRow(
+                                    column(6,
+                                           h4('ANOVA Table'),
+                                           tableOutput('aovSummary')
+                                    ),
+                                    column(6,
+                                           h4('Kruskal-Wallis Rank Sum Test'),
+                                           tableOutput('KWSummary')
+                                    )
+                                  ),
+                                  fluidRow(
+                                    column(6,
+                                           h4('Tukey HSD'),
+                                           tableOutput('tukeySummary')
+                                    ),
+                                    column(6,
+                                           h4('Tukey HSD Plot'),
+                                           plotlyOutput('tukeyPlot', height = "600px")
+                                    )
+                                  )
+                         ),
+                         tabPanel("Dispersion Inference",
+                                  fluidRow(
+                                    column(6,
+                                           h4("Bartlett test"),
+                                           tableOutput("BartlettSummary")
+                                    ),
+                                    column(6,
+                                           h4("Fligner-Killeen test"),
+                                           tableOutput("FlignerSummary")
+                                    )
+                                  )
                          )
              )
            )
@@ -473,9 +522,6 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     )
   }, rownames = TRUE, digits = 4)
   
-  # output$tableUImean <- renderUI({
-  #   withMathJax(tableOutput("mean"))
-  # })
   output$tableUImean_all <- renderUI({
     req(input$num_vars)
     df <- firstkit.data()
@@ -506,6 +552,10 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
       # Build the side-by-side layout
       tagList(
         tags$h4(paste("Variable:", varname)),
+        textInput(mu_input_id,
+                  label = withMathJax(paste0("\\( H_0: \\mu = \\mu_0 \\) for ", varname)),
+                  value = "0"),
+        tags$hr(),
         fluidRow(
           column(
             width = 6,
@@ -518,20 +568,11 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
             tableOutput(w_output_id)
           )
         ),
-        textInput(mu_input_id,
-                  label = withMathJax(paste0("\\( H_0: \\mu = \\mu_0 \\) for ", varname)),
-                  value = "0"),
-        tags$hr()
       )
     })
     
     tagList(output_ui_list)
   })
-  
-  
-  # output$tableUIvar <- renderUI({
-  #   withMathJax(tableOutput("variance"))
-  # })
   
   output$tableUIvar_all <- renderUI({
     req(input$num_vars)
@@ -611,10 +652,7 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
       ci_lower <- p_hat - z * se
       ci_upper <- p_hat + z * se
       
-      data.frame(
-        Estimate = round(p_hat, 4),
-        `Lower CI` = round(ci_lower, 4),
-        `Upper CI` = round(ci_upper, 4)
+      data.frame( Estimate = round(p_hat, 4), `Lower CI` = round(ci_lower, 4),`Upper CI` = round(ci_upper, 4)
       )
     }, rownames = FALSE)
     
@@ -758,6 +796,117 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     )
   })
   
+  
+  output$var <- renderUI({
+    df <- firstkit.data()
+    req(df)
+    numeric_vars <- names(df)[sapply(df, is.numeric)]
+    factor_vars <- names(df)[sapply(df, function(x) is.factor(x) || is.character(x))]
+    
+    tagList(
+      selectInput("dvar", "Response (y)", choices = numeric_vars),
+      selectInput("ivar", "Fixed-effects", choices = factor_vars)
+    )
+  })
+  
+  output$aovSummary <- renderTable({
+    req(input$dvar, input$ivar)
+    df <- firstkit.data()
+    df[[input$ivar]] <- as.factor(df[[input$ivar]])
+    fit <- lm(as.formula(paste(input$dvar, "~", input$ivar)), data = df)
+    
+    if (input$type == "type1") {
+      anova(fit)
+    } else if (input$type == "type2") {
+      Anova(fit, type = 2)
+    } else {
+      Anova(fit, type = 3)
+    }
+  }, rownames = TRUE, digits = 4)
+  
+  output$tukeySummary <- renderTable({
+    req(input$dvar, input$ivar)
+    df <- firstkit.data()
+    df[[input$ivar]] <- as.factor(df[[input$ivar]])
+    conf <- 1 - as.numeric(input$alpha)
+    
+    aov_fit <- aov(as.formula(paste(input$dvar, "~", input$ivar)), data = df)
+    tukey <- TukeyHSD(aov_fit, conf.level = conf)
+    varname <- names(tukey)[1]
+    tukey_df <- as.data.frame(tukey[[varname]])
+    tukey_df$Comparison <- rownames(tukey_df)
+    
+    data.frame(
+      Comparison = tukey_df$Comparison,
+      Estimate = round(tukey_df$diff, 3),
+      `95% CI` = paste0("(", round(tukey_df$lwr, 3), ", ", round(tukey_df$upr, 3), ")"),
+      `p-value` = ifelse(tukey_df$`p adj` < 0.001, "<0.001", round(tukey_df$`p adj`, 3)),
+      check.names = FALSE
+    )
+  }, rownames = FALSE)
+  
+  output$KWSummary <- renderTable({
+    req(input$dvar, input$ivar)
+    df <- firstkit.data()
+    df[[input$ivar]] <- as.factor(df[[input$ivar]])
+    fit <- kruskal.test(as.formula(paste(input$dvar, "~", input$ivar)), data = df)
+    data.frame(
+      DF = as.integer(fit$parameter),
+      Statistic = round(fit$statistic, 3),
+      `p-value` = if (fit$p.value >= 0.001) round(fit$p.value, 3) else "<0.001",
+      row.names = "Kruskal-Wallis"
+    )
+  }, rownames = TRUE)
+  
+  output$BartlettSummary <- renderTable({
+    req(input$dvar, input$ivar)
+    df <- firstkit.data()
+    df[[input$ivar]] <- as.factor(df[[input$ivar]])
+    fit <- bartlett.test(as.formula(paste(input$dvar, "~", input$ivar)), data = df)
+    data.frame(
+      DF = as.integer(fit$parameter),
+      Statistic = round(fit$statistic, 3),
+      `p-value` = if (fit$p.value >= 0.001) round(fit$p.value, 3) else "<0.001",
+      row.names = "Bartlett"
+    )
+  }, rownames = TRUE)
+  
+  output$FlignerSummary <- renderTable({
+    req(input$dvar, input$ivar)
+    df <- firstkit.data()
+    df[[input$ivar]] <- as.factor(df[[input$ivar]])
+    fit <- fligner.test(as.formula(paste(input$dvar, "~", input$ivar)), data = df)
+    data.frame(
+      DF = as.integer(fit$parameter),
+      Statistic = round(fit$statistic, 3),
+      `p-value` = if (fit$p.value >= 0.001) round(fit$p.value, 3) else "<0.001",
+      row.names = "Fligner-Killeen"
+    )
+  }, rownames = TRUE)
+  
+  output$tukeyPlot <- renderPlotly({
+    req(input$dvar, input$ivar)
+    df <- firstkit.data()
+    df[[input$ivar]] <- as.factor(df[[input$ivar]])
+    conf <- 1 - as.numeric(input$alpha)
+    
+    aov_fit <- aov(as.formula(paste(input$dvar, "~", input$ivar)), data = df)
+    tukey <- TukeyHSD(aov_fit, conf.level = conf)
+    varname <- names(tukey)[1]
+    tukey_df <- as.data.frame(tukey[[varname]])
+    tukey_df$Comparison <- rownames(tukey_df)
+    tukey_df$Group <- factor(tukey_df$Comparison, levels = rev(rownames(tukey_df)))
+    
+    p <- ggplot(tukey_df, aes(x = diff, y = Group)) +
+      geom_point(color = "purple", size = 3) +
+      geom_errorbarh(aes(xmin = lwr, xmax = upr), height = 0.25, color = "gray30") +
+      geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+      labs(x = "Mean Difference", y = "",
+           title = paste0("Tukey HSD ", round(conf * 100), "% CI")) +
+      theme_minimal(base_size = 16)
+    
+    ggplotly(p)
+  })
   
 }
 ##To learn more, see [FIRSTkit](https://github.com/ialmodovar/FIRSTkit). If you have any question or want to report to *israel.almodovar@upr.edu* or *maitra@iastate.edu*. 
