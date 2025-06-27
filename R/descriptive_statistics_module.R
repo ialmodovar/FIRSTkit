@@ -1,10 +1,21 @@
+##*******************************************
+##*
+##* @file: descriptive_statistics_module.R
+##* 
+##* UI and server for descriptive statistics module
+##* in FIRSTkit.
+##* 
+##* Author: Israel A. Almodovar-Rivera
+##* israel.almodovar@upr.edu
+##*
+##*
+##*******************************************
 
-
-# Define geo.mean
+## function for geometric mean
 geo.mean <- function(x, na.rm = TRUE) { 
   exp(mean(log(x[x > 0]), na.rm = na.rm))
 }
-# ---- Descriptive Statistics Tab ----
+
 descriptive_stats_ui <- tabPanel("Descriptive Statistics",
                           sidebarLayout(
                             sidebarPanel(
@@ -33,8 +44,6 @@ descriptive_stats_ui <- tabPanel("Descriptive Statistics",
                             )
                           )
                  )
-
-## ---- Server ---
 
 descriptive_stats_server <- function(input, output, session,firstkit.data) {
   
@@ -116,8 +125,6 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
     df <- numeric_summary_data()
     if (nrow(df) == 0) return(NULL)
     
-    # names(df)[which(names(df) == "\\( \\tilde{x} \\)")] <- sprintf("\\( \\tilde{x}_{%.1f%%} \\)",input$trim_level*100)
-    
     output$num_summary <- renderTable({df}, sanitize.text.function = identity)  
     
     tagList(
@@ -141,28 +148,19 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
       rr <- ifelse(sum(round(pp,digits=1))==1, 1, 
                    ifelse(sum(round(pp,digits=2))==1,2,
                           ifelse(sum(round(pp,digits=3))==1,3,4)))
+      
       percent_tbl <- round(100*pp, rr)
       
-      df_summary <- data.frame(
-        Category = names(tbl),
-        Count = as.vector(tbl),
-        Percentage = as.vector(percent_tbl),
-        stringsAsFactors = FALSE
-      )
+      vars.summary <- data.frame(Category = names(tbl), Count = as.vector(tbl), Percentage = as.vector(percent_tbl), stringsAsFactors = FALSE)
       
-      total_row <- data.frame(
-        Category = "Total:",
-        Count = sum(tbl),
-        Percentage = round(sum(percent_tbl), rr),
-        stringsAsFactors = FALSE
-      )
+      total.row <- data.frame(Category = "Total:", Count = sum(tbl), Percentage = round(sum(percent_tbl), rr),stringsAsFactors = FALSE)
       
-      list(title = paste("Frequency Table for:", var), table = rbind(df_summary, total_row))
+      list(title = paste("Frequency Table for:", var), table = rbind(vars.summary, total.row))
     })
   })
   
   output$cat_summary <- renderTable({
-    NULL  # placeholder, we’ll render in UI
+    NULL  
   })
   
   output$cat_summary <- renderUI({

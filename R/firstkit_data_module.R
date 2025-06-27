@@ -1,7 +1,16 @@
-##----------
-## firstkit_data
-##-----------
-
+##*********************************************
+##
+## @file: firstkit_data_module.R
+##
+## Run FIRSTkit software
+##
+## Author:
+## Israel Almodovar-Rivera PhD
+## Department of Mathematical Sciences
+## University of Puerto Rico at Mayaguez
+## israel.almodovar@upr.edu
+## Copyright June 2025
+##*********************************************
 
 data_ui <- tabPanel("Data",
          sidebarLayout(
@@ -27,7 +36,6 @@ data_ui <- tabPanel("Data",
 )
 
 data_server <- function(input, output, session) {
-  # ---- firstkit input ----
   firstkit.data <- reactiveVal(NULL)
   
   observeEvent({

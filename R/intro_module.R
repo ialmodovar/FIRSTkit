@@ -3,7 +3,6 @@ intro_ui <- tabPanel("Introduction",
                      fluidPage(
                        titlePanel("First Impressions R-based Statistics Toolkit (FIRSTkit)"),
                        withMathJax(),
-                       h4("WELCOME"),
                        h4("Overview"),
                        p("FIRSTkit is a companion for introductory statistics courses requiring no prior R knowledge. It enables statistical analysis with minimal programming and helps students grasp fundamental concepts interactively."),
 
@@ -17,13 +16,13 @@ intro_ui <- tabPanel("Introduction",
                        ),
 
                        h4("Data Input/Upload"),
-                       p("Supports .csv, .txt, .xls, .xlsx, and Google Sheets. Missing values are removed using na.rm = TRUE where possible."),
+                       p("User can input their own datasets. ATABEY Supports .csv, .txt, .xls, .xlsx, and Google Sheets. Missing values are removed from the calculations."),
 
                        h4("Descriptive Statistics"),
                        tags$ul(
                          tags$li("Location Measurements: Mean, Trimmed Mean, Median, Geometric Mean"),
                          tags$li("Dispersion Measures: Standard Deviation, Variance, IQR, MAD, Range"),
-                         tags$li("Visualizations: Boxplot, Histogram, Stem-and-leaf plot, Density plot, Bar Graph, Scatter plot")
+                         tags$li("Visualizations: Boxplot, Histogram,  Bar Graph, Scatter plot")
                        ),
 
                        h4("Probability Theory and Distribution Functions"),
@@ -36,7 +35,8 @@ intro_ui <- tabPanel("Introduction",
                        tags$ul(
                          tags$li("Binomial Distribution"),
                          tags$li("Poisson Distribution"),
-                         tags$li("Geometric Distribution")
+                         tags$li("Geometric Distribution"),
+                         tags$li("Hypergeometric Distribution")
                        ),
 
                        h4("Continuous Distributions"),
@@ -49,9 +49,9 @@ intro_ui <- tabPanel("Introduction",
 
                        h4("Inferential Statistics"),
                        tags$ul(
-                         tags$li("One-Sample Tests: t-test, Wilcoxon, Chi-squared for variance, Proportion test"),
+                         tags$li("One-Sample Tests: t-test, Wilcoxon, Chi-squared test for variance, Proportion test"),
                          tags$li("Two-Sample Tests: Independent & Paired t-tests, Wilcoxon-Mann-Whitney, F-test, Proportion test"),
-                         tags$li("Three or More Samples: ANOVA, Kruskal-Wallis, Chi-squared association test")
+                         tags$li("Three or More Samples: ANOVA, Kruskal-Wallis, Multiple Comparison")
                        ),
 
                        h4("Linear Regression"),
