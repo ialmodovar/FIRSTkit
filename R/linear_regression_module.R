@@ -4,7 +4,7 @@ linear_regression_ui <- tabPanel("Linear Regression",
                                    sidebarPanel(
                                      uiOutput("response_ui"),
                                      uiOutput("predictors_ui"),
-                                     actionButton("run", "Run Regression")
+                                     actionButton("run", "Run Analysis")
                                    ),
                                    
                                    mainPanel(
@@ -16,7 +16,7 @@ linear_regression_ui <- tabPanel("Linear Regression",
                                                           h4("Pearson Correlation Matrix"),
                                                           tableOutput("cor_matrix"),
                                                           br(),
-                                                          p("* indicates statistically significant correlation (p-value < α)",
+                                                          p("* indicates statistically significant correlation (p-value < \\( \\alpha \\))",
                                                             style = "color:gray; font-style:italic;")
                                                  ),
                                                  
@@ -89,7 +89,7 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
                 choices = choices, selected = NULL, multiple = TRUE)
   })
   
-  cor_pmat <- function(mat) {
+  cor.pmat <- function(mat) {
     n <- ncol(mat)
     p.mat <- matrix(NA, n, n)
     colnames(p.mat) <- colnames(mat)
@@ -122,16 +122,16 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
       return(data.frame(Message = "Need at least 2 numeric variables for correlation."))
     }
     
-    cor_mat <- cor(num_df, use = "pairwise.complete.obs", method = "pearson")
-    p_mat <- cor_pmat(num_df)
+    cor.mat <- cor(num_df, use = "pairwise.complete.obs", method = "pearson")
+    p_mat <- cor.pmat(num_df)
     
     # Apply asterisk for p-values < alpha
-    formatted_mat <- matrix("", nrow = nrow(cor_mat), ncol = ncol(cor_mat),
-                            dimnames = dimnames(cor_mat))
+    formatted_mat <- matrix("", nrow = nrow(cor.mat), ncol = ncol(cor.mat),
+                            dimnames = dimnames(cor.mat))
     
-    for (i in 1:nrow(cor_mat)) {
-      for (j in 1:ncol(cor_mat)) {
-        r_val <- round(cor_mat[i, j], 4)
+    for (i in 1:nrow(cor.mat)) {
+      for (j in 1:ncol(cor.mat)) {
+        r_val <- round(cor.mat[i, j], 4)
         p_val <- p_mat[i, j]
         sig <- if (!is.na(p_val) && i != j && p_val < alpha) " *" else ""
         formatted_mat[i, j] <- paste0(r_val, sig)
@@ -142,7 +142,7 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
   },   rownames = TRUE,digits = 3)
   
   # Fit model
-  model_fit <- eventReactive(input$run, {
+  model.fit <- eventReactive(input$run, {
     df <- firstkit.data()
     y <- input$response
     x <- input$predictors
@@ -153,13 +153,13 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
   
   # Model summary
   output$model_summary <- renderPrint({
-    req(model_fit())
-    summary(model_fit())
+    req(model.fit())
+    summary(model.fit())
   })
   
   output$fit_stats <- renderTable({
-    req(model_fit())
-    model <- model_fit()
+    req(model.fit())
+    model <- model.fit()
     s <- summary(model)
     
     rsq <- round(s$r.squared, 5)
@@ -169,33 +169,25 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     data.frame(
       Statistic = c("R-squared", "Adjusted R-squared", "AIC","BIC","$\\sigma^2$"),
       Value = c(rsq, adj_rsq,AIC(model),BIC(model), mse),
-      check.names = FALSE
-    )
+      check.names = FALSE)
   },digits=4)
   
   
   output$model_table <- renderTable({
-    req(model_fit(), input$conf_level)
-    model <- model_fit()
+    req(model.fit(), input$conf_level)
+    model <- model.fit()
     
     conf_level <- input$conf_level 
     alpha <- conf_level
     coefs <- summary(model)$coefficients
     ci <- confint(model, level = conf_level)
     
-    # Format p-values with asterisk for significance
-    p_vals <- coefs[, 4]
-    formatted_p <- ifelse(p_vals < 0.001,
-                          "< 0.001",
-                          signif(p_vals, 4))
+    pvals <- coefs[, 4]
+    p2 <- ifelse(pvals < 0.001,"< 0.001",signif(pvals, 4))
     
-    sig_marker <- ifelse(p_vals < alpha, " *", "")
-    formatted_p <- paste0(formatted_p, sig_marker)
+    sig_marker <- ifelse(pvals < alpha, " *", "")
+    p2 <- paste0(p2, sig_marker)
     
-    # Combine CI into one string
-    ci_combined <- paste0("(", round(ci[, 1], 2), ", ", round(ci[, 2], 2), ")")
-    
-    # Dynamic column label for CI
     ci_label <- paste0((1-input$conf_level)*100, "% CI")
     
     df <- data.frame(
@@ -203,18 +195,17 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
       `Std. Error` = round(coefs[, 2], 5),
       check.names = FALSE
     )
-    df[[ci_label]] <- ci_combined
-    df[["p-value"]] <- formatted_p
-    
-    # Reorder columns
+    df[[ci_label]] <- paste0("(", round(ci[, 1], 4), ", ", round(ci[, 2], 4), ")")
+    df[["p-value"]] <- p2
+        # Reorder columns
     df <- df[, c("Estimate", "Std. Error", ci_label, "p-value")]
     
     df
   }, rownames = TRUE,digits=4)
   
   output$residual_summary <- renderTable({
-    req(model_fit())
-    model <- model_fit()
+    req(model.fit())
+    model <- model.fit()
     
     df1 <- as.data.frame(rbind(summary(model$residuals),summary(studres(model))))
     
@@ -223,8 +214,8 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
   },rownames=TRUE,digits=4)
   
   output$model_eq <- renderUI({
-    req(model_fit())
-    model <- model_fit()
+    req(model.fit())
+    model <- model.fit()
     coefs <- coef(model)
     
     intercept <- round(coefs[1], 5)
@@ -244,8 +235,8 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
   })
   
   output$anova_table <- renderTable({
-    req(model_fit(), input$conf_level)
-    model <- model_fit()
+    req(model.fit(), input$conf_level)
+    model <- model.fit()
     alpha <- 1 - (input$conf_level / 100)
     
     anova_tbl <- anova(model)
@@ -295,8 +286,8 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
   
   # Residuals vs Fitted
   output$resid_plot <- renderPlotly({
-    req(model_fit())
-    model <- model_fit()
+    req(model.fit())
+    model <- model.fit()
     df <- data.frame(Fitted = fitted(model), Residuals = studres(model))
     
     p <- ggplot(df, aes(x = Fitted, y = Residuals)) +
@@ -310,8 +301,8 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
   })
   
   output$qq_plot <- renderPlotly({
-    req(model_fit())
-    model <- model_fit()
+    req(model.fit())
+    model <- model.fit()
     
     # Studentized residuals
     res <- studres(model)
@@ -360,8 +351,8 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
   })
   
   output$residual_hist <- renderPlotly({
-    req(model_fit())
-    model <- model_fit()
+    req(model.fit())
+    model <- model.fit()
     
     res <- studres(model)
     n <- length(res)
@@ -390,8 +381,8 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
   
   # Cook's Distance plot
   output$cook_plot <- renderPlotly({
-    req(model_fit())
-    model <- model_fit()
+    req(model.fit())
+    model <- model.fit()
     cooks <- cooks.distance(model)
     threshold <- input$cook_thresh %||% (4 / length(cooks))
     
@@ -414,8 +405,8 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
   })
   
   output$cook_flagged <- renderTable({
-    req(model_fit())
-    model <- model_fit()
+    req(model.fit())
+    model <- model.fit()
     cooks <- cooks.distance(model)
     threshold <- input$cook_thresh %||% (4 / length(cooks))
     

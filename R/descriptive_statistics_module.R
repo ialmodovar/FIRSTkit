@@ -1,15 +1,16 @@
-##*******************************************
+##*********************************************
 ##*
 ##* @file: descriptive_statistics_module.R
-##* 
-##* UI and server for descriptive statistics module
-##* in FIRSTkit.
-##* 
-##* Author: Israel A. Almodovar-Rivera
+##
+## Run FIRSTkit software
+##
+##* Author:
+##* Israel Almodovar-Rivera PhD
+##* Department of Mathematical Sciences
+##* University of Puerto Rico at Mayaguez
 ##* israel.almodovar@upr.edu
-##*
-##*
-##*******************************************
+##* Copyright June 2025
+##*********************************************
 
 ## function for geometric mean
 geo.mean <- function(x, na.rm = TRUE) { 
@@ -174,7 +175,6 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
       )
     })
     
-    # Dynamically bind each table output
     for (i in seq_along(summaries)) {
       local({
         idx <- i
@@ -187,7 +187,6 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
     
     do.call(tagList, output_list)
   })
-  
   
   output$plots <- renderUI({
     req(desc_trigger())

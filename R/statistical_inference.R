@@ -405,7 +405,7 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                 checkboxInput("equal_var", "Equal variance \\( (\\sigma^2_1 = \\sigma^2_2) \\)", value = FALSE),
                                                 sliderInput("alpha", "Significance level \\(\\alpha\\)",
                                                             min = 0, max = 1, value = 0.05, step = 0.001),
-                                                actionButton("run_two", "Submit")
+                                                actionButton("run_two", "Run Analysis")
                                             ),
                                             mainPanel(
                                               withMathJax(),

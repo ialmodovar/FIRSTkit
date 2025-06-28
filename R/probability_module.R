@@ -1,4 +1,16 @@
-
+##*********************************************
+##
+## @file: probability_module.R
+##
+## Run FIRSTkit software
+##
+## Author:
+## Israel Almodovar-Rivera PhD
+## Department of Mathematical Sciences
+## University of Puerto Rico at Mayaguez
+## israel.almodovar@upr.edu
+## Copyright June 2025
+##*********************************************
 
 bayes_probability_tree <- function(prior,sensitivity, specificity) {
   

@@ -19,7 +19,7 @@ data_ui <- tabPanel("Data",
                           choices = c("Upload File" = "file", "Google Sheets" = "gsheet", "Manual Entry" = "manual")),
              conditionalPanel(
                condition = "input.upload_method == 'file'",
-               fileInput("file1", "Choose CSV, Excel, or ODS File", accept = c(".csv", ".xlsx", ".xls", ".ods"))
+               fileInput("file1", "Choose file", accept = c(".csv", ".xlsx", ".xls", ".ods"))
              ),
              conditionalPanel(
                condition = "input.upload_method == 'gsheet'",
@@ -28,7 +28,7 @@ data_ui <- tabPanel("Data",
              ),
              conditionalPanel(
                condition = "input.upload_method == 'manual'",
-               textAreaInput("manual_data", "Paste CSV data here (including header)", "", rows = 8)
+               textAreaInput("manual_data", "Input data (including header)", "", rows = 8)
              )
            ),
            mainPanel(tableOutput("contents"))
