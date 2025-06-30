@@ -13,7 +13,9 @@
 ##*********************************************
 
 bayes_probability_tree <- function(prior,sensitivity, specificity) {
-  
+  ## code from https://daranzolin.github.io/2018-01-07-probability-trees/
+## modified to be a shiny app by Israel A. Almodóvar-Rivera.
+
   if (!all(c(prior,sensitivity, specificity) > 0) && !all(c(prior,sensitivity, specificity) < 1)) {
     stop("probabilities must be greater than 0 and less than 1.",
          call. = FALSE)
