@@ -1,15 +1,15 @@
 ##*********************************************
-##
-## @file: probability_module.R
-##
-## Run FIRSTkit software
-##
-## Author:
-## Israel Almodovar-Rivera PhD
-## Department of Mathematical Sciences
-## University of Puerto Rico at Mayaguez
-## israel.almodovar@upr.edu
-## Copyright June 2025
+##*
+##* @file: probability_module.R
+##*
+##* Probability Module of FIRSTkit software
+##*
+##* Author:
+##* Israel Almodovar-Rivera PhD
+##* Department of Mathematical Sciences
+##* University of Puerto Rico at Mayaguez
+##* israel.almodovar@upr.edu
+##* Copyright June 2025
 ##*********************************************
 
 bayes_probability_tree <- function(prior,sensitivity, specificity) {
@@ -162,7 +162,7 @@ probability_ui <- navbarMenu("Probability Theory",
                       )
                     )
            ),
-            tabPanel("Distribution Functions",
+            tabPanel("Probability Distribution Functions",
                      sidebarLayout(
                        sidebarPanel(
                          selectInput(

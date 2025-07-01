@@ -1,3 +1,17 @@
+##*********************************************
+##*
+##* @file: linear_regression_module.R
+##*
+##* Linear regression for FIRSTkit
+##* Perform diagnostic tools
+##*
+##* Author:
+##* Israel Almodovar-Rivera PhD
+##* Department of Mathematical Sciences
+##* University of Puerto Rico at Mayaguez
+##* israel.almodovar@upr.edu
+##* Copyright June 2025
+##*********************************************
 
 linear_regression_ui <- tabPanel("Linear Regression",
                                  sidebarLayout(
@@ -81,7 +95,6 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
                 choices = names(firstkit.data()), selected = NULL)
   })
   
-  # UI for predictors
   output$predictors_ui <- renderUI({
     req(firstkit.data(), input$response)
     choices <- setdiff(names(firstkit.data()), input$response)
@@ -125,7 +138,6 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     cor.mat <- cor(num_df, use = "pairwise.complete.obs", method = "pearson")
     p_mat <- cor.pmat(num_df)
     
-    # Apply asterisk for p-values < alpha
     formatted_mat <- matrix("", nrow = nrow(cor.mat), ncol = ncol(cor.mat),
                             dimnames = dimnames(cor.mat))
     
@@ -141,7 +153,6 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     as.data.frame(formatted_mat)
   },   rownames = TRUE,digits = 3)
   
-  # Fit model
   model.fit <- eventReactive(input$run, {
     df <- firstkit.data()
     y <- input$response
@@ -151,7 +162,6 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     lm(formula, data = df)
   })
   
-  # Model summary
   output$model_summary <- renderPrint({
     req(model.fit())
     summary(model.fit())
@@ -197,7 +207,7 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     )
     df[[ci_label]] <- paste0("(", round(ci[, 1], 4), ", ", round(ci[, 2], 4), ")")
     df[["p-value"]] <- p2
-        # Reorder columns
+
     df <- df[, c("Estimate", "Std. Error", ci_label, "p-value")]
     
     df
@@ -222,14 +232,13 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     terms <- names(coefs)[-1]
     betas <- round(coefs[-1], 5)
     
-    # Build terms with proper signs
-    term_parts <- mapply(function(beta, var) {
+    term.parts <- mapply(function(beta, var) {
       sign_str <- if (beta < 0) " - " else " + "
       paste0(sign_str, abs(beta), " \\cdot ", var)
     }, beta = betas, var = terms, SIMPLIFY = TRUE)
     
-    eq_rhs <- paste0(term_parts, collapse = "")
-    equation <- paste0("$$\\hat{", input$response, "} = ", intercept, eq_rhs, "$$")
+    eq.rhs <- paste0(term.parts, collapse = "")
+    equation <- paste0("$$\\hat{", input$response, "} = ", intercept, eq.rhs, "$$")
     
     withMathJax(HTML(equation))
   })
@@ -239,48 +248,46 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     model <- model.fit()
     alpha <- 1 - (input$conf_level / 100)
     
-    anova_tbl <- anova(model)
-    anova_tbl <- data.frame(anova_tbl)
+    anova.tbl <- anova(model)
+    anova.tbl <- data.frame(anova.tbl)
     
-    # Rename F-value and p-value columns
-    if ("F.value" %in% names(anova_tbl)) {
-      names(anova_tbl)[names(anova_tbl) == "F.value"] <- "F-statistic"
+    if ("F.value" %in% names(anova.tbl)) {
+      names(anova.tbl)[names(anova.tbl) == "F.value"] <- "F-statistic"
     }
-    if ("Pr..F." %in% names(anova_tbl)) {
-      names(anova_tbl)[names(anova_tbl) == "Pr..F."] <- "$p$-value"
-    }
-    
-    anova_tbl$Df <- as.integer(anova_tbl$Df)
-    
-    if ("Df" %in% names(anova_tbl)) {
-      names(anova_tbl)[names(anova_tbl) == "Df"] <- "df"
+    if ("Pr..F." %in% names(anova.tbl)) {
+      names(anova.tbl)[names(anova.tbl) == "Pr..F."] <- "$p$-value"
     }
     
-    for (col in names(anova_tbl)) {
-      if (col != "df" && is.numeric(anova_tbl[[col]])) {
+    anova.tbl$Df <- as.integer(anova.tbl$Df)
+    
+    if ("Df" %in% names(anova.tbl)) {
+      names(anova.tbl)[names(anova.tbl) == "Df"] <- "df"
+    }
+    
+    for (col in names(anova.tbl)) {
+      if (col != "df" && is.numeric(anova.tbl[[col]])) {
         if (col == "$p$-value") {
-          anova_tbl[[col]] <- ifelse(
-            anova_tbl[[col]] < 0.001,
+          anova.tbl[[col]] <- ifelse(
+            anova.tbl[[col]] < 0.001,
             "< 0.001",
-            signif(anova_tbl[[col]], 4)
+            signif(anova.tbl[[col]], 4)
           )
-          # Append asterisk if p < alpha
-          numeric_p <- suppressWarnings(as.numeric(anova_tbl[[col]]))
-          sig_marker <- ifelse(!is.na(numeric_p) & numeric_p < alpha, " *", "")
-          anova_tbl[[col]] <- paste0(anova_tbl[[col]], sig_marker)
-          # Ensure "< 0.001" gets asterisk too
-          anova_tbl[[col]] <- ifelse(
-            grepl("< 0.001", anova_tbl[[col]]) & (0.001 < alpha),
+          np <- suppressWarnings(as.numeric(anova.tbl[[col]]))
+          sig.marker <- ifelse(!is.na(np) & np < alpha, " *", "")
+          anova.tbl[[col]] <- paste0(anova.tbl[[col]], sig.marker)
+
+          anova.tbl[[col]] <- ifelse(
+            grepl("< 0.001", anova.tbl[[col]]) & (0.001 < alpha),
             "< 0.001 *",
-            anova_tbl[[col]]
+            anova.tbl[[col]]
           )
         } else {
-          anova_tbl[[col]] <- round(anova_tbl[[col]], 4)
+          anova.tbl[[col]] <- round(anova.tbl[[col]], 4)
         }
       }
     }
     
-    anova_tbl
+    anova.tbl
   }, rownames = TRUE,digits=3,na="")
   
   
@@ -309,33 +316,23 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     n <- length(res)
     validate(need(n > 0, "No residuals available for QQ plot."))
     
-    # Sort residuals
-    sorted_res <- sort(res)
+    ## Sort residuals
+    sres <- sort(res)
+    tq <- qnorm(ppoints(n))
     
-    # Theoretical quantiles (standard normal)
-    theoretical_q <- qnorm(ppoints(n))
-    
-    # Confidence bands (based on standard errors of order statistics)
+    ## Confidence bands (based on standard errors of order statistics)
     alpha <- input$qq_alpha
-    se <- (1 / dnorm(theoretical_q)) * sqrt(ppoints(n) * (1 - ppoints(n)) / n)
-    z_crit <- qnorm(1 - alpha / 2)
-    upper <- theoretical_q + z_crit * se
-    lower <- theoretical_q - z_crit * se
+    se <- (1 / dnorm(tq)) * sqrt(ppoints(n) * (1 - ppoints(n)) / n)
+    zcrit <- qnorm(1 - alpha/2)
+    upper <- tq + zcrit * se
+    lower <- tq - zcrit * se
     
-    # Create data frame
-    df <- data.frame(
-      Theoretical = theoretical_q,
-      Observed = sorted_res,
-      Upper = upper,
-      Lower = lower,
-      Label = ""
-    )
+    df <- data.frame( Theoretical = tq, Observed = sres, Upper = upper, Lower = lower,Label = "")
     
     # Identify top 3 outliers as in car::qqPlot
-    outlier_idx <- order(abs(res - theoretical_q), decreasing = TRUE)[1:3]
+    outlier_idx <- order(abs(res - tq), decreasing = TRUE)[1:3]
     df$Label[outlier_idx] <- outlier_idx
     
-    # Plot
     p <- ggplot(df, aes(x = Theoretical, y = Observed)) +
       geom_ribbon(aes(ymin = Lower, ymax = Upper), fill = "gray90", alpha = 0.5) +
       geom_point(color = "black") +
@@ -361,13 +358,10 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     df <- data.frame(Residual = res)
     
     p <- ggplot(df, aes(x = Residual)) +
-      # Histogram with density scale
       geom_histogram(aes(y = after_stat(density)),
                      fill = "white", color = "purple", linewidth = 1,
                      alpha = 0.6) +
-      # Add empirical density curve
       geom_density(color = "black", linewidth = 1.2) +
-      # Vertical line at zero
       geom_vline(xintercept = 0, color = "red", linetype = "dashed", linewidth = 1) +
       labs(
         title = "",
@@ -384,7 +378,7 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     req(model.fit())
     model <- model.fit()
     cooks <- cooks.distance(model)
-    threshold <- input$cook_thresh %||% (4 / length(cooks))
+    threshold <- input$cook_thresh %||% (4/length(cooks))
     
     df <- data.frame(
       Observation = seq_along(cooks),

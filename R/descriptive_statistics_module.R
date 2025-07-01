@@ -1,9 +1,11 @@
 ##*********************************************
 ##*
 ##* @file: descriptive_statistics_module.R
-##
-## Run FIRSTkit software
-##
+##*
+##* Descriptive Statistics UI an Server module
+##* for FIRSTkit
+##*
+##*
 ##* Author:
 ##* Israel Almodovar-Rivera PhD
 ##* Department of Mathematical Sciences
@@ -12,7 +14,7 @@
 ##* Copyright June 2025
 ##*********************************************
 
-## function for geometric mean
+## geometric mean
 geo.mean <- function(x, na.rm = TRUE) { 
   exp(mean(log(x[x > 0]), na.rm = na.rm))
 }
@@ -97,7 +99,7 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
     
     if (!is.null(group_var) && group_var %in% names(df)) {
       grouped_data <- df %>%
-        select(all_of(c(group_var, numeric_vars))) %>%
+        dplyr::select(all_of(c(group_var, numeric_vars))) %>%
         group_by(.data[[group_var]])
       
       summary_list <- lapply(numeric_vars, function(var) {

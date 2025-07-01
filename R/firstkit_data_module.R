@@ -1,16 +1,17 @@
 ##*********************************************
-##
-## @file: firstkit_data_module.R
-##
-## Run FIRSTkit software
-##
-## Author:
-## Israel Almodovar-Rivera PhD
-## Department of Mathematical Sciences
-## University of Puerto Rico at Mayaguez
-## israel.almodovar@upr.edu
-## Copyright June 2025
+##*
+##* @file: firstkit_data_module.R
+##*
+##* Server function for FIRSTkit software
+##*
+##* Author:
+##* Israel Almodovar-Rivera PhD
+##* Department of Mathematical Sciences
+##* University of Puerto Rico at Mayaguez
+##* israel.almodovar@upr.edu
+##* Copyright June 2025
 ##*********************************************
+
 
 data_ui <- tabPanel("Data",
          sidebarLayout(

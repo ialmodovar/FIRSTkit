@@ -1,4 +1,17 @@
-#' UI for FIRSTkit
+##*********************************************
+##*
+##* @file: app_ui.R
+##*
+##* UI for FIRSTkit software
+##*
+##* Author:
+##* Israel Almodovar-Rivera PhD
+##* Department of Mathematical Sciences
+##* University of Puerto Rico at Mayaguez
+##* israel.almodovar@upr.edu
+##* Copyright June 2025
+##*********************************************
+
 app_ui <- function() {
   navbarPage("FIRSTkit",
              theme = shinythemes::shinytheme("flatly"),

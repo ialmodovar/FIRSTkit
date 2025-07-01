@@ -1,9 +1,9 @@
 
-intro_ui <- tabPanel("Introduction",
+intro_ui <- tabPanel("WELCOME",
                      fluidPage(
-                       titlePanel("First Impressions R-based Statistics Toolkit (FIRSTkit)"),
+                       titlePanel("FIRST Impressions R-based Statistics Toolkit (FIRSTkit)"),
                        withMathJax(),
-                       h4("Overview"),
+                       h4("Introduction"),
                        p("FIRSTkit is a companion for introductory statistics courses requiring no prior R knowledge. It enables statistical analysis with minimal programming and helps students grasp fundamental concepts interactively."),
 
                        h4("Modules Covered"),
@@ -16,18 +16,18 @@ intro_ui <- tabPanel("Introduction",
                        ),
 
                        h4("Data Input/Upload"),
-                       p("User can input their own datasets. ATABEY Supports .csv, .txt, .xls, .xlsx, and Google Sheets. Missing values are removed from the calculations."),
+                       p("User can input their own datasets. Supports .csv, .txt, .xls, .xlsx, .ods, and Google Sheets. Missing values are removed from the calculations."),
 
                        h4("Descriptive Statistics"),
                        tags$ul(
                          tags$li("Location Measurements: Mean, Trimmed Mean, Median, Geometric Mean"),
                          tags$li("Dispersion Measures: Standard Deviation, Variance, IQR, MAD, Range"),
-                         tags$li("Visualizations: Boxplot, Histogram,  Bar Graph, Scatter plot")
+                         tags$li("Visualizations: Boxplot, Histograms,  and Bar Graph")
                        ),
 
                        h4("Probability Theory and Distribution Functions"),
                        tags$ul(
-                         tags$li("Probability Events with Venn Diagram"),
+                         tags$li("Displaying Venn Diagram"),
                          tags$li("Conditional Probability with Bayes Tree")
                        ),
 
