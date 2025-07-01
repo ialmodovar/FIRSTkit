@@ -32,7 +32,7 @@ descriptive_stats_ui <- tabPanel("Descriptive Statistics",
                               checkboxGroupInput("dispersion_stats", "Dispersion Statistics:",
                                                  choices = c("Sample variance (\\( s^2\\))" = "var","Sample standard deviation (\\( s\\))" = "sd", "Interquartile range (\\( IQR\\))" = "iqr", "Median absolute deviation (\\( MAD\\))" = "mad", "Range (\\( R \\))" = "range")),
                               selectInput("group_by", "Group by (optional):", choices = NULL),
-                              selectInput("plot_type", "Plot Type:", choices = c("None", "Histogram", "Boxplot", "Barplot")),
+                              selectInput("plot_type", "Plot Type:", choices = c("None", "Histogram","Density" ,"Boxplot", "Barplot")),
                               actionButton("run_desc", "Submit")
                             ),
                             mainPanel(
@@ -66,6 +66,7 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
   observe({
     df <- firstkit.data()
     if (!is.null(df)) {
+     # nn <- varnames[!sapply(df, is.numeric)]
       updateSelectInput(session, "group_by", choices = c("None", names(df)), selected = "None")
     }
   })
@@ -80,7 +81,7 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
     req(desc_trigger())
     df <- firstkit.data()
     req(df)
-    numeric_vars <- input$num_vars
+    numeric.vars <- input$num_vars
     group_var <- if (input$group_by != "None") input$group_by else NULL
     
     stat_funs <- list()
@@ -94,15 +95,15 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
     if ("mad" %in% input$dispersion_stats) stat_funs$`\\( MAD \\)` <- function(x, na.rm=TRUE) mad(x, constant = 1, na.rm=na.rm)
     if ("range" %in% input$dispersion_stats) stat_funs$`\\( R \\)` <- function(x, na.rm=TRUE) max(x, na.rm=na.rm) - min(x, na.rm=na.rm)
     
-    if (length(stat_funs) == 0 || length(numeric_vars) == 0)
+    if (length(stat_funs) == 0 || length(numeric.vars) == 0)
       return(data.frame(Message = "No statistics selected or no numeric variables chosen."))
     
     if (!is.null(group_var) && group_var %in% names(df)) {
       grouped_data <- df %>%
-        dplyr::select(all_of(c(group_var, numeric_vars))) %>%
+        dplyr::select(all_of(c(group_var, numeric.vars))) %>%
         group_by(.data[[group_var]])
       
-      summary_list <- lapply(numeric_vars, function(var) {
+      summary_list <- lapply(numeric.vars, function(var) {
         stats <- grouped_data %>%
           summarise(across(all_of(var), stat_funs, .names = "{.fn}"), .groups = "drop")
         stats <- stats %>% mutate(Variable = var)
@@ -111,7 +112,7 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
       
       bind_rows(summary_list)
     } else {
-      summary_list <- lapply(numeric_vars, function(var) {
+      summary_list <- lapply(numeric.vars, function(var) {
         values <- df[[var]]
         stats <- sapply(stat_funs, function(f) f(values))
         data.frame(Variable = var, t(stats), row.names = NULL, check.names = FALSE)
@@ -155,9 +156,7 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
       percent_tbl <- round(100*pp, rr)
       
       vars.summary <- data.frame(Category = names(tbl), Count = as.vector(tbl), Percentage = as.vector(percent_tbl), stringsAsFactors = FALSE)
-      
       total.row <- data.frame(Category = "Total:", Count = sum(tbl), Percentage = round(sum(percent_tbl), rr),stringsAsFactors = FALSE)
-      
       list(title = paste("Frequency Table for:", var), table = rbind(vars.summary, total.row))
     })
   })
@@ -193,9 +192,9 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
   output$plots <- renderUI({
     req(desc_trigger())
     req(input$plot_type)
-    numeric_vars <- input$num_vars
-    if (length(numeric_vars) == 0 || input$plot_type == "None") return(NULL)
-    plot_output_list <- lapply(numeric_vars, function(var) {
+    numeric.vars <- input$num_vars
+    if (length(numeric.vars) == 0 || input$plot_type == "None") return(NULL)
+    plot_output_list <- lapply(numeric.vars, function(var) {
       plotlyOutput(outputId = paste0("plot_", var))
     })
     do.call(tagList, plot_output_list)
@@ -204,20 +203,42 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
   observe({
     req(desc_trigger())
     df <- firstkit.data()
-    numeric_vars <- input$num_vars
+    numeric.vars <- input$num_vars
+    cat.vars <- input$cat_vars
     group_var <- if (input$group_by != "None") input$group_by else NULL
     plot_type <- isolate(input$plot_type)
     
-    for (var in numeric_vars) {
+    for (vv in numeric.vars) {
       local({
-        v <- var
+        v <- vv
         output[[paste0("plot_", v)]] <- renderPlotly({
           p <- NULL
           
           if (plot_type == "Histogram") {
-            p <- ggplot(df, aes(x = .data[[v]])) +
-              geom_histogram(fill = "white", color = "purple", bins = 30) +
-              labs(title = paste("Histogram of", v), x = v, y = "Count")  +theme_bw()
+            
+            if (!is.null(group_var) && group_var %in% names(df)) {
+              p <- ggplot(df, aes(x = .data[[v]],fill=.data[[group_var]])) +
+                geom_histogram(alpha=0.5) +
+                labs(title = paste("Histogram of", v, "by", group_var), x = group_var, y = v) +theme_bw()
+            } else {
+              p <- ggplot(df, aes(x = .data[[v]])) +
+                geom_histogram(fill = "white", color = "purple", bins = 30) +
+                labs(title = paste("Histogram of", v), x = v, y = "Count")  +theme_bw()
+            }
+            
+            
+          } else if (plot_type == "Density") {
+            
+            if (!is.null(group_var) && group_var %in% names(df)) {
+              p <- ggplot(df, aes(x = .data[[v]],y=after_stat(density),color=.data[[group_var]],fill=.data[[group_var]])) +
+                geom_density(alpha=0.5) +
+                labs(title = paste("Density of", v, "by", group_var), x = group_var, y = v) +theme_bw()
+            } else {
+              p <- ggplot(df, aes(x = .data[[v]],y=after_stat(density))) +
+                geom_density(fill = "white", color = "purple", bins = 30) +
+                labs(title = paste("Density of", v), x = v, y = "Prob")  +theme_bw()
+            }
+            
             
           } else if (plot_type == "Boxplot") {
             if (!is.null(group_var) && group_var %in% names(df)) {
@@ -230,14 +251,24 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
                 labs(title = paste("Boxplot of", v), y = v)  +theme_bw()
             }
             
-          } else if (plot_type == "Barplot") {
-            freq <- as.data.frame(table(df[[v]]))
-            colnames(freq) <- c("Category", "Count")
-            p <- ggplot(freq, aes(x = Category, y = Count)) +
-              geom_bar(stat = "identity", fill = "white",color="purple") +
-              labs(title = paste("Barplot of", v), x = v, y = "Count") +theme_bw()
           }
-          
+          else if (plot_type == "Barplot") {
+            if (!is.null(group_var) && group_var %in% names(df)) {
+              df2 <- df[!is.na(df[[v]]) & !is.na(df[[group_var]]), ]
+              p <- ggplot(df2, aes(x = .data[[v]], fill = .data[[group_var]])) +
+                geom_bar(position = "dodge", color = "black") +
+                labs(title = paste("Grouped Barplot of", v, "by", group_var),
+                     x = v, y = "Count", fill = group_var) +
+                theme_bw()
+            } else {
+              freq <- as.data.frame(table(df[[v]]))
+              colnames(freq) <- c("Category", "Count")
+              p <- ggplot(freq, aes(x = Category, y = Count)) +
+                geom_bar(stat = "identity", fill = "white", color = "purple") +
+                labs(title = paste("Barplot of", v), x = v, y = "Count") +
+                theme_bw()
+            }
+          }
           ggplotly(p)
         })
       })
