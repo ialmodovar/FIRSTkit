@@ -7,12 +7,12 @@ Maintainer: Israel Almodovar-Rivera <israel.almodovar@upr.edu>
 Description: A Shiny-based app for learning introductory statistics with modules on descriptive stats, inference, probability, and regression.
 License: GPL (>= 3)
 Encoding: UTF-8
-LazyData: true
 Imports:
     shiny,
     readxl,
     readODS,
     googlesheets4,
+    openxlsx,
     plotly,
     dplyr,
     venn,

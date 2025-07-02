@@ -29,8 +29,13 @@ data_ui <- tabPanel("Data",
              ),
              conditionalPanel(
                condition = "input.upload_method == 'manual'",
-               textAreaInput("manual_data", "Input data (including header)", "", rows = 8)
-             )
+               textAreaInput("manual_data", "Input data (including header)", "", rows = 8),
+               downloadButton("download", "Download .csv"),
+               br(),
+               downloadButton("download2", "Download .xlsx/.xlsx"),
+               br(),
+               downloadButton("download3", "Download .ods")
+             ),
            ),
            mainPanel(tableOutput("contents"))
          )
@@ -80,6 +85,38 @@ data_server <- function(input, output, session) {
   output$contents <- renderTable({
     head(firstkit.data(), 15)
   })
+  
+  
+  output$download <- downloadHandler(
+    filename = function() {
+      paste0(input$manual_data, ".csv")
+    },
+    content = function(file) {
+      write.csv(firstkit.data(), file,row.names = FALSE)
+    }
+  )
+  
+  output$download2 <- downloadHandler(
+    filename = function() {
+      paste0(input$manual_data, ".xlsx")
+    },
+    content = function(file) {
+      
+      wb <- createWorkbook()
+      addWorksheet(wb, "Sheet 1")
+      writeData(wb,sheet = "Sheet 1", firstkit.data(),rowNames = FALSE)
+      saveWorkbook(wb,file, overwrite = TRUE)
+    }
+  )
+  
+  output$download3 <- downloadHandler(
+    filename = function() {
+      paste0(input$manual_data, ".ods")
+    },
+    content = function(file) {
+      write_ods(firstkit.data(), file,row_names = FALSE)
+    }
+  )
   
   return(firstkit.data)  
 }
