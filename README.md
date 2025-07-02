@@ -25,6 +25,7 @@ We have all seen the increasing importance of statistical literacy in almost all
   + Univariate Data Visualization 
     + Box-plots 
     + Histograms
+    + Density plots
     + Bar graphs
 
 ### **Introduction to Probability Theory and Distribution Functions**
