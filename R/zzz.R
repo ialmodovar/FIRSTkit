@@ -1,8 +1,8 @@
 ##*********************************************
 ##*
-##* @file: run_app.R
+##* @file: zzz.R
 ##*
-##* Run FIRSTkit as a R function
+##* options set up for FIRSTkit
 ##*
 ##* Author:
 ##* Israel Almodovar-Rivera PhD
@@ -13,6 +13,6 @@
 ##*********************************************
 
 
-FIRSTkit <- function() {
-  shiny::shinyApp(ui = app_ui(), server = app_server)
+.onLoad <- function(libname, pkgname) {
+  options(shiny.maxRequestSize = 60 * 1024^2)  # Set max request size to 50 MB
 }
