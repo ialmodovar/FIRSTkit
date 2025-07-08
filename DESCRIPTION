@@ -20,4 +20,5 @@ Imports:
     MASS,
     DiagrammeR,
     car,
+    base64enc,
     ggplot2

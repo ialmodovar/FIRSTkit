@@ -178,8 +178,7 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     
     data.frame(
       Statistic = c("R-squared", "Adjusted R-squared", "AIC","BIC","$\\sigma^2$"),
-      Value = c(rsq, adj_rsq,AIC(model),BIC(model), mse),
-      check.names = FALSE)
+      Value = c(rsq, adj_rsq,AIC(model),BIC(model), mse),check.names = FALSE)
   },digits=4)
   
   
@@ -200,11 +199,7 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     
     ci_label <- paste0((1-input$conf_level)*100, "% CI")
     
-    df <- data.frame(
-      Estimate = round(coefs[, 1], 5),
-      `Std. Error` = round(coefs[, 2], 5),
-      check.names = FALSE
-    )
+    df <- data.frame( Estimate = round(coefs[, 1], 5), `Std. Error` = round(coefs[, 2], 5),check.names = FALSE)
     df[[ci_label]] <- paste0("(", round(ci[, 1], 4), ", ", round(ci[, 2], 4), ")")
     df[["p-value"]] <- p2
 
@@ -233,8 +228,8 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     betas <- round(coefs[-1], 5)
     
     term.parts <- mapply(function(beta, var) {
-      sign_str <- if (beta < 0) " - " else " + "
-      paste0(sign_str, abs(beta), " \\cdot ", var)
+      sign.str <- if (beta < 0) " - " else " + "
+      paste0(sign.str, abs(beta), " \\cdot ", var)
     }, beta = betas, var = terms, SIMPLIFY = TRUE)
     
     eq.rhs <- paste0(term.parts, collapse = "")
@@ -246,7 +241,7 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
   output$anova_table <- renderTable({
     req(model.fit(), input$conf_level)
     model <- model.fit()
-    alpha <- 1 - (input$conf_level / 100)
+    alpha <- 1 - (input$conf_level/100)
     
     anova.tbl <- anova(model)
     anova.tbl <- data.frame(anova.tbl)
@@ -311,25 +306,21 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     req(model.fit())
     model <- model.fit()
     
-    # Studentized residuals
     res <- studres(model)
     n <- length(res)
     validate(need(n > 0, "No residuals available for QQ plot."))
     
-    ## Sort residuals
     sres <- sort(res)
     tq <- qnorm(ppoints(n))
     
-    ## Confidence bands (based on standard errors of order statistics)
     alpha <- input$qq_alpha
-    se <- (1 / dnorm(tq)) * sqrt(ppoints(n) * (1 - ppoints(n)) / n)
+    se <- (1/dnorm(tq)) * sqrt(ppoints(n) * (1-ppoints(n))/n)
     zcrit <- qnorm(1 - alpha/2)
-    upper <- tq + zcrit * se
-    lower <- tq - zcrit * se
+    upper <- tq + zcrit*se
+    lower <- tq - zcrit*se
     
     df <- data.frame( Theoretical = tq, Observed = sres, Upper = upper, Lower = lower,Label = "")
     
-    # Identify top 3 outliers as in car::qqPlot
     outlier_idx <- order(abs(res - tq), decreasing = TRUE)[1:3]
     df$Label[outlier_idx] <- outlier_idx
     
@@ -373,7 +364,6 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
   })
   
   
-  # Cook's Distance plot
   output$cook_plot <- renderPlotly({
     req(model.fit())
     model <- model.fit()
@@ -402,15 +392,12 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     req(model.fit())
     model <- model.fit()
     cooks <- cooks.distance(model)
-    threshold <- input$cook_thresh %||% (4 / length(cooks))
+    threshold <- input$cook_thresh %||% (4/length(cooks))
     
     flagged <- which(cooks > threshold)
     if (length(flagged) == 0) return(data.frame(Message = "No observations flagged."))
     
-    data.frame(
-      Observation = flagged,
-      `Cook's Distance` = round(cooks[flagged], 5)
-    )
+    data.frame( Observation = flagged,`Cook's Distance` = round(cooks[flagged], 5))
   },digits=4)
   
 }

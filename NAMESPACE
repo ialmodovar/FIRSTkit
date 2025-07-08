@@ -1,30 +1,29 @@
-export(app_ui)
-export(app_server)
-export(intro_ui)
-export(intro_server)
-export(data_ui)
-export(data_server)
-export(descriptive_stats_ui)
-export(descriptive_stats_server)
-export(probability_ui)
-export(probability_server)
-export(stats_inference_ui)
-export(stats_inference_server)
-export(linear_regression_ui)
-export(linear_regression_server)
 export(FIRSTkit)
 
 import(shiny)
-import(shinythemes)
-import(readxl)
-import(readODS)
-import(googlesheets4)
-import(openxlsx)
-import(plotly)
 import(dplyr)
 import(venn)
-import(MASS)
 import(DiagrammeR)
-import(car)
 import(ggplot2)
+
+importFrom("readxl", "read_excel")
+importFrom("openxlsx", "createWorkbook", "addWorksheet","writeData", "saveWorkbook")
+importFrom("googlesheets4", "read_sheet")
+importFrom("readODS", "read_ods","write_ods")
+importFrom("shinythemes","shinytheme")
+importFrom("base64enc", "dataURI")
+importFrom("MASS", "studres")
+importFrom("car","Anova")
+importFrom("plotly","ggplotly","plotlyOutput","renderPlotly")
+
+importFrom("stats", "AIC", "BIC", "IQR", "TukeyHSD", "anova",
+             "ansari.test", "aov", "as.formula", "bartlett.test",
+             "binom.test", "coef", "confint", "cooks.distance", "cor",
+             "cor.test", "dbinom", "dchisq", "density", "deviance",
+             "df.residual", "dgeom", "dhyper", "dnorm", "dpois", "dt",
+             "fitted", "fligner.test", "kruskal.test", "lm", "mad",
+             "median", "pchisq", "pnorm", "ppoints", "qbinom", "qchisq",
+             "qf", "qhyper", "qnorm", "qpois", "qt", "sd", "t.test",
+             "var", "var.test", "wilcox.test")
+importFrom("utils", "head", "read.csv", "str", "write.csv")
 

@@ -173,13 +173,9 @@ all.t.two.sample.test <- function(x, y, delta0 = 0,paired = FALSE, var.equal = F
   res <- data.frame(Test = tt, df = dfs, CI =ci,Pvalue = pval)
   names(res) <- c("statistic","DF",paste(as.character((1-alpha)*100),"% CI",sep=""),"p-value")
   
-  #   rownames(res) <- c(paste("\\(H_{1}: \\mu_{1}-\\mu_{2} =\\) ",delta0,sep=""),
-  #                      paste("H_1: mu_1-mu_2 < ",delta0,sep=""),
-  #                      paste("H_1: mu_1-mu_2 > ",delta0,sep=""))
-  # res
-  rownames(res) <- c(paste("\\(H_{1}: \\mu_{1}-\\mu_{2} \\neq \\) ",delta0,sep=""),
-                     paste("\\(H_{1}: \\mu_{1}-\\mu_{2} <\\) ",delta0,sep=""),
-                     paste("\\(H_{1}: \\mu_{1}-\\mu_{2} >\\) ",delta0,sep=""))
+  rownames(res) <- c(paste0("\\( H_1: \\mu_1 - \\mu_2 \\neq ", delta0, " \\)"),
+                     paste0("\\( H_1: \\mu_1 - \\mu_2 < ", delta0, " \\)"),
+                     paste0("\\( H_1: \\mu_1 - \\mu_2 > ", delta0, " \\)"))
   res
   
 }
@@ -396,7 +392,7 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                             )
                                           )
                                  ),
-                                 tabPanel("Two Sample Inference",
+                                 tabPanel("Two Samples Inference",
                                           sidebarLayout(
                                               sidebarPanel(
                                                 withMathJax(),
@@ -415,7 +411,8 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                                    textInput("delta0", label = withMathJax("\\( H_0: \\mu_1 - \\mu_2 = \\delta_0 \\)"),
                                                                              value = "0", placeholder = "Enter null difference"),
                                                                    fluidRow(
-                                                                     column(6, tags$b("Two-Sample \\( t \\) test"), tableOutput("mean")),
+                                                                     withMathJax(),
+                                                                     column(6, tags$b("Two-Samples \\( t \\) test"), tableOutput("mean")),
                                                                      column(6, tags$b("Mann-Whitney-Wilcoxon test"), tableOutput("loc"))
                                                                    ),
                                                           ),
@@ -456,8 +453,7 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                                    textInput("p0", label = withMathJax("\\( H_0: p_1 - p_2 = p_0 \\)"),
                                                                              value = "0", placeholder = "Enter null difference in proportions"),
                                                                    fluidRow(
-                                                                     column(6, tags$b("Two-Sample Proportion test"), tableOutput("proportion")),
-                                                                  ##   column(6, tags$b("Wald CI for difference"), tableOutput("prop_ci"))
+                                                                     column(6, tags$b("Two-Samples Proportion test"), tableOutput("proportion")),
                                                                    ),
                                                           )
                                               )
@@ -542,9 +538,6 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     
     tagList(inputs)
   })
-  
-##---- one sample mean inference
- 
   
   ##---- one sample proportion inference  
   output$proportion <- renderTable({
@@ -885,8 +878,7 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
       Estimate = round(tky.df$diff, 3),
       CI = paste0("(", round(tky.df$lwr, 3), ", ", round(tky.df$upr, 3), ")"),
       pvalue = ifelse(tky.df$`p adj` < 0.001, "<0.001", round(tky.df$`p adj`, 3)),
-      check.names = FALSE
-    )
+      check.names = FALSE)
     
     names(res.tky)[3] <- paste(conf*100,"% CI",sep="")
     names(res.tky)[4] <- "\\(p\\)-value"
@@ -902,8 +894,7 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     fit <- kruskal.test(as.formula(paste(input$dvar, "~", input$ivar)), data = df)
     data.frame(Statistic = round(fit$statistic, 4), DF = as.integer(fit$parameter),
       `p-value` = ifelse(fit$p.value >= 0.001, round(fit$p.value, 4),"<0.001"),
-      row.names = "Kruskal-Wallis"
-    )
+      row.names = "Kruskal-Wallis")
   }, rownames = TRUE)
   
   output$BartlettSummary <- renderTable({
@@ -913,8 +904,7 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     fit <- bartlett.test(as.formula(paste(input$dvar, "~", input$ivar)), data = df)
     data.frame( DF = as.integer(fit$parameter), Statistic = round(fit$statistic, 4),
       `p-value` = ifelse(fit$p.value >= 0.001, round(fit$p.value, 4),"<0.001"),
-      row.names = "Bartlett"
-    )
+      row.names = "Bartlett")
   }, rownames = TRUE)
   
   output$FlignerSummary <- renderTable({

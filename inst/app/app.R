@@ -1,4 +1,16 @@
-library(shiny)
-library(FIRSTkit)
+##*********************************************
+##*
+##* @file: app.R
+##*
+##* Run FIRSTkit software
+##*
+##* Author:
+##* Israel Almodovar-Rivera PhD
+##* Department of Mathematical Sciences
+##* University of Puerto Rico at Mayaguez
+##* israel.almodovar@upr.edu
+##* Copyright June 2025
+##*********************************************
 
-shinyApp(ui = FIRSTkit::app_ui(), server = FIRSTkit::app_server)
+
+shinyApp(ui = app_ui(), server = app_server)
