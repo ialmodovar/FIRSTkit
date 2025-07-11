@@ -165,7 +165,7 @@ all.t.two.sample.test <- function(x, y, delta0 = 0,paired = FALSE, var.equal = F
   
   ci <- c(paste("(",paste(round(twosided$conf.int[1],digits=4),",",
                           round(twosided$conf.int[2],digits=4),sep=""),")",sep=""),
-          paste("(",paste(round(oneless$conf.int[1],digits=4),",",
+          paste("(",paste("\\( -\\infty\\),",
                           round(oneless$conf.int[2],digits=4),sep=""),")",sep=""),
           paste("(",paste(round(onegreater$conf.int[1],digits=4),",",
                           round(onegreater$conf.int[2],digits=4),sep=""),")",sep=""))
@@ -173,9 +173,9 @@ all.t.two.sample.test <- function(x, y, delta0 = 0,paired = FALSE, var.equal = F
   res <- data.frame(Test = tt, df = dfs, CI =ci,Pvalue = pval)
   names(res) <- c("statistic","DF",paste(as.character((1-alpha)*100),"% CI",sep=""),"p-value")
   
-  rownames(res) <- c(paste0("\\( H_1: \\mu_1 - \\mu_2 \\neq ", delta0, " \\)"),
-                     paste0("\\( H_1: \\mu_1 - \\mu_2 < ", delta0, " \\)"),
-                     paste0("\\( H_1: \\mu_1 - \\mu_2 > ", delta0, " \\)"))
+  rownames(res) <- c(paste("\\(H_{1}: \\mu_{1}-\\mu_{2} \\neq \\) ",delta0,sep=""),
+                     paste("\\(H_{1}: \\mu_{1}-\\mu_{2} <\\) ",delta0,sep=""),
+                     paste("\\(H_{1}: \\mu_{1}-\\mu_{2} >\\) ",delta0,sep=""))
   res
   
 }
@@ -386,10 +386,11 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                          ),
                                                          hr(),
                                                          uiOutput("tableUIprop_all"),
-                                                         textInput("p0", label = withMathJax("\\( H_0: p = p_0 \\)"), value = "0.5",
-                                                                   placeholder = "Indicate the null value for the proportion"))
-                                              )
+                                                          textInput("p0", label = withMathJax("\\( H_0: p = p_0 \\)"), value = "0.5",
+                                                                    placeholder = "Indicate the null value for the proportion"))
+                                              
                                             )
+                                          )
                                           )
                                  ),
                                  tabPanel("Two Samples Inference",
@@ -412,8 +413,8 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                                              value = "0", placeholder = "Enter null difference"),
                                                                    fluidRow(
                                                                      withMathJax(),
-                                                                     column(6, tags$b("Two-Samples \\( t \\) test"), tableOutput("mean")),
-                                                                     column(6, tags$b("Mann-Whitney-Wilcoxon test"), tableOutput("loc"))
+                                                                     column(6, tags$b("Two-Samples \\( t \\) test"), tableOutput("twomean")),
+                                                                     column(6, tags$b("Mann-Whitney-Wilcoxon test"), tableOutput("twoloc"))
                                                                    ),
                                                           ),
                                                           tabPanel("Dispersion Inference",
@@ -463,6 +464,7 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                  tabPanel(title = "Three samples or more inference",
                                           sidebarLayout(
                                             sidebarPanel(
+                                              withMathJax(), 
                                               uiOutput('var'),
                                               selectInput('type', 'Sums of Squares Type',
                                                           c(I = 'type1', II = 'type2', III = 'type3'), 'type1'),
@@ -677,29 +679,29 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
       )
     }, rownames = TRUE, digits = 4)
     
-    # Wald CI output
-    output[[ci_output_id]] <- renderTable({
-      if (input$propsuccess == "pr") {
-        phat <- as.numeric(input$p_prop)
-      } else {
-        phat <- input$x_prop / input$nprop
-      }
-      
-      se <- sqrt(phat*(1-phat)/input$nprop)
-      z <- qnorm(1-alpha/ 2)
-      ci_lower <- phat - z * se
-      ci_upper <- phat + z * se
-      data.frame( Estimate = round(phat, 4), `Lower CI` = round(ci_lower, 4),`Upper CI` = round(ci_upper, 4))
-    }, rownames = FALSE)
+    # # Wald CI output
+    # output[[ci_output_id]] <- renderTable({
+    #   if (input$propsuccess == "pr") {
+    #     phat <- as.numeric(input$p_prop)
+    #   } else {
+    #     phat <- input$x_prop/input$nprop
+    #   }
+    #   
+    #   se <- sqrt(phat*(1-phat)/input$nprop)
+    #   z <- qnorm(1-alpha/ 2)
+    #   ci_lower <- phat - z * se
+    #   ci_upper <- phat + z * se
+    #   data.frame( Estimate = round(phat, 4), `Lower CI` = round(ci_lower, 4),`Upper CI` = round(ci_upper, 4))
+    # }, rownames = FALSE)
     
     tagList(
       fluidRow(
         column(6,
                tags$b("One-Sample Proportion Test"),
-               tableOutput(test_output_id)),
-        column(6,
-               tags$b("Wald Confidence Interval"),
-               tableOutput(ci_output_id))
+               tableOutput(test_output_id))
+        # column(6,
+        #        tags$b("Wald Confidence Interval"),
+        #        tableOutput(ci_output_id))
       ),
       tags$hr()
     )
@@ -768,7 +770,7 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     list(x = x, y = y)
   })
 
-  output$mean <- renderTable({
+  output$twomean <- renderTable({
     data <- two.vars()
     req(data$x, data$y)
     all.t.two.sample.test(data$x, data$y,
@@ -776,9 +778,10 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
                           alpha = as.numeric(input$alpha),
                           paired=input$paired,
                           var.equal = input$equal_var)
-  }, rownames = TRUE)
+    
+  },rownames=TRUE)
   
-  output$loc <- renderTable({
+  output$twoloc <- renderTable({
     data <- two.vars()
     req(data$x, data$y)
     all.wilcoxon.two.sample.test(data$x, data$y,
@@ -841,10 +844,17 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     nvars <- names(df)[sapply(df, is.numeric)]
     fvars <- names(df)[sapply(df, function(x) is.factor(x) || is.character(x))]
     
-    tagList(
-      selectInput("dvar", "Response \\( (y) \\)", choices = nvars),
-      selectInput("ivar", "Fixed-effects \\( (\\alpha) \\)", choices = fvars)
+    # tagList(
+    #   selectInput("dvar", "Response \\( (y) \\)", choices = nvars),
+    #   selectInput("ivar", "Fixed-effects \\( (\\alpha) \\)", choices = fvars)
+    # )
+    withMathJax(
+      tagList(
+        selectInput("dvar", label = HTML("Response: \\( y \\)"), choices = nvars),
+        selectInput("ivar", label = HTML("Fixed-effects: \\( \\alpha \\)"), choices = fvars)
+      )
     )
+    
   })
   
   output$aovSummary <- renderTable({

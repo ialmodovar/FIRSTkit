@@ -31,6 +31,7 @@ descriptive_stats_ui <- tabPanel("Descriptive Statistics",
                               ),
                               checkboxGroupInput("dispersion_stats", "Dispersion Statistics:",
                                                  choices = c("Sample variance (\\( s^2\\))" = "var","Sample standard deviation (\\( s\\))" = "sd", "Interquartile range (\\( IQR\\))" = "iqr", "Median absolute deviation (\\( MAD\\))" = "mad", "Range (\\( R \\))" = "range")),
+                              textInput("quantiles", "Enter Quantiles (comma-separated, between 0 and 1)", "0, 0.25, 0.5, 0.75,1"),
                               selectInput("group_by", "Group by (optional):", choices = NULL),
                               selectInput("plot_type", "Plot Type:", choices = c("None", "Histogram","Density" ,"Boxplot", "Barplot")),
                               actionButton("run_desc", "Submit")
@@ -41,6 +42,8 @@ descriptive_stats_ui <- tabPanel("Descriptive Statistics",
                                          uiOutput("latex_table_ui")),
                                 tabPanel("Frequency", 
                                          uiOutput("cat_summary")),
+                                tabPanel("Quantiles", 
+                                         tableOutput("qtable")),
                                 tabPanel("Visualization", 
                                          uiOutput("plots"))
                               )
@@ -64,10 +67,9 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
   })
   
   observe({
-    df <- firstkit.data()
-    if (!is.null(df)) {
-     # nn <- varnames[!sapply(df, is.numeric)]
-      updateSelectInput(session, "group_by", choices = c("None", names(df)), selected = "None")
+    if (!is.null(firstkit.data())) {
+      gvars <- names(firstkit.data())[sapply(firstkit.data(), function(x) is.factor(x) || is.character(x))]
+      updateSelectInput(session, "group_by", choices = c("None", gvars), selected = "None")
     }
   })
   
@@ -84,18 +86,18 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
     numeric.vars <- input$num_vars
     group_var <- if (input$group_by != "None") input$group_by else NULL
     
-    stat_funs <- list()
-    if ("mean" %in% input$location_stats) stat_funs$`\\( \\bar{x} \\)` <- function(x, na.rm=TRUE) mean(x, na.rm=na.rm)
-    if ("median" %in% input$location_stats) stat_funs$`\\( M \\)` <- function(x, na.rm=TRUE) median(x, na.rm=na.rm)
-    if ("geo.mean" %in% input$location_stats) stat_funs$`\\(g\\)` <- function(x, na.rm=TRUE) geo.mean(x, na.rm=na.rm)
-    if ("tmean" %in% input$location_stats) stat_funs$`\\( \\tilde{x} \\)` <- function(x, na.rm=TRUE) mean(x, na.rm=na.rm,trim=input$trim_level)
-    if ("var" %in% input$dispersion_stats) stat_funs$`\\( s^2 \\)` <- function(x, na.rm=TRUE) var(x, na.rm=na.rm)
-    if ("sd" %in% input$dispersion_stats) stat_funs$`\\( s \\)` <- function(x, na.rm=TRUE) sd(x, na.rm=na.rm)
-    if ("iqr" %in% input$dispersion_stats) stat_funs$`\\( IQR \\)` <- function(x, na.rm=TRUE) IQR(x, na.rm=na.rm)
-    if ("mad" %in% input$dispersion_stats) stat_funs$`\\( MAD \\)` <- function(x, na.rm=TRUE) mad(x, constant = 1, na.rm=na.rm)
-    if ("range" %in% input$dispersion_stats) stat_funs$`\\( R \\)` <- function(x, na.rm=TRUE) max(x, na.rm=na.rm) - min(x, na.rm=na.rm)
+    stat.funs <- list()
+    if ("mean" %in% input$location_stats) stat.funs$`\\( \\bar{x} \\)` <- function(x, na.rm=TRUE) mean(x, na.rm=na.rm)
+    if ("median" %in% input$location_stats) stat.funs$`\\( M \\)` <- function(x, na.rm=TRUE) median(x, na.rm=na.rm)
+    if ("geo.mean" %in% input$location_stats) stat.funs$`\\(g\\)` <- function(x, na.rm=TRUE) geo.mean(x, na.rm=na.rm)
+    if ("tmean" %in% input$location_stats) stat.funs$`\\( \\tilde{x} \\)` <- function(x, na.rm=TRUE) mean(x, na.rm=na.rm,trim=input$trim_level)
+    if ("var" %in% input$dispersion_stats) stat.funs$`\\( s^2 \\)` <- function(x, na.rm=TRUE) var(x, na.rm=na.rm)
+    if ("sd" %in% input$dispersion_stats) stat.funs$`\\( s \\)` <- function(x, na.rm=TRUE) sd(x, na.rm=na.rm)
+    if ("iqr" %in% input$dispersion_stats) stat.funs$`\\( IQR \\)` <- function(x, na.rm=TRUE) IQR(x, na.rm=na.rm)
+    if ("mad" %in% input$dispersion_stats) stat.funs$`\\( MAD \\)` <- function(x, na.rm=TRUE) mad(x, constant = 1, na.rm=na.rm)
+    if ("range" %in% input$dispersion_stats) stat.funs$`\\( R \\)` <- function(x, na.rm=TRUE) max(x, na.rm=na.rm) - min(x, na.rm=na.rm)
     
-    if (length(stat_funs) == 0 || length(numeric.vars) == 0)
+    if (length(stat.funs) == 0 || length(numeric.vars) == 0)
       return(data.frame(Message = "No statistics selected or no numeric variables chosen."))
     
     if (!is.null(group_var) && group_var %in% names(df)) {
@@ -103,19 +105,19 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
         dplyr::select(all_of(c(group_var, numeric.vars))) %>%
         group_by(.data[[group_var]])
       
-      summary_list <- lapply(numeric.vars, function(var) {
+      summary_list <- lapply(numeric.vars, function(v) {
         stats <- grouped_data %>%
-          summarise(across(all_of(var), stat_funs, .names = "{.fn}"), .groups = "drop")
-        stats <- stats %>% mutate(Variable = var)
+          summarise(across(all_of(v), stat.funs, .names = "{.fn}"), .groups = "drop")
+        stats <- stats %>% mutate(Variable = v)
         stats[, c(group_var, "Variable", setdiff(names(stats), c(group_var, "Variable")))]
       })
       
       bind_rows(summary_list)
     } else {
-      summary_list <- lapply(numeric.vars, function(var) {
-        values <- df[[var]]
-        stats <- sapply(stat_funs, function(f) f(values))
-        data.frame(Variable = var, t(stats), row.names = NULL, check.names = FALSE)
+      summary_list <- lapply(numeric.vars, function(v) {
+        values <- df[[v]]
+        stats <- sapply(stat.funs, function(f) f(values))
+        data.frame(Variable = v, t(stats), row.names = NULL, check.names = FALSE)
       })
       bind_rows(summary_list)
     }
@@ -187,6 +189,51 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
     }
     
     do.call(tagList, output_list)
+  })
+  
+  observeEvent(input$run_desc, {
+    req(input$num_vars, input$quantiles)
+    
+    # Parse quantile values
+    probs <- as.numeric(strsplit(input$quantiles, ",")[[1]])
+    probs <- probs[!is.na(probs) & probs >= 0 & probs <= 1]
+    
+    if (length(probs) == 0) {
+      showNotification("Please enter valid quantile values between 0 and 1.", type = "error")
+      return(NULL)
+    }
+    
+    df <- firstkit.data()
+    vars <- input$num_vars
+    group_var <- input$group_by
+    qnames <- paste0(probs * 100, "%")
+    
+    sdf <- data.frame()
+    
+    if (group_var == "None") {
+      for (v in vars) {
+        qvals <- quantile(df[[v]], probs = probs, na.rm = TRUE)
+        sdf <- rbind(sdf, data.frame(Variable = v,t(qvals)))
+      }
+      colnames(sdf) <- c("Variable", qnames)
+      
+    } else {
+      req(group_var %in% names(df))
+      df[[group_var]] <- as.factor(df[[group_var]])
+      
+      for (g in levels(df[[group_var]])) {
+        subset_df <- df[df[[group_var]] == g, ]
+        for (v in vars) {
+          qvals <- quantile(subset_df[[v]], probs = probs, na.rm = TRUE)
+          sdf <- rbind(sdf, data.frame(Group = g,Variable = v,t(qvals)))
+        }
+      }
+      colnames(sdf) <- c("Group", "Variable", qnames)
+    }
+    
+    output$qtable <- renderTable({
+      sdf
+    })
   })
   
   output$plots <- renderUI({

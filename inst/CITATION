@@ -1,0 +1,11 @@
+citHeader("To cite FIRSTkit in a publication use:")
+
+citEntry(
+  entry = "Misc",
+  title = "{FIRSTkit}: First Impressions R-based Statistics Toolkit for Teaching and Implementing Introductory Statistics ",
+  author = personList(as.person("Israel Almodovar-Rivera")),
+  year = "2025",
+  note = "{R} Package, URL http://github.com/ialmodovar/FIRSTkit",
+  textVersion = "Almodovar-Rivera, I., Maitra, R.(2025) FIRSTkit: First Impressions R-based Statistics Toolkit for Teaching and Implementing Introductory Statistics. R Package, URL http://github.com/ialmodovar/FIRSTkit",
+  key = "AlmodovarRiveraandMaitra25"
+)

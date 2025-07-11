@@ -1,10 +1,11 @@
 
-intro_ui <- tabPanel("WELCOME",
+intro_ui <- tabPanel("Welcome",
                      fluidPage(
                        titlePanel("FIRST Impressions R-based Statistics Toolkit (FIRSTkit)"),
                        withMathJax(),
                        h4("Introduction"),
-                       p("FIRSTkit is a companion for introductory statistics courses requiring no prior R knowledge. It enables statistical analysis with minimal programming and helps students grasp fundamental concepts interactively."),
+                       p("FIRSTkit is a companion for introductory statistics courses requiring no prior R knowledge."), 
+                       p("It enables statistical analysis with minimal programming and helps students grasp fundamental concepts interactively."),
 
                        h4("Modules Covered"),
                        tags$ul(
@@ -12,7 +13,7 @@ intro_ui <- tabPanel("WELCOME",
                          tags$li("Probability Theory"),
                          tags$li("Distribution Functions"),
                          tags$li("Statistical Inference"),
-                         tags$li("Simple and Multiple Linear Regression")
+                         tags$li("Linear Regression")
                        ),
 
                        h4("Data Input/Upload"),
@@ -22,7 +23,7 @@ intro_ui <- tabPanel("WELCOME",
                        tags$ul(
                          tags$li("Location Measurements: Mean, Trimmed Mean, Median, Geometric Mean"),
                          tags$li("Dispersion Measures: Standard Deviation, Variance, IQR, MAD, Range"),
-                         tags$li("Visualizations: Boxplot, Histograms,  and Bar Graph")
+                         tags$li("Visualizations: Boxplot, Histograms, Density plots and Bar Graph")
                        ),
 
                        h4("Probability Theory and Distribution Functions"),
@@ -41,27 +42,29 @@ intro_ui <- tabPanel("WELCOME",
 
                        h4("Continuous Distributions"),
                        tags$ul(
+                         withMathJax(),
                          tags$li("Normal Distribution"),
                          tags$li("Chi-Squared Distribution"),
-                         tags$li("Student's t Distribution"),
-                         tags$li("Snedecor's F Distribution")
+                         tags$li("Student's \\(t\\) Distribution"),
+                         tags$li("Snedecor's \\(F\\) Distribution")
                        ),
 
                        h4("Inferential Statistics"),
                        tags$ul(
-                         tags$li("One-Sample Tests: t-test, Wilcoxon, Chi-squared test for variance, Proportion test"),
-                         tags$li("Two-Sample Tests: Independent & Paired t-tests, Wilcoxon-Mann-Whitney, F-test, Proportion test"),
+                         withMathJax(),
+                         tags$li("One-Sample Tests: \\(t\\)-test, Wilcoxon, Chi-squared test for variance, Proportion test"),
+                         tags$li("Two-Sample Tests: Independent & Paired \\(t\\)-tests, Wilcoxon-Mann-Whitney, \\(F\\)-test, Proportion test"),
                          tags$li("Three or More Samples: ANOVA, Kruskal-Wallis, Multiple Comparison")
                        ),
 
                        h4("Linear Regression"),
-                       p("Fit simple or multiple linear regression models. The model assumes normally distributed residuals with constant variance:"),
+                       p("Fit a linear regression models. The model assumes normally distributed residuals with constant variance:"),
                        uiOutput("regression_equation")
                      )
 )
 
 intro_server <- function(input, output, session) {
   output$regression_equation <- renderUI({
-    withMathJax("$$Y_i = \\beta_0 + \\sum^p_{j=1} \\beta_j x_{ij} + \\varepsilon_i$$ where \\( \\varepsilon_i \\sim N(0, \\sigma^2) \\)")
+    withMathJax("\\(Y_i = \\beta_0 + \\sum^p_{j=1} \\beta_j x_{ij} + \\varepsilon_i\\) where \\( \\varepsilon_i \\sim N(0, \\sigma^2) \\)")
   })
 }
