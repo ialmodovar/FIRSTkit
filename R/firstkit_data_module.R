@@ -24,6 +24,7 @@ data_ui <- tabPanel("Data",
              conditionalPanel(
                condition = "input.upload_method == 'gsheet'",
                textInput("gsheet_url", "Enter Google Sheets URL"),
+               helpText("FIRSTkit uses the R package googlesheets4. Make sure you have OAuth access credentials. For any question about googlesheets4 package, see https://github.com/tidyverse/googlesheets4."),
                actionButton("load_gsheet", "Load Data")
              ),
              conditionalPanel(

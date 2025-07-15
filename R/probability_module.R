@@ -710,9 +710,9 @@ output$posterior <- renderUI({
   }
 })
 
-# ##**************************
-# ##* Discrete distributions
-# ##**************************
+##**************************
+##* Discrete distributions
+##**************************
 
 output$binomialPlot <- renderPlotly({
   xx <- qbinom(0.99999, size = input$n_binomial, prob = input$p_binomial, lower.tail = FALSE):
@@ -720,17 +720,17 @@ output$binomialPlot <- renderPlotly({
 
   probs <- dbinom(xx, size = input$n_binomial, prob = input$p_binomial)
 
-  df <- data.frame(x = xx, prob = probs)
+  dt.probs <- data.frame(x = xx, prob = probs)
 
-  df$X <- switch(input$tail_binomial,
-                 equal = ifelse(df$x <= input$x1_binomial, "2", "Other"),
-                 lower.tail = ifelse(df$x <= input$x1_binomial, "2", "Other"),
-                 upper.tail = ifelse(df$x >  input$x2_binomial, "2", "Other"),
-                 two.sided  = ifelse(df$x >= input$a_binomial & df$x <= input$b_binomial, "2", "Other"))
+  dt.probs$X <- switch(input$tail_binomial,
+                 equal = ifelse(dt.probs$x <= input$x1_binomial, "2", "Other"),
+                 lower.tail = ifelse(dt.probs$x <= input$x1_binomial, "2", "Other"),
+                 upper.tail = ifelse(dt.probs$x >  input$x2_binomial, "2", "Other"),
+                 two.sided  = ifelse(dt.probs$x >= input$a_binomial & dt.probs$x <= input$b_binomial, "2", "Other"))
 
-  df$x <- as.factor(df$x)
+  dt.probs$x <- as.factor(dt.probs$x)
 
-  p <- ggplot(df, aes(x = x, y = prob, fill = X, color = X, text = paste("x =", x, "<br>p =", round(prob, 4)))) +
+  p <- ggplot(dt.probs, aes(x = x, y = prob, fill = X, color = X, text = paste("x =", x, "<br>p =", round(prob, 4)))) +
     geom_col() +
     geom_text(aes(label = round(prob, 4), y = prob + 0.005), size = 3, vjust = 0) +
     scale_fill_manual(values = c("2" = "#656565", "Other" = "#ffffff")) +
@@ -746,15 +746,15 @@ output$binomialPlot <- renderPlotly({
 output$PoissonPlot <- renderPlotly({
   lambda <- input$lambda_poisson
   xx <- qpois(0.99999, lambda, lower.tail = FALSE):qpois(0.99999, lambda, lower.tail = TRUE)
-  df <- data.frame(x = xx, prob = dpois(xx, lambda = lambda))
+  dt.probs <- data.frame(x = xx, prob = dpois(xx, lambda = lambda))
 
-  df$region <- switch(input$tail_poisson,
-                      "equal" = ifelse(df$x <= input$x1_poisson, "Interest", "Other"),
-                      "lower.tail" = ifelse(df$x <= input$x1_poisson, "Interest", "Other"),
-                      "upper.tail" = ifelse(df$x > input$x2_poisson, "Interest", "Other"),
-                      "two.sided" = ifelse(df$x >= input$a_poisson & df$x <= input$b_poisson, "Interest", "Other"))
+  dt.probs$region <- switch(input$tail_poisson,
+                      "equal" = ifelse(dt.probs$x <= input$x1_poisson, "Interest", "Other"),
+                      "lower.tail" = ifelse(dt.probs$x <= input$x1_poisson, "Interest", "Other"),
+                      "upper.tail" = ifelse(dt.probs$x > input$x2_poisson, "Interest", "Other"),
+                      "two.sided" = ifelse(dt.probs$x >= input$a_poisson & dt.probs$x <= input$b_poisson, "Interest", "Other"))
 
-  p <- ggplot(df, aes(x = factor(x), y = prob, fill = region)) +
+  p <- ggplot(dt.probs, aes(x = factor(x), y = prob, fill = region)) +
     geom_col(color = "black") +
     geom_text(aes(label = round(prob, 4)), vjust = -0.5, size = 3) +
     scale_fill_manual(values = c("Interest" = "#656565", "Other" = "white")) +
@@ -769,18 +769,18 @@ output$PoissonPlot <- renderPlotly({
 })
 
 output$geometricPlot <- renderPlotly({
-  p_geom <- input$p_geom
-  xmax <- ceiling(p_geom + 5 * sqrt((1 - p_geom) / p_geom^2))
+  pgeom <- input$p_geom
+  xmax <- ceiling(pgeom + 5 * sqrt((1 - pgeom) / pgeom^2))
   xx <- 0:xmax
-  df <- data.frame(x = xx, prob = dgeom(xx, prob = p_geom))
+  dt.probs <- data.frame(x = xx, prob = dgeom(xx, prob = pgeom))
 
-  df$region <- switch(input$tail_geom,
-                      "equal" = ifelse(df$x <= input$x1_geom, "Interest", "Other"),
-                      "lower.tail" = ifelse(df$x <= input$x1_geom, "Interest", "Other"),
-                      "upper.tail" = ifelse(df$x > input$x2_geom, "Interest", "Other"),
-                      "two.sided" = ifelse(df$x >= input$a_geom & df$x <= input$b_geom, "Interest", "Other"))
+  dt.probs$region <- switch(input$tail_geom,
+                      "equal" = ifelse(dt.probs$x <= input$x1_geom, "Interest", "Other"),
+                      "lower.tail" = ifelse(dt.probs$x <= input$x1_geom, "Interest", "Other"),
+                      "upper.tail" = ifelse(dt.probs$x > input$x2_geom, "Interest", "Other"),
+                      "two.sided" = ifelse(dt.probs$x >= input$a_geom & dt.probs$x <= input$b_geom, "Interest", "Other"))
 
-  p <- ggplot(df, aes(x = factor(x), y = prob, fill = region)) +
+  p <- ggplot(dt.probs, aes(x = factor(x), y = prob, fill = region)) +
     geom_col(color = "black") +
     geom_text(aes(label = round(prob, 4)), vjust = -0.5, size = 3) +
     scale_fill_manual(values = c("Interest" = "#656565", "Other" = "white")) +
@@ -802,15 +802,15 @@ output$HypergeometricPlot <- renderPlotly({
   xx <- qhyper(0.99999, m = m, n = N - m, k = k, lower.tail = FALSE):
     qhyper(0.99999, m = m, n = N - m, k = k, lower.tail = TRUE)
 
-  df <- data.frame(x = xx, prob = dhyper(xx, m = m, n = N - m, k = k))
+  dt.probs <- data.frame(x = xx, prob = dhyper(xx, m = m, n = N - m, k = k))
 
-  df$region <- switch(input$tail_hypergeometric,
-                      "equal" = ifelse(df$x <= input$x1_hypergeometric, "Interest", "Other"),
-                      "lower.tail" = ifelse(df$x <= input$x1_hypergeometric, "Interest", "Other"),
-                      "upper.tail" = ifelse(df$x > input$x2_hypergeometric, "Interest", "Other"),
-                      "two.sided" = ifelse(df$x >= input$a_hypergeometric & df$x <= input$b_hypergeometric, "Interest", "Other"))
+  dt.probs$region <- switch(input$tail_hypergeometric,
+                      "equal" = ifelse(dt.probs$x <= input$x1_hypergeometric, "Interest", "Other"),
+                      "lower.tail" = ifelse(dt.probs$x <= input$x1_hypergeometric, "Interest", "Other"),
+                      "upper.tail" = ifelse(dt.probs$x > input$x2_hypergeometric, "Interest", "Other"),
+                      "two.sided" = ifelse(dt.probs$x >= input$a_hypergeometric & dt.probs$x <= input$b_hypergeometric, "Interest", "Other"))
 
-  p <- ggplot(df, aes(x = factor(x), y = prob, fill = region)) +
+  p <- ggplot(dt.probs, aes(x = factor(x), y = prob, fill = region)) +
     geom_col(color = "black") +
     geom_text(aes(label = round(prob, 4)), vjust = -0.5, size = 3) +
     scale_fill_manual(values = c("Interest" = "#656565", "Other" = "white")) +
@@ -838,15 +838,15 @@ output$normalPlot <- renderPlotly({
   }
 
   xx <- seq(qnorm(0.0001, mean, sigma), qnorm(0.9999, mean, sigma), length.out = 500)
-  df <- data.frame(x = xx, y = dnorm(xx, mean, sigma))
+  dt.probs <- data.frame(x = xx, y = dnorm(xx, mean, sigma))
 
-  df$region <- switch(input$tail_normal,
-                      "lower.tail" = ifelse(df$x <= input$x1_normal, "Interest", "Other"),
-                      "upper.tail" = ifelse(df$x > input$x2_normal, "Interest", "Other"),
-                      "two.sided" = ifelse(df$x >= input$a_normal & df$x <= input$b_normal, "Interest", "Other")
+  dt.probs$region <- switch(input$tail_normal,
+                      "lower.tail" = ifelse(dt.probs$x <= input$x1_normal, "Interest", "Other"),
+                      "upper.tail" = ifelse(dt.probs$x > input$x2_normal, "Interest", "Other"),
+                      "two.sided" = ifelse(dt.probs$x >= input$a_normal & dt.probs$x <= input$b_normal, "Interest", "Other")
   )
 
-  p <- ggplot(df, aes(x = x, y = y, fill = region)) +
+  p <- ggplot(dt.probs, aes(x = x, y = y, fill = region)) +
     geom_area(aes(group = region), color = "black") +
     scale_fill_manual(values = c("Interest" = "#656565", "Other" = "white")) +
     scale_color_manual(values = c("Interest" = "#000000", "Other" = "#000000")) +
@@ -862,14 +862,14 @@ output$normalPlot <- renderPlotly({
 output$chiSquarePlot <- renderPlotly({
   dfg <- input$df_chisq
   xx <- seq(qchisq(0.0001, dfg), qchisq(0.9999, dfg), length.out = 500)
-  df <- data.frame(x = xx, y = dchisq(xx, dfg))
+  dt.probs <- data.frame(x = xx, y = dchisq(xx, dfg))
 
-  df$region <- switch(input$tail_chisq,
-                           "lower.tail" = ifelse(df$x <= input$x1_chisq, "Interest", "Other"),
-                           "upper.tail" = ifelse(df$x > input$x2_chisq, "Interest", "Other"),
-                           "two.sided" = ifelse(df$x >= input$a_chisq & df$x <= input$b_chisq, "Interest", "Other"))
+  dt.probs$region <- switch(input$tail_chisq,
+                           "lower.tail" = ifelse(dt.probs$x <= input$x1_chisq, "Interest", "Other"),
+                           "upper.tail" = ifelse(dt.probs$x > input$x2_chisq, "Interest", "Other"),
+                           "two.sided" = ifelse(dt.probs$x >= input$a_chisq & dt.probs$x <= input$b_chisq, "Interest", "Other"))
 
-  p <- ggplot(df, aes(x = x, y = y, fill = region)) +
+  p <- ggplot(dt.probs, aes(x = x, y = y, fill = region)) +
     geom_area(aes(group = region), color = "black") +
     scale_fill_manual(values = c("Interest" = "#656565", "Other" = "white")) +
     scale_color_manual(values = c("Interest" = "#000000", "Other" = "#000000")) +
@@ -883,14 +883,14 @@ output$chiSquarePlot <- renderPlotly({
 output$StudenttPlot <- renderPlotly({
   dft <- input$df_t
   xx <- seq(qt(0.0005, dft), qt(0.9995, dft), length.out = 500)
-  df <- data.frame(x = xx, y = dt(xx, dft))
+  dt.probs <- data.frame(x = xx, y = dt(xx, dft))
 
-  df$region <- switch(input$tail_studentt,
-                           "lower.tail" = ifelse(df$x <= input$x1_t, "Interest", "Other"),
-                           "upper.tail" = ifelse(df$x > input$x2_t, "Interest", "Other"),
-                           "two.sided" = ifelse(df$x >= input$a_t & df$x <= input$b_t, "Interest", "Other"))
+  dt.probs$region <- switch(input$tail_studentt,
+                           "lower.tail" = ifelse(dt.probs$x <= input$x1_t, "Interest", "Other"),
+                           "upper.tail" = ifelse(dt.probs$x > input$x2_t, "Interest", "Other"),
+                           "two.sided" = ifelse(dt.probs$x >= input$a_t & dt.probs$x <= input$b_t, "Interest", "Other"))
 
-  p <- ggplot(df, aes(x = x, y = y, fill = region)) +
+  p <- ggplot(dt.probs, aes(x = x, y = y, fill = region)) +
     geom_area(aes(group = region), color = "black") +
     scale_fill_manual(values = c("Interest" = "#656565", "Other" = "white")) +
     scale_color_manual(values = c("Interest" = "#000000", "Other" = "#000000")) +
@@ -905,14 +905,14 @@ output$SnedecorFPlot <- renderPlotly({
   df1 <- input$df1_f
   df2 <- input$df2_f
   xx <- seq(qf(0.0005, df1, df2), qf(0.9995, df1, df2), length.out = 500)
-  df <- data.frame(x = xx, y = df(xx, df1, df2))
+  dt.probs <- data.frame(x = xx, y = dt.probs(xx, df1, df2))
 
-  df$region <- switch(input$tail_f,
-                           "lower.tail" = ifelse(df$x <= input$x1_f, "Interest", "Other"),
-                           "upper.tail" = ifelse(df$x > input$x2_f, "Interest", "Other"),
-                           "two.sided" = ifelse(df$x >= input$a_f & df$x <= input$b_f, "Interest", "Other"))
+  dt.probs$region <- switch(input$tail_f,
+                           "lower.tail" = ifelse(dt.probs$x <= input$x1_f, "Interest", "Other"),
+                           "upper.tail" = ifelse(dt.probs$x > input$x2_f, "Interest", "Other"),
+                           "two.sided" = ifelse(dt.probs$x >= input$a_f & dt.probs$x <= input$b_f, "Interest", "Other"))
 
-  p <- ggplot(df, aes(x = x, y = y, fill = region)) +
+  p <- ggplot(dt.probs, aes(x = x, y = y, fill = region)) +
     geom_area(aes(group = region), color = "black") +
     scale_fill_manual(values = c("Interest" = "#656565", "Other" = "white")) +
     scale_color_manual(values = c("Interest" = "#000000", "Other" = "#000000")) +

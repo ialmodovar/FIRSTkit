@@ -266,11 +266,6 @@ all.ansari.two.sample.test <- function(x, y, ratio = 1,alpha = 0.05,...){
   res <- data.frame(Test = tt,CI =ci,Pval = pval)
   names(res) <- c("statistic",paste(as.character((1-alpha)*100),"% CI",sep=""),Pval = pval )
   
-  # rownames(res) <- c(paste("H_1: sigma^2_1/sigma^2_2 = ",ratio,sep=""),
-  #                    paste("H_1: sigma^2_1/sigma^2_2 < ",ratio,sep=""),
-  #                    paste("H_1: sigma^2_1/sigma^2_2 > ",ratio,sep=""))
-  # res
-  
   rownames(res) <- c(paste("\\(H_{1}: \\sigma_{1}/\\sigma_{2} \\neq \\)",1,sep=""),
                      paste("\\(H_{1}: \\sigma_{1}/\\sigma_{2} <\\)",1,sep=""),
                      paste("\\(H_{1}: \\sigma_{1}/\\sigma_{2} >\\)",1,sep=""))
@@ -481,12 +476,14 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                                             tableOutput('aovSummary')
                                                                      ),
                                                                      column(6,
+                                                                            withMathJax(),
                                                                             h4('Kruskal-Wallis Rank Sum Test'),
                                                                             tableOutput('KWSummary')
                                                                      )
                                                                    ),
                                                                    fluidRow(
                                                                      column(6,
+                                                                            withMathJax(),
                                                                             h4('Tukey HSD'),
                                                                             tableOutput('tukeySummary')
                                                                      ),
@@ -499,10 +496,12 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                           tabPanel("Dispersion Inference",
                                                                    fluidRow(
                                                                      column(6,
+                                                                            withMathJax(),
                                                                             h4("Bartlett test"),
                                                                             tableOutput("BartlettSummary")
                                                                      ),
                                                                      column(6,
+                                                                            withMathJax(),
                                                                             h4("Fligner-Killeen test"),
                                                                             tableOutput("FlignerSummary")
                                                                      )
@@ -528,15 +527,14 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
   
   output$mu0_inputs <- renderUI({
     req(input$num.vars)
-    var_list <- input$num.vars
+    var.list <- input$num.vars
     
-    inputs <- lapply(var_list, function(v) {
+    inputs <- lapply(var.list, function(v) {
       inputId <- paste0("mu0_", v)
       textInput(inputId,
                 label = withMathJax(paste0("Null hypothesis for ", v, ": \\( H_0: \\mu = \\mu_0 \\)")),
                 value = "0",
-                placeholder = "Enter \\(\\mu_0\\) for this variable")
-    })
+                placeholder = "Enter \\(\\mu_0\\) for this variable")})
     
     tagList(inputs)
   })
@@ -559,17 +557,16 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
       n = input$nprop,
       p = ifelse(input$propsuccess == "pr", input$p_prop, x/input$nprop),
       p0 = p0,
-      alpha = alpha
-    )
+      alpha = alpha)
   }, rownames = TRUE, digits = 4)
   
   output$tableUImean_all <- renderUI({
     req(input$num.vars)
     df <- firstkit.data()
     alpha <- as.numeric(input$alpha)
-    var_list <- input$num.vars
+    var.list <- input$num.vars
     
-    output_ui_list <- lapply(var_list, function(varname) {
+    output_ui_list <- lapply(var.list, function(varname) {
       t_output_id <- paste0("mean_", varname)
       w_output_id <- paste0("wilcox_", varname)
       mu_input_id <- paste0("mu0_", varname)
@@ -619,9 +616,9 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     req(input$num.vars)
     df <- firstkit.data()
     alpha <- as.numeric(input$alpha)
-    var_list <- input$num.vars
+    var.list <- input$num.vars
     
-    output_ui_list <- lapply(var_list, function(varname) {
+    output_ui_list <- lapply(var.list, function(varname) {
       chi_output_id <- paste0("variance_", varname)
       other_output_id <- paste0("othervar_", varname)
       sigma_input_id <- paste0("sigma0_", varname)
@@ -658,8 +655,7 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     p0 <- as.numeric(input$p0)
     
     test_output_id <- "prop_test"
-    ci_output_id <- "prop_ci"
-    
+
     # One-sample test output
     output[[test_output_id]] <- renderTable({
       if (input$propsuccess == "pr") {
@@ -679,29 +675,11 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
       )
     }, rownames = TRUE, digits = 4)
     
-    # # Wald CI output
-    # output[[ci_output_id]] <- renderTable({
-    #   if (input$propsuccess == "pr") {
-    #     phat <- as.numeric(input$p_prop)
-    #   } else {
-    #     phat <- input$x_prop/input$nprop
-    #   }
-    #   
-    #   se <- sqrt(phat*(1-phat)/input$nprop)
-    #   z <- qnorm(1-alpha/ 2)
-    #   ci_lower <- phat - z * se
-    #   ci_upper <- phat + z * se
-    #   data.frame( Estimate = round(phat, 4), `Lower CI` = round(ci_lower, 4),`Upper CI` = round(ci_upper, 4))
-    # }, rownames = FALSE)
-    
     tagList(
       fluidRow(
         column(6,
                tags$b("One-Sample Proportion Test"),
                tableOutput(test_output_id))
-        # column(6,
-        #        tags$b("Wald Confidence Interval"),
-        #        tableOutput(ci_output_id))
       ),
       tags$hr()
     )
@@ -843,18 +821,11 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     req(df)
     nvars <- names(df)[sapply(df, is.numeric)]
     fvars <- names(df)[sapply(df, function(x) is.factor(x) || is.character(x))]
-    
-    # tagList(
-    #   selectInput("dvar", "Response \\( (y) \\)", choices = nvars),
-    #   selectInput("ivar", "Fixed-effects \\( (\\alpha) \\)", choices = fvars)
-    # )
     withMathJax(
       tagList(
         selectInput("dvar", label = HTML("Response: \\( y \\)"), choices = nvars),
-        selectInput("ivar", label = HTML("Fixed-effects: \\( \\alpha \\)"), choices = fvars)
-      )
+        selectInput("ivar", label = HTML("Fixed-effects: \\( \\alpha \\)"), choices = fvars))
     )
-    
   })
   
   output$aovSummary <- renderTable({
@@ -883,9 +854,7 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     tky.df <- as.data.frame(tky[[varname]])
     tky.df$Comparison <- rownames(tky.df)
     
-    res.tky <- data.frame(
-      Comparison = tky.df$Comparison,
-      Estimate = round(tky.df$diff, 3),
+    res.tky <- data.frame(Comparison = tky.df$Comparison, Estimate = round(tky.df$diff, 3),
       CI = paste0("(", round(tky.df$lwr, 3), ", ", round(tky.df$upr, 3), ")"),
       pvalue = ifelse(tky.df$`p adj` < 0.001, "<0.001", round(tky.df$`p adj`, 3)),
       check.names = FALSE)
@@ -895,37 +864,43 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     
     res.tky
     
-  }, rownames = FALSE)
+  }, rownames = FALSE,digits=4)
   
   output$KWSummary <- renderTable({
     req(input$dvar, input$ivar)
     df <- firstkit.data()
     df[[input$ivar]] <- as.factor(df[[input$ivar]])
     fit <- kruskal.test(as.formula(paste(input$dvar, "~", input$ivar)), data = df)
-    data.frame(Statistic = round(fit$statistic, 4), DF = as.integer(fit$parameter),
-      `p-value` = ifelse(fit$p.value >= 0.001, round(fit$p.value, 4),"<0.001"),
+    kw.res <- data.frame(Statistic = round(fit$statistic, 4), DF = as.integer(fit$parameter),
+      pvalue = ifelse(fit$p.value >= 0.001, round(fit$p.value, 4),"<0.001"),
       row.names = "Kruskal-Wallis")
-  }, rownames = TRUE)
+    names(kw.res)[3] <- "\\(p\\)-value"
+    kw.res
+  }, rownames = TRUE,digits=4)
   
   output$BartlettSummary <- renderTable({
     req(input$dvar, input$ivar)
     df <- firstkit.data()
     df[[input$ivar]] <- as.factor(df[[input$ivar]])
     fit <- bartlett.test(as.formula(paste(input$dvar, "~", input$ivar)), data = df)
-    data.frame( DF = as.integer(fit$parameter), Statistic = round(fit$statistic, 4),
-      `p-value` = ifelse(fit$p.value >= 0.001, round(fit$p.value, 4),"<0.001"),
+    bt.res <- data.frame(Statistic = round(fit$statistic, 4), DF = as.integer(fit$parameter),
+      pvalue = ifelse(fit$p.value >= 0.001, round(fit$p.value, 4),"<0.001"),
       row.names = "Bartlett")
-  }, rownames = TRUE)
+    names(bt.res)[3] <- "\\(p\\)-value"
+    bt.res
+  }, rownames = TRUE,digits=4)
   
   output$FlignerSummary <- renderTable({
     req(input$dvar, input$ivar)
     df <- firstkit.data()
     df[[input$ivar]] <- as.factor(df[[input$ivar]])
     fit <- fligner.test(as.formula(paste(input$dvar, "~", input$ivar)), data = df)
-    data.frame(DF = as.integer(fit$parameter), 
-               Statistic = round(fit$statistic, 4),
+    flig.res <- data.frame( Statistic = round(fit$statistic, 4),
+                            DF = as.integer(fit$parameter),
                pvalue = ifelse(fit$p.value >= 0.001, round(fit$p.value, 4), "<0.001"),row.names = "Fligner-Killeen")
-  }, rownames = TRUE)
+    names(flig.res)[3] <- "\\(p\\)-value"
+    flig.res
+  }, rownames = TRUE,digits=4)
   
   output$tukeyPlot <- renderPlotly({
     req(input$dvar, input$ivar)
@@ -951,4 +926,3 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
   })
   
 }
-##To learn more, see [FIRSTkit](https://github.com/ialmodovar/FIRSTkit). If you have any question or want to report to *israel.almodovar@upr.edu* or *maitra@iastate.edu*. 

@@ -31,9 +31,9 @@ descriptive_stats_ui <- tabPanel("Descriptive Statistics",
                               ),
                               checkboxGroupInput("dispersion_stats", "Dispersion Statistics:",
                                                  choices = c("Sample variance (\\( s^2\\))" = "var","Sample standard deviation (\\( s\\))" = "sd", "Interquartile range (\\( IQR\\))" = "iqr", "Median absolute deviation (\\( MAD\\))" = "mad", "Range (\\( R \\))" = "range")),
-                              textInput("quantiles", "Enter Quantiles (comma-separated, between 0 and 1)", "0, 0.25, 0.5, 0.75,1"),
+                              textInput("quantiles", "Enter quantiles (comma-separated, between 0 and 1)", "0, 0.25, 0.5, 0.75,1"),
                               selectInput("group_by", "Group by (optional):", choices = NULL),
-                              selectInput("plot_type", "Plot Type:", choices = c("None", "Histogram","Density" ,"Boxplot", "Barplot")),
+                              selectInput("plot_type", "Plot Type:", choices = c("None","Stem-and-Leaf" ,"Histogram","Density" ,"Boxplot", "Barplot","Scatterplot")),
                               actionButton("run_desc", "Submit")
                             ),
                             mainPanel(
@@ -45,6 +45,11 @@ descriptive_stats_ui <- tabPanel("Descriptive Statistics",
                                 tabPanel("Quantiles", 
                                          tableOutput("qtable")),
                                 tabPanel("Visualization", 
+                                         conditionalPanel("input.plot_type == 'Stem-and-Leaf'",
+                                                          numericInput(inputId="sc",label = "scale",value = 1,min = 0,step = 0.05)
+                                                          ),
+                                         conditionalPanel("input.plot_type == 'Scatterplot'",
+                                                          plotOutput("legend_scatterplot", height = "100px")),
                                          uiOutput("plots"))
                               )
                             )
@@ -102,7 +107,7 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
     
     if (!is.null(group_var) && group_var %in% names(df)) {
       grouped_data <- df %>%
-        dplyr::select(all_of(c(group_var, numeric.vars))) %>%
+        select(all_of(c(group_var, numeric.vars))) %>%
         group_by(.data[[group_var]])
       
       summary_list <- lapply(numeric.vars, function(v) {
@@ -130,6 +135,8 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
   output$latex_table_ui <- renderUI({
     df <- numeric_summary_data()
     if (nrow(df) == 0) return(NULL)
+    
+    df <- df[order(df[[1]]), , drop = FALSE]
     
     output$num_summary <- renderTable({df}, sanitize.text.function = identity)  
     
@@ -237,15 +244,22 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
   })
   
   output$plots <- renderUI({
-    req(desc_trigger())
-    req(input$plot_type)
-    numeric.vars <- input$num_vars
-    if (length(numeric.vars) == 0 || input$plot_type == "None") return(NULL)
-    plot_output_list <- lapply(numeric.vars, function(var) {
-      plotlyOutput(outputId = paste0("plot_", var))
-    })
-    do.call(tagList, plot_output_list)
+    req(desc_trigger(), input$plot_type)
+    if (length(input$num_vars) == 0 || input$plot_type == "None") return(NULL)
+    
+    if (input$plot_type == "Scatterplot") {
+      return(uiOutput("grid.ui"))  
+    }
+    
+    tagList(lapply(input$num_vars, function(v) {
+      if (input$plot_type == "Stem-and-Leaf") {
+        plotOutput(paste0("stem_", v))
+      } else {
+        plotlyOutput(paste0("plot_", v))  
+      }
+    }))
   })
+  
   
   observe({
     req(desc_trigger())
@@ -321,5 +335,142 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
       })
     }
   })
+  
+  output$grid.ui <- renderUI({
+    req(input$num_vars)
+    vars <- input$num_vars
+    n <- length(vars)
+    validate(need(n >= 2, "Please select at least two variables."))
+    
+    tagList(lapply(1:n, function(i) {
+      fluidRow(
+        lapply(1:n, function(j) {
+          id <- paste0("cell_", i, "_", j)
+          if (i == j) {
+            column(3, div(style = "height:100px; display:flex; align-items:center; justify-content:center;",strong(vars[i])))
+          } else if (i > j) {
+            column(3, plotlyOutput(id, height = "300px"))
+          } else {
+            column(3, HTML("&nbsp;"))
+          }
+        }))
+      }))
+  })
+  
+  observe({
+    req(input$plot_type == "Scatterplot")
+    req(input$num_vars)
+    df <- firstkit.data()
+    vars <- input$num_vars
+    n <- length(vars)
+    group_var <- if (!is.null(input$group_by) && input$group_by != "None") input$group_by else NULL
+    
+    for (i in 1:n) {
+      for (j in 1:n) {
+        if (i > j) {
+          local({
+            xx <- vars[j]
+            yy <- vars[i]
+            id <- paste0("cell_", i, "_", j)
+            
+            output[[id]] <- renderPlotly({
+              p <- ggplot(df, aes_string(x = xx, y = yy)) +
+                geom_point(aes_string(color = group_var), size = 2) +
+                theme_bw() +
+                theme(legend.position = "none")
+              ggplotly(p) 
+            })
+          })
+        }
+      }
+    }
+  })
+  
+  output$legend_scatterplot <- renderPlot({
+    req(input$group_by)
+    gvar <- input$group_by
+    req(gvar != "None")
+    glevels <- levels(factor(firstkit.data()[[gvar]]))
+    df.leg <- data.frame(x = 1:length(glevels), y = 1, group = factor(glevels))
+    
+    ggplot(df.leg, aes(x = x, y = y, color = group)) +
+      geom_point(size = 5) + scale_color_discrete(name = gvar) +
+      theme_void() + ylim(c(2, 3)) +
+      theme(legend.position = "top",
+        legend.direction = "horizontal",
+        legend.title = element_text(size = 16, face = "bold"),
+        legend.text = element_text(size = 14),
+        legend.key.size = unit(1.5, "cm"),
+        legend.key.width = unit(2, "cm")) +
+      guides(color = guide_legend(nrow = 1, byrow = TRUE))
+  })
+  
+  observe({
+    req(input$plot_type == "Stem-and-Leaf")
+    req(input$num_vars)
+    
+    sc <- as.numeric(input$sc)
+    fkit <- firstkit.data()
+    nvars <- input$num_vars
+    gvar <- input$group_by
+    
+    for (vv in nvars) {
+      local({
+        v <- vv
+        output[[paste0("stem_", v)]] <- renderPlot({
+          req(fkit[[v]])
+          
+          if (!is.null(gvar) && gvar %in% names(fkit)) {
+            fkit.nonan <- na.omit(fkit[, c(v, gvar)])
+            fkit.nonan[[gvar]] <- as.factor(fkit.nonan[[gvar]])
+            
+            glist <- split(fkit.nonan, fkit.nonan[[gvar]])
+            stem.list <- lapply(names(glist), function(g) {
+              lines <- capture.output(stem(glist[[g]][[v]], scale = sc))
+              data.frame(tmp = lines, rr = seq_along(lines), group = g, stringsAsFactors = FALSE)
+            })
+            stemdf <- do.call(rbind, stem.list)
+            
+            ggplot(stemdf) +
+              geom_text(aes(x = rr, y = 0, label = tmp), size = max(10 / sc, 3), hjust = 0) +
+              coord_flip() +
+              facet_wrap(~group, scales = "free_y") +
+              theme_classic() +
+              scale_x_continuous(breaks = NULL) +
+              scale_y_continuous(breaks = NULL, limits = c(0, 1)) +
+              theme(
+                axis.text = element_blank(),
+                axis.title = element_blank(),
+                axis.ticks = element_blank(),
+                panel.grid = element_blank(),
+                axis.line = element_blank(),
+                legend.position = "none"
+              )
+            
+          } else {
+            tmp <- capture.output(stem(fkit[[v]], scale = sc))
+            stemdf <- data.frame(tmp = tmp, rr = seq_along(tmp))
+            
+            ggplot(stemdf) +
+              geom_text(aes(x = rr, y = 0, label = tmp), size = max(10 / sc, 3), hjust = 0) +
+              coord_flip() +
+              theme_classic() +
+              scale_x_continuous(breaks = NULL) +
+              scale_y_continuous(breaks = NULL, limits = c(0, 1)) +
+              theme(
+                axis.text = element_blank(),
+                axis.title = element_blank(),
+                axis.ticks = element_blank(),
+                panel.grid = element_blank(),
+                axis.line = element_blank(),
+                legend.position = "none"
+              )
+          }
+        })
+      })
+    }
+  })
+  
+  
 }
 
