@@ -1,3 +1,4 @@
+logo2 <- dataURI(file = "inst/app/www/firstkit-logo-final.png", mime = "image/png")
 
 intro_ui <- tabPanel("Welcome",
                      fluidPage(
@@ -7,6 +8,12 @@ intro_ui <- tabPanel("Welcome",
                        p("FIRSTkit is a companion for introductory statistics courses requiring no prior R knowledge."), 
                        p("It enables statistical analysis with minimal programming and helps students grasp fundamental concepts interactively."),
 
+                       HTML(paste0(
+                         '<div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.05; z-index: 0; pointer-events: none;">',
+                         '<img src="', logo2, '" style="height: 300px;">',
+                         '</div>'
+                       )),
+                       
                        h4("Modules Covered"),
                        tags$ul(
                          tags$li("Descriptive Statistics"),

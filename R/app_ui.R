@@ -13,7 +13,7 @@
 ##*********************************************
 
 
-logo <- dataURI(file = "inst/app/www/IAAR_Logo.png", mime = "image/png")
+logo <- dataURI(file = "inst/app/www/firstkit-logo.png", mime = "image/png")
 
 app_ui <- function() {
   navbarPage(
@@ -21,7 +21,7 @@ app_ui <- function() {
     title = HTML(paste0(
       '<div style="display: flex; align-items: center;">',
       '<img src="', logo, '" height="35">',
-      '<span style="color: white; font-weight: bold; font-size: 18px; margin-right: 10px;">FIRSTkit</span>',
+#      '<span style="color: white; font-weight: bold; font-size: 18px; margin-right: 10px;">FIRSTkit</span>',
       '</div>'
     )),
 windowTitle="FIRSTkit",
