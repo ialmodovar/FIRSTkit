@@ -12,6 +12,20 @@
 ##* Copyright June 2025
 ##*********************************************
 
+manual_code <- function(text_input) {
+  # Try to read the text input as a CSV
+  df <- tryCatch(read.csv(text = text_input, header = TRUE), error = function(e) NULL)
+  if (is.null(df)) return("Invalid manual input.")
+  
+  code_parts <- lapply(names(df), function(col) {
+    values <- paste(df[[col]], collapse = ", ")
+    paste0(col, " = c(", values, ")")
+  })
+  
+  paste0("mydata <- data.frame(", paste(code_parts, collapse = ", "), ")")
+}
+
+
 data_ui <- tabPanel("Data",
          sidebarLayout(
            sidebarPanel(
@@ -37,10 +51,18 @@ data_ui <- tabPanel("Data",
                downloadButton("download3", "Download .ods")
              ),
            ),
-           mainPanel(tableOutput("contents"))
+           mainPanel(
+             tabsetPanel(
+               tabPanel("Data",
+                        br(),
+                         dataTableOutput("contents")), 
+               tabPanel("R code",
+                        br(),
+                        verbatimTextOutput("code"))
+             )
          )
 )
-
+)
 data_server <- function(input, output, session) {
   firstkit.data <- reactiveVal(NULL)
   
@@ -82,10 +104,11 @@ data_server <- function(input, output, session) {
     }
   })
   
-  output$contents <- renderTable({
-    head(firstkit.data(), 15)
-  })
   
+  output$contents <- renderDT({
+    req(firstkit.data())
+    datatable(firstkit.data(), options = list(pageLength = 10))
+  })
   
   output$download <- downloadHandler(
     filename = function() {
@@ -117,6 +140,56 @@ data_server <- function(input, output, session) {
       write_ods(firstkit.data(), file,row_names = FALSE)
     }
   )
+  
+  output$code <- renderText({
+    req(input$upload_method)
+    
+    mcode <- function(tinput) {
+      df <- tryCatch(read.csv(text = tinput, header = TRUE), error = function(e) NULL)
+      if (is.null(df)) return("Invalid manual input.")
+      
+      cparts <- lapply(names(df), function(col) {
+        values <- paste(df[[col]], collapse = ", ")
+        paste0(col, " = c(", values, ")")
+      })
+      
+      paste0("mydata <- data.frame(", paste(cparts, collapse = ", "), ")")
+    }
+    
+    code <- switch(input$upload_method,
+                   file = {
+                     if (!is.null(input$file1)) {
+                       ext <- tools::file_ext(input$file1$name)
+
+                       switch(ext,
+                              csv  = paste0('mydata <- read.csv(file = "', input$file1$name, '")'),
+                              xlsx = paste0('library("readxl")\nmydata <- read_excel(path = "', input$file1$name, '")'),
+                              xls  = paste0('library("readxl")\nmydata <- read_excel(path = "', input$file1$name, '")'),
+                              ods  = paste0('library("readODS")\nmydata <- read_ods(path = "', input$file1$name, '")'),
+                              "Unknown file type")
+                     } else {
+                       "No file selected."
+                     }
+                   },
+                   gsheet = {
+                     if (nzchar(input$gsheet_url)) {
+                       paste0('library("googlesheet4")\nmydata <- read_sheet("', input$gsheet_url, '")')
+                     } else {
+                       "No Google Sheets URL provided."
+                     }
+                   },
+                   manual = {
+                     if (nzchar(input$manual_data)) {
+                       mcode(input$manual_data)
+                     } else {
+                       "No manual text provided."
+                     }
+                   }
+    )
+    
+    return(code)
+  })
+  
   
   return(firstkit.data)  
 }

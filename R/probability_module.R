@@ -240,7 +240,7 @@ probability_ui <- navbarMenu("Probability Theory",
                         ),
                         conditionalPanel(
                           condition = "input.distribution == 'Geometric'",
-                          numericInput("p_geom", "Probability of success \\(p\\):",
+                          numericInput("pgeom", "Probability of success \\(p\\):",
                                        value = 0.5, min = 0, max = 1, step = 0.001,
                           )
                         ),
@@ -384,7 +384,7 @@ probability_ui <- navbarMenu("Probability Theory",
                                         value = 3, min = 0, step = 1
                            ),
                            numericInput("b_binomial", "b \\( (a \\leq b) \\)",
-                                        value = 11, min = 0, step = 1
+                                        value = 5, min = 0, step = 1
                            )
                          ),
                         conditionalPanel(
@@ -559,9 +559,9 @@ probability_ui <- navbarMenu("Probability Theory",
                          actionButton("dist_submit", "Submit"),
                          hr()
                        ),
-           #            
-           #            # Show a plot of the generated distribution
                        mainPanel(
+                          tabsetPanel(
+                          tabPanel("Probability Distributions",
                          br(),
                          conditionalPanel(
                            condition = "input.distribution == 'Binomial'",
@@ -597,7 +597,12 @@ probability_ui <- navbarMenu("Probability Theory",
                         ),
                          br(),
                          uiOutput("results_distribution"),
-                         br()
+                         br(),
+                        ),
+                         tabPanel("R Code", 
+                                  verbatimTextOutput("prob_code")
+                        )
+                       )
                        )
                     )
            )
@@ -657,11 +662,11 @@ output$posterior <- renderUI({
     )
   }  else if(input$distribution == "Geometric") {
     withMathJax(
-      paste0("\\(X \\sim \\mbox{Geometric}(p = \\)", " ", input$p_geom, "\\()\\)", " and ", case_when(
-        input$tail_geom == "equal" ~ paste0("\\(\\mathbb{P}(X = \\)", " ", input$x1_geom, "\\()\\)", " ", "\\( = \\)", " ", round(dgeom(input$x1_geom, prob = input$p_geom), 4)),
-        input$tail_geom == "lower.tail" ~ paste0("\\(\\mathbb{P}(X \\leq \\)", " ", input$x1_geom, "\\()\\)", " ", "\\( = \\)", " ", round(pgeom(input$x1_geom, prob = input$p_geom, lower.tail = TRUE), 4)),
-        input$tail_geom == "upper.tail" ~ paste0("\\(\\mathbb{P}(X > \\)", " ", input$x2_geom, "\\()\\)", " ", "\\( = \\)", " ", round(pgeom(input$x2_geom, prob = input$p_geom, lower.tail = FALSE), 4)),
-        input$tail_geom == "two.sided" ~ paste0("\\(\\mathbb{P}(\\)", input$a_geom, " ", "\\(\\leq X\\leq \\)", " ", input$b_geom, "\\()\\)", " ", "\\( = \\)", " ", ifelse(input$a_geom > input$b_geom, "a must be less than or equal to b", round(pgeom(input$b_geom, prob = input$p_geom, lower.tail = TRUE) - pgeom(input$a_geom - 1, prob = input$p_geom, lower.tail = TRUE), 4)))
+      paste0("\\(X \\sim \\mbox{Geometric}(p = \\)", " ", input$pgeom, "\\()\\)", " and ", case_when(
+        input$tail_geom == "equal" ~ paste0("\\(\\mathbb{P}(X = \\)", " ", input$x1_geom, "\\()\\)", " ", "\\( = \\)", " ", round(dgeom(input$x1_geom, prob = input$pgeom), 4)),
+        input$tail_geom == "lower.tail" ~ paste0("\\(\\mathbb{P}(X \\leq \\)", " ", input$x1_geom, "\\()\\)", " ", "\\( = \\)", " ", round(pgeom(input$x1_geom, prob = input$pgeom, lower.tail = TRUE), 4)),
+        input$tail_geom == "upper.tail" ~ paste0("\\(\\mathbb{P}(X > \\)", " ", input$x2_geom, "\\()\\)", " ", "\\( = \\)", " ", round(pgeom(input$x2_geom, prob = input$pgeom, lower.tail = FALSE), 4)),
+        input$tail_geom == "two.sided" ~ paste0("\\(\\mathbb{P}(\\)", input$a_geom, " ", "\\(\\leq X\\leq \\)", " ", input$b_geom, "\\()\\)", " ", "\\( = \\)", " ", ifelse(input$a_geom > input$b_geom, "a must be less than or equal to b", round(pgeom(input$b_geom, prob = input$pgeom, lower.tail = TRUE) - pgeom(input$a_geom - 1, prob = input$pgeom, lower.tail = TRUE), 4)))
       ))
     )
   } else if(input$distribution == "Hypergeometric") {
@@ -723,7 +728,7 @@ output$binomialPlot <- renderPlotly({
   dt.probs <- data.frame(x = xx, prob = probs)
 
   dt.probs$X <- switch(input$tail_binomial,
-                 equal = ifelse(dt.probs$x <= input$x1_binomial, "2", "Other"),
+                 equal = ifelse(dt.probs$x == input$x1_binomial, "2", "Other"),
                  lower.tail = ifelse(dt.probs$x <= input$x1_binomial, "2", "Other"),
                  upper.tail = ifelse(dt.probs$x >  input$x2_binomial, "2", "Other"),
                  two.sided  = ifelse(dt.probs$x >= input$a_binomial & dt.probs$x <= input$b_binomial, "2", "Other"))
@@ -749,7 +754,7 @@ output$PoissonPlot <- renderPlotly({
   dt.probs <- data.frame(x = xx, prob = dpois(xx, lambda = lambda))
 
   dt.probs$region <- switch(input$tail_poisson,
-                      "equal" = ifelse(dt.probs$x <= input$x1_poisson, "Interest", "Other"),
+                      "equal" = ifelse(dt.probs$x == input$x1_poisson, "Interest", "Other"),
                       "lower.tail" = ifelse(dt.probs$x <= input$x1_poisson, "Interest", "Other"),
                       "upper.tail" = ifelse(dt.probs$x > input$x2_poisson, "Interest", "Other"),
                       "two.sided" = ifelse(dt.probs$x >= input$a_poisson & dt.probs$x <= input$b_poisson, "Interest", "Other"))
@@ -769,13 +774,13 @@ output$PoissonPlot <- renderPlotly({
 })
 
 output$geometricPlot <- renderPlotly({
-  pgeom <- input$p_geom
+  pgeom <- input$pgeom
   xmax <- ceiling(pgeom + 5 * sqrt((1 - pgeom) / pgeom^2))
   xx <- 0:xmax
   dt.probs <- data.frame(x = xx, prob = dgeom(xx, prob = pgeom))
 
   dt.probs$region <- switch(input$tail_geom,
-                      "equal" = ifelse(dt.probs$x <= input$x1_geom, "Interest", "Other"),
+                      "equal" = ifelse(dt.probs$x == input$x1_geom, "Interest", "Other"),
                       "lower.tail" = ifelse(dt.probs$x <= input$x1_geom, "Interest", "Other"),
                       "upper.tail" = ifelse(dt.probs$x > input$x2_geom, "Interest", "Other"),
                       "two.sided" = ifelse(dt.probs$x >= input$a_geom & dt.probs$x <= input$b_geom, "Interest", "Other"))
@@ -786,7 +791,7 @@ output$geometricPlot <- renderPlotly({
     scale_fill_manual(values = c("Interest" = "#656565", "Other" = "white")) +
     scale_color_manual(values = c("Interest" = "#000000", "Other" = "#000000")) +
     labs(x = "x", y = "Probability Mass Function",
-         title = paste0("Geometric(", p_geom, ")")) +
+         title = paste0("Geometric(", pgeom, ")")) +
     theme_bw() +
     theme(plot.title = element_text(hjust = 0.5),
           legend.position = "none")
@@ -805,7 +810,7 @@ output$HypergeometricPlot <- renderPlotly({
   dt.probs <- data.frame(x = xx, prob = dhyper(xx, m = m, n = N - m, k = k))
 
   dt.probs$region <- switch(input$tail_hypergeometric,
-                      "equal" = ifelse(dt.probs$x <= input$x1_hypergeometric, "Interest", "Other"),
+                      "equal" = ifelse(dt.probs$x == input$x1_hypergeometric, "Interest", "Other"),
                       "lower.tail" = ifelse(dt.probs$x <= input$x1_hypergeometric, "Interest", "Other"),
                       "upper.tail" = ifelse(dt.probs$x > input$x2_hypergeometric, "Interest", "Other"),
                       "two.sided" = ifelse(dt.probs$x >= input$a_hypergeometric & dt.probs$x <= input$b_hypergeometric, "Interest", "Other"))
@@ -904,23 +909,114 @@ output$StudenttPlot <- renderPlotly({
 output$SnedecorFPlot <- renderPlotly({
   df1 <- input$df1_f
   df2 <- input$df2_f
-  xx <- seq(qf(0.0005, df1, df2), qf(0.9995, df1, df2), length.out = 500)
-  dt.probs <- data.frame(x = xx, y = dt.probs(xx, df1, df2))
-
+  
+  xx <- seq(qf(0.0005, df1,df2), qf(0.9995, df1,df2), length.out = 500)
+  
+  dt.probs <- data.frame(x = xx, y = df(xx, df1,df2))
+  
   dt.probs$region <- switch(input$tail_f,
-                           "lower.tail" = ifelse(dt.probs$x <= input$x1_f, "Interest", "Other"),
-                           "upper.tail" = ifelse(dt.probs$x > input$x2_f, "Interest", "Other"),
-                           "two.sided" = ifelse(dt.probs$x >= input$a_f & dt.probs$x <= input$b_f, "Interest", "Other"))
-
+                            "lower.tail" = ifelse(dt.probs$x <= input$x1_f, "Interest", "Other"),
+                            "upper.tail" = ifelse(dt.probs$x > input$x2_f, "Interest", "Other"),
+                            "two.sided" = ifelse(dt.probs$x >= input$a_f & dt.probs$x <= input$b_f, "Interest", "Other"))
+  
   p <- ggplot(dt.probs, aes(x = x, y = y, fill = region)) +
     geom_area(aes(group = region), color = "black") +
     scale_fill_manual(values = c("Interest" = "#656565", "Other" = "white")) +
     scale_color_manual(values = c("Interest" = "#000000", "Other" = "#000000")) +
-    labs(title = paste0("Snedecor-F(", df1, ", ", df2, ")"), x = "x", y = "Probability Density Function") +
+    labs(title = paste0("Snedecor-F(", df1,",",df2, ")"), x = "x", y = "Probability Density Function") +
     theme_bw() +
     theme(plot.title = element_text(hjust = 0.5), legend.position = "none")
-
+  
   ggplotly(p)
 })
+
+output$prob_code <- renderText({
+  code_lines <- c("## compute probabilities")
+  
+  if (input$distribution == "Binomial") {
+    code_lines <- c(code_lines, switch(input$tail_binomial,
+                                       "equal" = paste0("dbinom(x = ", input$x1_binomial, ", size = ", input$n_binomial, ", prob = ", input$p_binomial, ")"),
+                                       "lower.tail" = paste0("pbinom(q = ", input$x1_binomial, ", size = ", input$n_binomial, ", prob = ", input$p_binomial, ")"),
+                                       "upper.tail" = paste0("pbinom(q = ", input$x1_binomial, ", size = ", input$n_binomial, ", prob = ", input$p_binomial, ", lower.tail = FALSE)"),
+                                       "two.sided" = paste0("sum(dbinom(x = ", input$a_binomial, ":", input$b_binomial, ", size = ", input$n_binomial, ", prob = ", input$p_binomial, "))")
+    ))
+  }
+  
+  if (input$distribution == "Poisson") {
+    code_lines <- c(code_lines, switch(input$tail_poisson,
+                                       "equal" = paste0("dpois(x = ", input$x1_poisson, ", lambda = ", input$lambda_poisson, ")"),
+                                       "lower.tail" = paste0("ppois(q = ", input$x1_poisson, ", lambda = ", input$lambda_poisson, ")"),
+                                       "upper.tail" = paste0("ppois(q = ", input$x1_poisson, ", lambda = ", input$lambda_poisson, ", lower.tail = FALSE)"),
+                                       "two.sided" = paste0("sum(dpois(x = ", input$a_poisson, ":", input$b_poisson, ", lambda = ", input$lambda_poisson, "))")
+    ))
+  }
+  
+  if (input$distribution == "Geometric") {
+    code_lines <- c(code_lines, switch(input$tail_geom,
+                                       "equal" = paste0("dgeom(x = ", input$x1_geom, ", prob = ", input$pgeom, ")"),
+                                       "lower.tail" = paste0("pgeom(q = ", input$x1_geom, ", prob = ", input$pgeom, ")"),
+                                       "upper.tail" = paste0("pgeom(q = ", input$x1_geom, ", prob = ", input$pgeom, ", lower.tail = FALSE)"),
+                                       "two.sided" = paste0("sum(dgeom(x = ", input$a_geom, ":", input$b_geom, ", prob = ", input$pgeom, "))")
+    ))
+  }
+  
+  if (input$distribution == "Hypergeometric") {
+    m <- input$M_hypergeometric
+    N <- input$N_hypergeometric
+    k <- input$n_hypergeometric
+    
+    code_lines <- c(code_lines, switch(input$tail_hypergeometric,
+                                       "equal" = paste0("dhyper(x = ", input$x1_hypergeometric, ",m  = ", m, ", n = ", N-m,",k = ", k ,")"),
+                                       "lower.tail" = paste0("phyper(q = ", input$x1_hypergeometric,  ",m  = ", m, ",n = ", N-m,",k = ", k, ")"),
+                                       "upper.tail" = paste0("phyper(q = ", input$x1_hypergeometric, ",m  = ", m, ", n = ", N-m,",k = ", k, ", lower.tail = FALSE)"),
+                                       "two.sided" = paste0("sum(dhyper(x = ", input$a_hypergeometric, ":", input$b_hypergeometric, ",m  = ", m, ", n = ", N-m,",k = ", k, "))")
+    ))
+  }
+  
+  if (input$distribution == "Normal") {
+    mean <- input$mean_normal
+    sigma <- if (input$variance_sd == "variance_true") {
+      sqrt(input$variance_normal)
+    } else {
+      input$sd_normal
+    }
+    code_lines <- c(code_lines, switch(input$tail_normal,
+                                       "lower.tail" = paste0("pnorm(q = ", input$x1_normal, ", mean = ", mean, ",sd =",sigma,")"),
+                                       "upper.tail" = paste0("pnorm(q = ", input$x1_normal, ", mean = ", mean, ",sd =",sigma,",lower.tail=FALSE)"),
+                                       "two.sided" = paste0(paste0("pnorm(q = ", input$b_normal, ", mean = ", mean, ",sd =",sigma,")"),"-",paste0("pnorm(q = ", input$a_normal, ", mean = ", mean, ",sd =",sigma,")"))
+    ))
+  }
+  
+  if (input$distribution == "Chi-squared") {
+    dfg <- input$df_chisq
+    code_lines <- c(code_lines, switch(input$tail_chisq,
+                                       "lower.tail" = paste0("pchisq(q = ", input$x1_chisq, ", df = ", dfg, ")"),
+                                       "upper.tail" = paste0("pchisq(q = ", input$x1_chisq, ", df = ",dfg,",lower.tail=FALSE)"),
+                                       "two.sided" = paste0(paste0("pchisq(q = ", input$b_chisq, ", df = ", dfg,")"),"-",paste0("pchisq(q = ", input$a_chisq, ", df = ", dfg, ")"))
+    ))
+  }
+  
+  if (input$distribution == "Student-t") {
+    dft <- input$df_t
+    code_lines <- c(code_lines, switch(input$tail_studentt,
+                                       "lower.tail" = paste0("pt(q = ", input$x1_t, ", df = ", dft, ")"),
+                                       "upper.tail" = paste0("pt(q = ", input$x1_t, ", df = ",dft,",lower.tail=FALSE)"),
+                                       "two.sided" = paste0(paste0("pt(q = ", input$b_t, ", df = ", dft,")"),"-",paste0("pt(q = ", input$a_t, ", df = ", dft, ")"))
+    ))
+  }
+  
+  if (input$distribution == "Snedecor-F") {
+    df1 <- input$df1_f
+    df2 <- input$df2_f
+    code_lines <- c(code_lines, switch(input$tail_f,
+                                       "lower.tail" = paste0("pf(q = ", input$x1_f, ", df1 = ", df1,", df2 = ", df2, ")"),
+                                       "upper.tail" = paste0("pf(q = ", input$x1_f, ", df1 = ",df1,", df2 = ", df2 ,",lower.tail=FALSE)"),
+                                       "two.sided" = paste0(paste0("pf(q = ", input$b_f, ", df1 = ", df1,", df2 = ", df2,")"),"-",paste0("pf(q = ", input$a_f, ", df1 = ", df1,", df2 = ", df2, ")"))
+    ))
+  }
+  
+  paste(code_lines, collapse = "\n")
+})
+
 
 }

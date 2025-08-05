@@ -9,6 +9,7 @@ License: GPL (>= 3)
 Encoding: UTF-8
 Imports:
     shiny,
+    DT,
     readxl,
     readODS,
     googlesheets4,

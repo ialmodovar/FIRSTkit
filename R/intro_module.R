@@ -66,7 +66,14 @@ intro_ui <- tabPanel("Welcome",
 
                        h4("Linear Regression"),
                        p("Fit a linear regression models. The model assumes normally distributed residuals with constant variance:"),
-                       uiOutput("regression_equation")
+                       uiOutput("regression_equation"),
+                       
+                       h4("Authors:"),
+                       p("Israel A. Almodóvar-Rivera, PhD"),
+                       p("email: ", tags$a(href = "mailto:israel.almodovar@upr.edu", "israel.almodovar@upr.edu")),
+                       p("Ranjan Maitra, PhD"),
+                       p("email: ", tags$a(href = "mailto:maitra@iastate.edu", "maitra@iastate.edu")),
+                       p("Website: ", tags$a(href = "https://ialmodovar.github.io", "IAAR-Website", target = "_blank"))
                      )
 )
 

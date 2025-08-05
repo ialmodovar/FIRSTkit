@@ -1,6 +1,6 @@
 export(FIRSTkit)
 
-import(shiny)
+import(shiny, except=c("dataTableOutput"))
 import(dplyr)
 import(venn)
 import(DiagrammeR)
@@ -15,6 +15,11 @@ importFrom("base64enc", "dataURI")
 importFrom("MASS", "studres")
 importFrom("car","Anova")
 importFrom("plotly","ggplotly","plotlyOutput","renderPlotly")
+importFrom("DT","datatable","dataTableOutput","renderDT")
+importFrom("graphics", "stem")
+importFrom("stats", "na.omit", "quantile")
+importFrom("utils", "capture.output")
+
 
 importFrom("stats", "AIC", "BIC", "IQR", "TukeyHSD", "anova",
              "ansari.test", "aov", "as.formula", "bartlett.test",

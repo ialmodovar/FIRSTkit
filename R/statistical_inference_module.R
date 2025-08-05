@@ -539,7 +539,7 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     tagList(inputs)
   })
   
-  ##---- one sample proportion inference  
+  ## ---- one sample proportion inference ----
   output$proportion <- renderTable({
     alpha <- as.numeric(input$alpha)
     p0 <- as.numeric(input$p0)
@@ -684,6 +684,8 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
       tags$hr()
     )
   })
+  
+  ## ---- two sample
   
   output$var_select_two_sample_ui <- renderUI({
     df <- firstkit.data()

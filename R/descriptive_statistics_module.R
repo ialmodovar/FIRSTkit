@@ -50,7 +50,9 @@ descriptive_stats_ui <- tabPanel("Descriptive Statistics",
                                                           ),
                                          conditionalPanel("input.plot_type == 'Scatterplot'",
                                                           plotOutput("legend_scatterplot", height = "100px")),
-                                         uiOutput("plots"))
+                                         uiOutput("plots")),
+                                tabPanel("R Code",
+                                         verbatimTextOutput("desc_code"))
                               )
                             )
                           )
@@ -251,7 +253,17 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
       return(uiOutput("grid.ui"))  
     }
     
-    tagList(lapply(input$num_vars, function(v) {
+    vars <- if (input$plot_type == "Barplot") {
+      if (length(input$num_vars) == 0 && length(input$cat_vars) > 0) {
+        input$cat_vars
+      } else {
+        unique(c(input$num_vars, input$cat_vars))
+      }
+    } else {
+      input$num_vars
+    }
+  
+    tagList(lapply(vars, function(v) {
       if (input$plot_type == "Stem-and-Leaf") {
         plotOutput(paste0("stem_", v))
       } else {
@@ -260,7 +272,7 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
     }))
   })
   
-  
+
   observe({
     req(desc_trigger())
     df <- firstkit.data()
@@ -269,14 +281,22 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
     group_var <- if (input$group_by != "None") input$group_by else NULL
     plot_type <- isolate(input$plot_type)
     
-    for (vv in numeric.vars) {
+    # Use both num_vars and cat_vars for Barplot, only num_vars otherwise
+    vars <- if (plot_type == "Barplot") {
+      unique(c(input$num_vars, input$cat_vars))
+    } else {
+      input$num_vars
+    }
+    
+
+    for (vv in vars) {
       local({
         v <- vv
         output[[paste0("plot_", v)]] <- renderPlotly({
           p <- NULL
-          
+
           if (plot_type == "Histogram") {
-            
+
             if (!is.null(group_var) && group_var %in% names(df)) {
               p <- ggplot(df, aes(x = .data[[v]],fill=.data[[group_var]])) +
                 geom_histogram(alpha=0.5) +
@@ -286,21 +306,21 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
                 geom_histogram(fill = "white", color = "purple", bins = 30) +
                 labs(title = paste("Histogram of", v), x = v, y = "Count")  +theme_bw()
             }
-            
-            
+
+
           } else if (plot_type == "Density") {
-            
+
             if (!is.null(group_var) && group_var %in% names(df)) {
               p <- ggplot(df, aes(x = .data[[v]],y=after_stat(density),color=.data[[group_var]],fill=.data[[group_var]])) +
                 geom_density(alpha=0.5) +
                 labs(title = paste("Density of", v, "by", group_var), x = group_var, y = v) +theme_bw()
             } else {
               p <- ggplot(df, aes(x = .data[[v]],y=after_stat(density))) +
-                geom_density(fill = "white", color = "purple", bins = 30) +
+                geom_density(fill = "purple",alpha=0.5) +
                 labs(title = paste("Density of", v), x = v, y = "Prob")  +theme_bw()
             }
-            
-            
+
+
           } else if (plot_type == "Boxplot") {
             if (!is.null(group_var) && group_var %in% names(df)) {
               p <- ggplot(df, aes(x = .data[[group_var]], y = .data[[v]])) +
@@ -311,9 +331,9 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
                 geom_boxplot(outlier.colour = "black", fill = "white", color = "darkorange") +
                 labs(title = paste("Boxplot of", v), y = v)  +theme_bw()
             }
-            
+
           }
-          else if (plot_type == "Barplot") {
+          if (plot_type == "Barplot") {
             if (!is.null(group_var) && group_var %in% names(df)) {
               df2 <- df[!is.na(df[[v]]) & !is.na(df[[group_var]]), ]
               p <- ggplot(df2, aes(x = .data[[v]], fill = .data[[group_var]])) +
@@ -335,7 +355,8 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
       })
     }
   })
-  
+
+
   output$grid.ui <- renderUI({
     req(input$num_vars)
     vars <- input$num_vars
@@ -360,7 +381,7 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
   observe({
     req(input$plot_type == "Scatterplot")
     req(input$num_vars)
-    df <- firstkit.data()
+    fkit <- firstkit.data()
     vars <- input$num_vars
     n <- length(vars)
     group_var <- if (!is.null(input$group_by) && input$group_by != "None") input$group_by else NULL
@@ -374,7 +395,7 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
             id <- paste0("cell_", i, "_", j)
             
             output[[id]] <- renderPlotly({
-              p <- ggplot(df, aes_string(x = xx, y = yy)) +
+              p <- ggplot(fkit, aes_string(x = xx, y = yy)) +
                 geom_point(aes_string(color = group_var), size = 2) +
                 theme_bw() +
                 theme(legend.position = "none")
@@ -432,7 +453,7 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
             stemdf <- do.call(rbind, stem.list)
             
             ggplot(stemdf) +
-              geom_text(aes(x = rr, y = 0, label = tmp), size = max(10 / sc, 3), hjust = 0) +
+              geom_text(aes(x = rr, y = 0, label = tmp), size = max(10/sc, 3), hjust = 0) +
               coord_flip() +
               facet_wrap(~group, scales = "free_y") +
               theme_classic() +
@@ -452,7 +473,7 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
             stemdf <- data.frame(tmp = tmp, rr = seq_along(tmp))
             
             ggplot(stemdf) +
-              geom_text(aes(x = rr, y = 0, label = tmp), size = max(10 / sc, 3), hjust = 0) +
+              geom_text(aes(x = rr, y = 0, label = tmp), size = max(10/sc, 3), hjust = 0) +
               coord_flip() +
               theme_classic() +
               scale_x_continuous(breaks = NULL) +
@@ -471,6 +492,219 @@ descriptive_stats_server <- function(input, output, session,firstkit.data) {
     }
   })
   
+  
+  output$desc_code <- renderText({
+    req(desc_trigger())
+    req(input$num_vars)
+    
+    vars <- input$num_vars
+    location_stats <- input$location_stats
+    dispersion_stats <- input$dispersion_stats
+    quantiles <- input$quantiles
+    plot_types <- input$plot_type
+    group_var <- if (input$group_by != "None") input$group_by else NULL
+    
+    stat_map <- list(
+      "mean" = "mean(x, na.rm = TRUE)## sample mean",
+      "geo.mean" = "geo.mean(x)## geometric mean",
+      "median" = "median(x, na.rm = TRUE)## sample median",
+      "tmean" = paste0("mean(x, na.rm = TRUE, trim = ", input$trim_level, ")## truncated mean"),
+      "var" = "var(x, na.rm = TRUE)## sample variance",
+      "sd" = "sd(x, na.rm = TRUE)## sample standard deviation",
+      "iqr" = "IQR(x, na.rm = TRUE)## sample interquartile range",
+      "mad" = "mad(x, constant = 1, na.rm = TRUE)## sample median absolute deviation",
+      "range" = "diff(range(x, na.rm = TRUE))## sample range")
+    
+    code_lines <- c("attach(mydata)")
+    all_stats <- c(location_stats, dispersion_stats)
+    if ("geo.mean" %in% all_stats) {
+      code_lines <- c(code_lines,
+                      "geo.mean <- function(x, na.rm = TRUE) {",
+                      "  exp(mean(log(x[x > 0]), na.rm = na.rm))",
+                      "}",
+                      "")
+    }
+    
+    for (stat in all_stats) {
+      label <- gsub(".*##", "##", stat_map[[stat]])
+      code_lines <- c(code_lines, label)
+      
+      for (v in vars) {
+        expr_template <- stat_map[[stat]]
+        
+        if (is.null(group_var)) {
+          expr <- gsub("x", v, expr_template)
+          code_lines <- c(code_lines, expr)
+        } else {
+          # tapply(x, group, function)
+          func_body <- gsub("x", "x", stat_map[[stat]])
+          func_body <- sub("##.*", "", func_body)
+#          tapply_code <- paste0("tapply(", v, ", ", group_var, ", function(x) ", func_body, ")")
+          if(stat == "tmean"){
+            tapply_code <- paste0("tapply(", v, ", ", group_var, ", mean, trim =", input$trim_level ,",na.rm=TRUE)")
+          } else if(stat == "geo.mean"){
+            tapply_code <- paste0("tapply(", v, ", ", group_var, ", geo.mean)")
+          } else if(stat == "mad"){
+            tapply_code <- paste0("tapply(", v, ", ", group_var, ",mad,constant=1,na.rm=TRUE)")
+          }  else if(stat == "iqr"){
+            tapply_code <- paste0("tapply(", v, ", ", group_var, ",IQR,na.rm=TRUE)")
+          } else{
+          tapply_code <- paste0("tapply(", v, ", ", group_var, ", ", stat, ", na.rm=TRUE)")
+          }
+          code_lines <- c(code_lines, tapply_code)
+        }
+      }
+      
+      code_lines <- c(code_lines, "")  
+    }
+    if (!is.null(quantiles) && length(quantiles) > 0) {
+      probs_str <- paste0("c(", paste0(quantiles, collapse = ", "), ")")
+      code_lines <- c(code_lines, "## quantiles")
+      for (v in vars) {
+        if (is.null(group_var)) {
+          code_lines <- c(code_lines,
+                          paste0("quantile(", v, ", probs = ", probs_str, ", na.rm = TRUE)"))
+        } else {
+          code_lines <- c(code_lines,
+                          paste0("tapply(", v, ", ", group_var,
+                                 ", quantile, probs = ", probs_str, ", na.rm = TRUE)"))
+        }
+      }
+      code_lines <- c(code_lines, "")
+    }
+    
+    if (!is.null(plot_types) && length(plot_types) > 0) {
+      code_lines <- c(code_lines, '## plots \nlibrary("ggplot2")')
+      for (v in vars) {
+        for (ptype in plot_types) {
+          if (ptype == "Boxplot") {
+            if (is.null(group_var)) {
+              code_lines <- c(code_lines,
+                              paste0("ggplot(mydata, aes(x = ", v, ")) +"),
+                              ' geom_boxplot(outlier.colour = "black", fill = "white", color = "darkorange") +',
+                              paste0(' labs(title = paste("Boxplot of ", "', v, '"), x = "', v, '", y = "Count") + theme_bw()'),
+                              "")
+
+            } else {
+              code_lines <- c(code_lines,
+                              paste0("ggplot(mydata, aes(x = factor(", group_var, "), y = ", v, ")) +"),
+                              ' geom_boxplot(outlier.colour = "black", fill = "white", color = "darkorange") + theme_bw()+',
+                              paste0("  labs(title = 'Boxplot of ", v, " by ", group_var, "', x = '", group_var, "', y = '", v, "')"),
+                              "")
+            }
+          } else if (ptype == "Histogram") {
+            if (is.null(group_var)) {
+              code_lines <- c(code_lines,
+                              paste0("ggplot(mydata, aes(x = ", v, ")) +"),
+                              '  geom_histogram(fill = "white", color = "purple", bins = 30) +',
+                              paste0(' labs(title = paste("Histogram of ", "', v, '"), x = "', v, '", y = "Count") +'),
+                              "  theme_bw()",
+                              "")
+            } else {
+              code_lines <- c(code_lines,
+                              paste0("ggplot(mydata, aes(x = ", v, ", fill = factor(", group_var, "))) +"),
+                              "  geom_histogram(position = 'identity', alpha = 0.5, bins = 30) + theme_bw()+",
+                              paste0("  labs(title = 'Histogram of ", v, " by ", group_var, "', x = '", v, "', fill = '", group_var, "')"),
+                              "")
+            }
+          }
+          else if (ptype == "Density") {
+            if (is.null(group_var)) {
+              code_lines <- c(code_lines,
+                              paste0("ggplot(mydata, aes(x = ", v, ")) +"),
+                              '  geom_density(fill="purple",alpha=0.5) +',
+                              paste0(' labs(title = paste("Density of ", "', v, '"), x = "', v, '", y = "Count") +'),
+                              "  theme_bw()",
+                              "")
+            } else {
+              code_lines <- c(code_lines,
+                              paste0("ggplot(mydata, aes(x = ", v, ", fill = factor(", group_var, "))) +"),
+                              "  geom_density(alpha = 0.5) + theme_bw()+",
+                              paste0("  labs(title = 'Density of ", v, " by ", group_var, "', x = '", v, "', fill = '", group_var, "')"),
+                              "")
+            } 
+          }
+          else if (ptype == "Stem-and-Leaf") {
+            code_lines <- c(code_lines, "## stem-and-leaf plot")
+            if (is.null(group_var)) {
+  #            for (v in vars) {
+                code_lines <- c(code_lines,
+                                paste0("stem(", v, ", scale = ", input$sc, ")"),
+                                "")
+  #            }
+            } else {
+#              for (v in vars) {
+                code_lines <- c(code_lines,
+                                paste0("glist <- split(mydata[, c('", v, "', '", group_var, "')], mydata$", group_var, ")"),
+                                paste0("for (g in names(glist)) {"),
+                                paste0("  cat('\\nGroup: ', g, '\\n')"),
+                                paste0("  stem(glist[[g]][[\"", v, "\"]], scale = ", input$sc, ")"),
+                                "}",
+                                "")
+ #             }
+            }
+          }
+          else if (ptype == "Barplot") {
+              if (!is.null(group_var)) {
+                code_lines <- c(code_lines,
+                                paste0("ggplot(mydata, aes(x = ", v, ", fill = ", group_var, ")) +"),
+                                "  geom_bar(position = 'dodge', color = 'black') +",
+                                paste0("  labs(title = 'Grouped Barplot of ", v, " by ", group_var, "',"),
+                                paste0("       x = '", v, "', y = 'Count', fill = '", group_var, "') +"),
+                                "  theme_bw()")
+              } else {
+                code_lines <- c(code_lines,
+                                paste0("freq <- as.data.frame(table(mydata$", v, "))"),
+                                "colnames(freq) <- c('Category', 'Count')",
+                                "ggplot(freq, aes(x = Category, y = Count)) +",
+                                "  geom_bar(stat = 'identity', fill = 'white', color = 'purple') +",
+                                paste0("  labs(title = 'Barplot of ", v, "', x = '", v, "', y = 'Count') +"),
+                                "  theme_bw()"
+                )
+            }
+          }
+        }
+      }
+      if (plot_types == "Scatterplot") {
+        if (length(vars) >= 2) {
+          code_lines <- c(code_lines, "## scatterplots")
+          pairs <- combn(vars, 2)
+          if (!is.null(group_var) && group_var != "") {
+            code_lines <- c(code_lines, apply(pairs,2,function(x)  paste0("ggplot(mydata, aes(x = ", x[1], ", y = ", x[2],  ",color=", group_var,"))+ geom_point() + theme_bw()")))
+          } else {
+            code_lines <- c(code_lines, apply(pairs,2,function(x)  paste0("ggplot(mydata, aes(x = ", x[1], ", y = ", x[2],  "))+ geom_point() + theme_bw()")))
+          }
+        }
+      }
+    }
+    
+    cat_vars <- input$cat_vars
+    if (!is.null(cat_vars) && length(cat_vars) > 0) {
+      code_lines <- c(code_lines, "", "## categorical summaries")
+      for (v in cat_vars) {
+        code_lines <- c(code_lines,
+                        paste0("table(", v, ", useNA = 'always')"),
+                        paste0("prop.table(table(", v, ", useNA = 'always'))"),
+                        "")
+        if(plot_types=="Barplot"){
+          if (!is.null(group_var)) {
+            code_lines <- c(code_lines,
+                            paste0("ggplot(mydata, aes(x = ", v, ", fill = ", group_var, ")) +"),
+                            "  geom_bar(position = 'dodge') +",
+                            paste0("  labs(title = 'Grouped Barplot of ", v, " by ", group_var, "',"),
+                            paste0("       x = '", v, "', y = 'Count', fill = '", group_var, "') + theme_bw()"))
+          } else{
+            code_lines <- c(code_lines,
+                            paste0("ggplot(mydata, aes(x = ", v, ")) +"),
+                            "  geom_bar() +",
+                            paste0("  labs(title = 'Barplot of ", v,") + theme_bw()"))
+          }
+        }
+      }
+    }
+    
+    paste(code_lines, collapse = "\n")
+  })
   
 }
 
