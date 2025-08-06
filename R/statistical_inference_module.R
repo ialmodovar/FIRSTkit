@@ -83,7 +83,7 @@ one.sample.var.test <- function(x,sigma0=1,alpha=0.05,...){
   sigma02 <- sigma0^2
   X2 <- df * vv/sigma02 #test statistics
   ##
-  pval <- c(pchisq(X2,df=df,lower.tail = FALSE),pchisq(X2,df=df,lower.tail = TRUE),pchisq(X2,df=df,lower.tail = FALSE))
+  pval <- c(2*min(pchisq(X2,df=df,lower.tail = FALSE),pchisq(X2,df=df,lower.tail = TRUE)),pchisq(X2,df=df,lower.tail = TRUE),pchisq(X2,df=df,lower.tail = FALSE))
   c1 <- qchisq(p=1-alpha/2,df = df)
   c2 <- qchisq(p=alpha/2,df = df)
   ci <- c(paste("(",round(sqrt(df*vv/c1),digits=4),",  ",round(sqrt(df*vv/c2),digits=3),")",sep=""),paste("(",0,",",round(sqrt(df*vv/qchisq(p=alpha,df = df)),digits=4),")",sep=""),
@@ -382,7 +382,8 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                          hr(),
                                                          uiOutput("tableUIprop_all"),
                                                           textInput("p0", label = withMathJax("\\( H_0: p = p_0 \\)"), value = "0.5",
-                                                                    placeholder = "Indicate the null value for the proportion"))
+                                                                    placeholder = "Indicate the null value for the proportion")),
+                                                tabPanel("R code", verbatimTextOutput("one_sample_code"))
                                               
                                             )
                                           )
@@ -515,7 +516,6 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
 )
 stats_inference_server <- function(input, output, session, firstkit.data) {
   
-  # UI for variable selection
   output$var_select_one_sample_ui <- renderUI({
     df <- firstkit.data()
     if (is.null(df)) return(NULL)
@@ -547,7 +547,7 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     # Choose x and p values based on selection
     if (input$propsuccess == "pr") {
       phat <- as.numeric(input$p_prop)
-      x <- round(phat * input$nprop)
+      x <- round(phat*input$nprop)
     } else {
       x <- input$x_prop
     }
@@ -638,10 +638,9 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
                   label = withMathJax(paste0("\\( H_0: \\sigma = \\sigma_0 \\) for ", varname)),
                   value = "1"),
         fluidRow(
-          column(6,
                  tags$b("One-Sample \\(\\chi^2\\) Variance Test"),
+                 withMathJax(),
                  tableOutput(chi_output_id)),
-        ),
         tags$hr()
       )
     })
@@ -926,5 +925,73 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     
     ggplotly(p)
   })
+
+  output$one_sample_code <- renderText({
+    code_lines <- c("attach(mydata)",
+                    '
+one.sample.var.test <- function(x,sigma0=1,conf.level=0.95,alternative="two.sided"){
+  x <- x[!is.na(x)]
+  n <- length(x)
+  nu <- n-1
+  vv <- var(x)
+  X2 <- nu * vv/(sigma0^2)
+  alpha <- 1-conf.level
+  if(alternative=="two.sided"){
+  ci <- c(nu*vv/qchisq(p=1-alpha/2,df = nu), nu*vv/qchisq(p=alpha/2,df = nu))
+  pval <- 2* min(pchisq(q = X2,df = nu,lower.tail = FALSE), pchisq(q = X2,df = nu,lower.tail = TRUE))
+  } else if(alternative=="less"){
+    ci <- c(0, nu*vv/qchisq(p=alpha,df = nu))
+    pval <- pchisq(q = X2,df = nu,lower.tail = TRUE)
+  } else if(alternative=="greater"){
+    ci <- c(nu*vv/qchisq(p=1-alpha,df = nu),Inf)
+    pval <- pchisq(q = X2,df = nu,lower.tail = FALSE)
+  }
+
+  list(estimate = vv, statistic=X2, pvalue= pval, conf.int = ci)
+}\n')
+    
+    vars <- input$num.vars
+    alpha <- as.numeric(input$alpha)
+    if (is.null(vars) || length(vars) == 0) {
+      return("No numeric variables selected for one-sample inference.")
+    }
+    
+    
+    for (v in vars) {
+      mu_input_id <- paste0("mu0_", v)
+      mu0_raw <- input[[mu_input_id]]
+      if (is.null(mu0_raw) || mu0_raw == "") next
+      mu0_val <- as.numeric(mu0_raw)
+      if (is.na(mu0_val)) next
+      
+      code_lines <- c(
+        code_lines,
+        paste0("## One-sample inference for ", v),
+        "## One Sample t-test",
+        paste0("# two-sided"),
+        paste0("t.test(x = ", v, ", mu = ", mu0_val, ", conf.level = ", 1 - alpha, ", alternative = \"two.sided\")"),
+        paste0("# one-sided (less)"),
+        paste0("t.test(x = ", v, ", mu = ", mu0_val, ", conf.level = ", 1 - alpha, ", alternative = \"less\")"),
+        paste0("# one-sided (greater)"),
+        paste0("t.test(x = ", v, ", mu = ", mu0_val, ", conf.level = ", 1 - alpha, ", alternative = \"greater\")"),
+        "",
+        "## Wilcoxon signed-rank test",
+        paste0("# two-sided"),
+        paste0("wilcox.test(x = ", v, ", mu = ", mu0_val, ", conf.level = ", 1 - alpha, ", alternative = \"two.sided\", conf.int = TRUE)"),
+        paste0("# one-sided (less)"),
+        paste0("wilcox.test(x = ", v, ", mu = ", mu0_val, ", conf.level = ", 1 - alpha, ", alternative = \"less\", conf.int = TRUE)"),
+        paste0("# one-sided (greater)"),
+        paste0("wilcox.test(x = ", v, ", mu = ", mu0_val, ", conf.level = ", 1 - alpha, ", alternative = \"greater\", conf.int = TRUE)"),
+        ""
+      )
+    }
+    
+    if (length(code_lines) == 0) {
+      "No valid null hypotheses provided."
+    } else {
+      paste(code_lines, collapse = "\n")
+    }
+  })
   
+   
 }

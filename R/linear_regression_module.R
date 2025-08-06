@@ -40,7 +40,7 @@ linear_regression_ui <- tabPanel("Linear Regression",
                                                           uiOutput("model_eq"),
                                                           h4("Model Fit Statistics"),
                                                           tableOutput("fit_stats"), 
-                                                          h4("Model Summary Table"),
+                                                          h4("Regression Model Summary Table"),
                                                           sliderInput("conf_level", "Significance Level (\\( \\alpha \\))",
                                                                       value = 0.05, min = 0, max = 1, step = 0.001),
                                                           tableOutput("model_table"),
@@ -132,7 +132,7 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     num_df <- df_subset[sapply(df_subset, is.numeric)]
     
     if (ncol(num_df) < 2) {
-      return(data.frame(Message = "Need at least 2 numeric variables for correlation."))
+      return(data.frame(Message = "Need at least 2 numerical variables to calculate the correlation."))
     }
     
     cor.mat <- cor(num_df, use = "pairwise.complete.obs", method = "pearson")
@@ -297,7 +297,7 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
       geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
       labs(title = "Studentized Residuals vs Fitted Values",
            x = "Fitted Values", y = "Studentized Residuals") +
-      theme_minimal()
+      theme_bw()
     
     ggplotly(p)
   })
@@ -329,11 +329,8 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
       geom_point(color = "black") +
       geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
       geom_text(aes(label = Label), vjust = -1, color = "darkred") +
-      labs(
-        title = "",
-        x = "Theoretical Quantiles", y = "Studentized Residuals"
-      ) +
-      theme_minimal()
+      labs(title = "",x = "Theoretical Quantiles", y = "Studentized Residuals") +
+      theme_bw()
     
     ggplotly(p)
   })
@@ -354,11 +351,7 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
                      alpha = 0.6) +
       geom_density(color = "black", linewidth = 1.2) +
       geom_vline(xintercept = 0, color = "red", linetype = "dashed", linewidth = 1) +
-      labs(
-        title = "",
-        x = "Studentized Residual", y = "Density"
-      ) +
-      theme_minimal()
+      labs( title = "", x = "Studentized Residual", y = "Density") + theme_bw()
     
     ggplotly(p)
   })
@@ -380,10 +373,8 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
       geom_point(size = 2) +
       geom_hline(yintercept = threshold, linetype = "dashed", color = "red") +
       scale_color_manual(values = c("FALSE" = "lightblue", "TRUE" = "darkorange")) +
-      labs(title = "Cook's Distance",
-           x = "Observation", y = "Cook's Distance",
-           color = paste(">", round(threshold, 3))) +
-      theme_minimal()
+      labs(title = "Cook's Distance",x = "Observation", y = "Cook's Distance",
+           color = paste(">", round(threshold, 3))) + theme_bw()
     
     ggplotly(p)
   })
