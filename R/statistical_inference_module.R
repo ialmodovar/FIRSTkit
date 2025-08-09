@@ -298,7 +298,9 @@ all.ansari.two.sample.test <- function(x, y, conf.int = FALSE, alpha = 0.05, ...
   return(res)
 }
 
-all.proportion.two.sample.test <- function(x = NULL,n, p = NULL, p0 = 0.5, alpha = 0.05){
+
+all.proportion.two.sample.test <- function(x = NULL,n, p = NULL, p0 = 0.5, alpha = 0.05,...) {
+  conf.level <- 1 - alpha
   
   if(is.null(x)& is.null(p)){
     stop("You must either provide the number of success or the probability of success")
@@ -324,37 +326,43 @@ all.proportion.two.sample.test <- function(x = NULL,n, p = NULL, p0 = 0.5, alpha
     p2 <- x2/n2
     
   }
-  twosided <- binom.test(x = c(x1,x2), n = c(n1,n2), p = p0, 
-                         alternative = "two.sided",
-                         conf.level = 1-alpha)
-  oneless <- binom.test(x = c(x1,x2), n = c(n1,n2), p = p0, 
-                        alternative = "less",
+  twosided <- prop.test(x = c(x1,x2), n = c(n1,n2), 
+                        alternative = "two.sided",
                         conf.level = 1-alpha)
-  onegreater <- binom.test(x = c(x1,x2), n = c(n1,n2), p = p0, 
-                           alternative = "greater",
-                           conf.level = 1-alpha)
+  oneless <- prop.test(x = c(x1,x2), n = c(n1,n2), 
+                       alternative = "less",
+                       conf.level = 1-alpha)
+  onegreater <- prop.test(x = c(x1,x2), n = c(n1,n2), 
+                          alternative = "greater",
+                          conf.level = 1-alpha)
   
-  tt <- round(c(twosided$statistic, oneless$statistic, onegreater$statistic),digits=3)
-  pval <- round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits = 5)
-  pval <- ifelse(pval < 0.001, "<0.001",as.character(pval))
+  format_ci <- function(ci_low, ci_high) {
+    paste0("(", formatC(ci_low, digits = 4, format = "f"), ", ", formatC(ci_high, digits = 4, format = "f"), ")")
+  }
   
   
-  ci <- c(paste("(",paste(round(twosided$conf.int[1],digits=3),", ",
-                          round(twosided$conf.int[2],digits=3),sep=""),")",sep=""),
-          paste("(",paste("0",", ",
-                          round(oneless$conf.int[2],digits=3),sep=""),")",sep=""),
-          paste("(",paste(round(onegreater$conf.int[1],digits=3),", ",
-                          "1",sep=""),")",sep=""))
-  res <- data.frame(Test = tt, CI =ci,Pval = pval)
-  names(res) <- c("statistic",paste(as.character((1-alpha)*100),"% CI",sep=""),"\\(p\\)-value")
+  res <- data.frame(
+    Alternative = c(
+      paste0("\\(H_{1}: p_{1} \\neq p_{2}   \\)"),
+      paste0("\\(H_{1}: p_{1} < p_{2} \\)"),
+      paste0("\\(H_{1}: p_{1} > p_{2}  \\)")
+    ),
+    Statistic = formatC(c(formatC(twosided$statistic,digits=4,format="f"), "", ""), digits = 4, format = "f"),
+    Estimate = c(paste0("(",formatC(twosided$estimate[1],digits=4,format="f"),",",formatC(twosided$estimate[2],digits=4,format="f") ,")"),"",""),
+    CI = c(
+      format_ci(twosided$conf.int[1], twosided$conf.int[2]),
+      paste0("(", "\\( 0 \\), ", formatC(oneless$conf.int[2], digits = 4, format = "f"), ")"),
+      paste0("(", formatC(onegreater$conf.int[1], digits = 4, format = "f"), ", \\( 1 \\) )")),
+    `\\(p\\)-value` = formatC(ifelse(round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits=4)<0.001,"<0.001",round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits=4)), digits = 4, format = "f"),
+    check.names = FALSE, stringsAsFactors = FALSE)
   
-  rownames(res) <- c(paste("\\( H_{1}: p_1 -p_2 \\neq \\: \\)",p0,sep=""),
-                     paste("\\( H_{1}: p_1 -p_2 < \\: \\)",p0,sep=""),
-                     paste("\\( H_{1}: p_1 -p_2 > \\: \\)",p0,sep=""))
+  colnames(res)[1] <- " "
+  colnames(res)[3] <- "\\( (\\hat{p}_1, \\hat{p}_2) \\)"
+  colnames(res)[4] <- paste0(formatC(conf.level * 100, digits = 1, format = "f"), "% CI")
   
-  res
-  
+  return(res)
 }
+
 }
 
 stats_inference_ui <- navbarMenu("Statistical Inference",
@@ -380,13 +388,13 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                 tabPanel("Proportion Inference",
                                                          withMathJax(),
                                                          fluidRow(
-                                                           column(6,
+                                                           #column(6,
                                                                   radioButtons(
                                                                     inputId = "propsuccess",
                                                                     label = NULL,
-                                                                    choices = c(
-                                                                      "Proportion of success \\(\\hat{p}\\)" = "pr",
-                                                                      "Number of successes \\(x\\)" = "success"
+                                                                    choices = c("Number of successes \\(x\\)" = "success",
+                                                                      "Proportion of success \\(\\hat{p}\\)" = "pr"
+                                                                      
                                                                     )
                                                                   ),
                                                                   conditionalPanel(
@@ -398,11 +406,11 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                                     condition = "input.propsuccess == 'success'",
                                                                     numericInput("x_prop", "Number of successes (\\(x\\))",
                                                                                  value = 20, min = 0, step = 1)
-                                                                  )
-                                                           ),
-                                                           column(6,
+                                                                  ),
+                                                          # ),
+                                                           #column(6,
                                                                   numericInput("nprop", "Sample size (\\(n\\))", value = 50, min = 0, step = 1)
-                                                           )
+                                                           #)
                                                          ),
                                                          hr(),
                                                          uiOutput("tableUIprop_all"),
@@ -470,9 +478,9 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                                    br(),
                                                                    fluidRow(
                                                                      column(6,
-                                                                            radioButtons("propsuccess1", NULL, choices = c(
-                                                                              "Proportion of success \\(\\hat{p}_1\\)" = "pr1",
-                                                                              "Number of successes \\(x_1\\)" = "success1")),
+                                                                            radioButtons("propsuccess1", NULL, choices = c("Number of successes \\(x_1\\)" = "success1",
+                                                                              "Proportion of success \\(\\hat{p}_1\\)" = "pr1"
+                                                                              )),
                                                                             conditionalPanel("input.propsuccess1 == 'pr1'",
                                                                                              numericInput("p_prop1", "Proportion \\(\\hat{p}_1\\)", 0.5, 0, 1, 0.001)),
                                                                             conditionalPanel("input.propsuccess1 == 'success1'",
@@ -480,9 +488,9 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                                             numericInput("nprop1", "Sample size \\(n_1\\)", 50, 0, step = 1)
                                                                      ),
                                                                      column(6,
-                                                                            radioButtons("propsuccess2", NULL, choices = c(
-                                                                              "Proportion of success \\(\\hat{p}_2\\)" = "pr2",
-                                                                              "Number of successes \\(x_2\\)" = "success2")),
+                                                                            radioButtons("propsuccess2", NULL, choices = c("Number of successes \\(x_2\\)" = "success2",
+                                                                              "Proportion of success \\(\\hat{p}_2\\)" = "pr2"
+                                                                              )),
                                                                             conditionalPanel("input.propsuccess2 == 'pr2'",
                                                                                              numericInput("p_prop2", "Proportion \\(\\hat{p}_2\\)", 0.5, 0, 1, 0.001)),
                                                                             conditionalPanel("input.propsuccess2 == 'success2'",
@@ -491,12 +499,12 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                                      )
                                                                    ),
                                                                    hr(),
-                                                                   textInput("p0", label = withMathJax("\\( H_0: p_1 - p_2 = p_0 \\)"),
-                                                                             value = "0", placeholder = "Enter null difference in proportions"),
+                                                                  # textInput("p0", label = withMathJax("\\( H_0: p_1 - p_2 = p_0 \\)"),
+                                                                   #          value = "0", placeholder = "Enter null difference in proportions"),
                                                                    fluidRow(
                                                                      #column(6, 
                                                                             tags$b("Two-Samples Proportion test"), 
-                                                                            tableOutput("proportion")
+                                                                            uiOutput("proportion")
                                                                           #  ),
                                                                    ),
                                                           ),
@@ -888,36 +896,24 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     )
   })
   
-  output$proportion <- renderTable({
-    p0 <- as.numeric(input$p0)
-    n1 <- input$nprop1
-    n2 <- input$nprop2
-    x1 <- if (input$propsuccess1 == "pr1") round(input$p_prop1 * n1) else input$x_prop1
-    x2 <- if (input$propsuccess2 == "pr2") round(input$p_prop2 * n2) else input$x_prop2
-    
-    all.proportion.two.sample.test(x = c(x1,x2),
-                                   n = c(n1,n2),
-                                   p0 = p0, 
-                                   alpha = as.numeric(input$alpha))
-  }, rownames = TRUE)
-  
-  output$prop_ci <- renderTable({
-    n1 <- input$nprop1
-    n2 <- input$nprop2
-    p1 <- if (input$propsuccess1 == "pr1") input$p_prop1 else input$x_prop1/n1
-    p2 <- if (input$propsuccess2 == "pr2") input$p_prop2 else input$x_prop2/n2
-    se <- sqrt(p1*(1-p1)/n1+p2*(1-p2)/n2)
-    z <- qnorm(1-input$alpha/2)
-    diff <- p1-p2
-    
-    zstat <- diff/se
-    pvalue <- 2*(pnorm(abs(zstat),lower.tail = FALSE))
-    
-    data.frame( Estimate = round(diff, 4),
-      CI = paste0("(", round(diff - z * se, 4), ", ", round(diff + z * se, 4), ")"),
-      pvalue = ifelse(pvalue < 0.001, "<0.001", round(pvalue, 3)),
-      check.names = FALSE)
+  output$proportion <- renderUI({
+       p0 <- as.numeric(input$p0)
+       n1 <- input$nprop1
+       n2 <- input$nprop2
+       x1 <- if (input$propsuccess1 == "pr1") round(input$p_prop1 * n1) else input$x_prop1
+       x2 <- if (input$propsuccess2 == "pr2") round(input$p_prop2 * n2) else input$x_prop2
+       
+       tbl <- all.proportion.two.sample.test(x = c(x1,x2), n = c(n1,n2), alpha = as.numeric(input$alpha))
+    withMathJax(
+      HTML(
+        htmlTable(tbl, rnames = FALSE, escape = FALSE,
+                  align = "lcccc",
+                  css.cell = "padding: 5px 10px;")
+      )
+    )
   })
+  
+  
   ##*********
   ##* Three samples or more analysis
   ##********
@@ -1169,102 +1165,152 @@ one.sample.var.test <- function(x,sigma0=1,conf.level=0.95,alternative="two.side
     
     mode <- req(input$two_sample_mode)
     
+    n1 <- input$nprop1
+    n2 <- input$nprop2
+    x1 <- if (input$propsuccess1 == "pr1") round(input$p_prop1 * n1) else input$x_prop1
+    x2 <- if (input$propsuccess2 == "pr2") round(input$p_prop2 * n2) else input$x_prop2
     
-    # p <- as.numeric(input$p_prop)
-    # x <- round(p * input$nprop)
-    # p0 <- as.numeric(input$p0)
-    # n <- input$nprop
-    # if(!is.null(x) & is.null(p)){
-    #   p <- x/n
-    # } 
-    # if(is.null(x) & !is.null(p)){
-    #   p <- p
-    #   x <- round(p*n,digits = 0)
-    # }
-    # if(!is.null(x) & !is.null(p)){
-    #   p <- x/n
-    # }
-    # 
-    # code_lines <- c(code_lines, 
-    #                 "##***************** Two-sample Proportion test",
-    #                 paste0("binom.test(x = ", x,", n = ", n, ", p = ", p0,", conf.level = ",1-alpha ,", alternative = \"two.sided\")"),
-    #                 paste0("binom.test(x = ", x,", n = ", n, ", p = ", p0,", conf.level = ",1-alpha ,", alternative = \"less\")"),
-    #                 paste0("binom.test(x = ", x,", n = ", n, ", p = ", p0,", conf.level = ",1-alpha ,", alternative = \"greater\")"),
-    #                 "No numeric variables selected for one-sample inference.")
-    # 
-    # paste(code_lines, collapse = "\n")
-    # 
     
-     if(input$paired){
-    code_lines <- c(
-      code_lines,
-      paste0("##**************** Paired samples"),
-     "## Paired t-test ",
-      paste0("# two-sided"),
-      paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", alternative = \"two.sided\")"),
-      paste0("# one-sided (less)"),
-      paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired, ", alternative = \"less\")"),
-      paste0("# one-sided (greater)"),
-      paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired, ", alternative = \"greater\")"),
-      "",
-      "## Wilcoxon Rank signed test",
-      paste0("# two-sided"),
-      paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"two.sided\", conf.int = TRUE)"),
-      paste0("# one-sided (less)"),
-      paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"less\", conf.int = TRUE)"),
-      paste0("# one-sided (greater)"),
-      paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"greater\", conf.int = TRUE)"),
-      ""
-    )
-     } else{
-       
-       if (mode == "group") {
-       code_lines <- c(
-         code_lines,
-         paste0("##**************** Two-sample inference "),
-         paste0("x <- ", input$numvar_grouped,"[",input$groupvar," == ", input$selected_groups[1],"]"),
-         paste0("y <- ", input$numvar_grouped,"[",input$groupvar," == ", input$selected_groups[2],"]"),
-         ifelse(input$equal_var, "## Two Sample t-test with equal variance" ,"## Two Sample t-test with unequal variance"),
-         paste0("# two-sided"),
-         paste0("t.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"two.sided\")"),
-         paste0("# one-sided (less)"),
-         paste0("t.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"less\")"),
-         paste0("# one-sided (greater)"),
-         paste0("t.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"greater\")"),
-        "",
-        "## Wilcoxon Mann-Whitney test",
-        paste0("# two-sided"),
-        paste0("wilcox.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"two.sided\", conf.int = TRUE)"),
-        paste0("# one-sided (less)"),
-        paste0("wilcox.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"less\", conf.int = TRUE)"),
-        paste0("# one-sided (greater)"),
-        paste0("wilcox.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"greater\", conf.int = TRUE)"),
-        "")
-       
-       } else{
-    code_lines <- c(
-      code_lines,
-      paste0("##**************** Two-sample inference for the mean of "),
-      ifelse(input$equal_var, "## Two Sample t-test with equal variance" ,"## Two Sample t-test with unequal variance"),
-      paste0("# two-sided"),
-      paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"two.sided\")"),
-      paste0("# one-sided (less)"),
-      paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"less\")"),
-      paste0("# one-sided (greater)"),
-      paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"greater\")"),
-      "",
-      "## Wilcoxon Mann-Whitney test",
-      paste0("# two-sided"),
-      paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"two.sided\", conf.int = TRUE)"),
-      paste0("# one-sided (less)"),
-      paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"less\", conf.int = TRUE)"),
-      paste0("# one-sided (greater)"),
-      paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"greater\", conf.int = TRUE)"),
-      ""
-    )
-       }
+    code_lines <- c(code_lines,
+                    "##***************** Two Sample Proportions test *************",
+                    "",
+                    paste0("# two-sided"),
+                    paste0("prop.test( x = c(", x1, ",",x2, "), n = c(",n1, ", ", n2, "), conf.level = ", 1-alpha,", alternative=c(\"two.sided\"))"),
+                    paste0("# one-sided (less)"),
+                    paste0("prop.test( x = c(", x1, ",",x2, "), n = c(",n1, ", ", n2, "), conf.level = ", 1-alpha,", alternative=c(\"less\"))"),
+                    paste0("# one-sided (greater)"),
+                    paste0("prop.test( x = c(", x1, ",",x2, "), n = c(",n1, ", ", n2, "), conf.level = ", 1-alpha,", alternative=c(\"greater\"))",""))
     
-  }
+    if (mode == "group") {
+      
+      code_lines <- c(
+        code_lines,
+        paste0("##**************** Two-sample inference for location"),
+        paste0("x <- ", input$numvar_grouped,"[",input$groupvar," == ", input$selected_groups[1],"]"),
+        paste0("y <- ", input$numvar_grouped,"[",input$groupvar," == ", input$selected_groups[2],"]"),"")
+      if(input$paired){
+        
+        code_lines <- c(
+          code_lines,
+          paste0("##**************** Paired samples (both groups needs to have same size)"),
+          "## Paired t-test ",
+          paste0("# two-sided"),
+          paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", alternative = \"two.sided\")"),
+          paste0("# one-sided (less)"),
+          paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired, ", alternative = \"less\")"),
+          paste0("# one-sided (greater)"),
+          paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired, ", alternative = \"greater\")"),
+          "",
+          "## Wilcoxon Rank signed test",
+          paste0("# two-sided"),
+          paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"two.sided\", conf.int = TRUE)"),
+          paste0("# one-sided (less)"),
+          paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"less\", conf.int = TRUE)"),
+          paste0("# one-sided (greater)"),
+          paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"greater\", conf.int = TRUE)"),
+          "")
+        
+        
+      } else{
+        
+        code_lines <- c(
+          code_lines,
+          ifelse(input$equal_var, "##*************** Two Sample t-test with equal variance" ,"##***************** Two Sample t-test with unequal variance"),
+          paste0("# two-sided"),
+          paste0("t.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"two.sided\")"),
+          paste0("# one-sided (less)"),
+          paste0("t.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"less\")"),
+          paste0("# one-sided (greater)"),
+          paste0("t.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"greater\")"),
+          "",
+          "## Wilcoxon Mann-Whitney test",
+          paste0("# two-sided"),
+          paste0("wilcox.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"two.sided\", conf.int = TRUE)"),
+          paste0("# one-sided (less)"),
+          paste0("wilcox.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"less\", conf.int = TRUE)"),
+          paste0("# one-sided (greater)"),
+          paste0("wilcox.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"greater\", conf.int = TRUE)"),
+          "",
+          "## Variance F-test",
+          paste0("# two-sided"),
+          paste0("var.test(x = x ,y = y, ratio = ", input$sigma0, ", conf.level = ", 1 - alpha, ", alternative = \"two.sided\")"),
+          paste0("# one-sided (less)"),
+          paste0("var.test(x = x ,y = y, ratio = ", input$sigma0, ", conf.level = ", 1 - alpha,  ", alternative = \"less\")"),
+          paste0("# one-sided (greater)"),
+          paste0("var.test(x = x ,y = y, ratio = ", input$sigma0, ", conf.level = ", 1 - alpha, ", alternative = \"greater\")"),
+          "",
+          "## Ansari-Bradley test",
+          paste0("# two-sided"),
+          paste0("ansari.test(x = x ,y = y, conf.level = ", 1 - alpha, ",conf.int =", input$ciansari ,", alternative = \"two.sided\")"),
+          paste0("# one-sided (less)"),
+          paste0("ansari.test(x = x ,y = y, conf.level = ", 1 - alpha, ",conf.int =", input$ciansari ,  ", alternative = \"less\")"),
+          paste0("# one-sided (greater)"),
+          paste0("ansari.test(x = x ,y = y, conf.level = ", 1 - alpha, ",conf.int =", input$ciansari , ", alternative = \"greater\")")
+        )
+      }
+    } else{
+      if(input$paired){
+        code_lines <- c(
+          code_lines,
+          paste0("##**************** Paired samples"),
+          "## Paired t-test ",
+          paste0("# two-sided"),
+          paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", alternative = \"two.sided\")"),
+          paste0("# one-sided (less)"),
+          paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired, ", alternative = \"less\")"),
+          paste0("# one-sided (greater)"),
+          paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired, ", alternative = \"greater\")"),
+          "",
+          "## Wilcoxon Rank signed test",
+          paste0("# two-sided"),
+          paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"two.sided\", conf.int = TRUE)"),
+          paste0("# one-sided (less)"),
+          paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"less\", conf.int = TRUE)"),
+          paste0("# one-sided (greater)"),
+          paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"greater\", conf.int = TRUE)"),
+          ""
+        )
+      } else{
+        code_lines <- c(
+          code_lines,
+          paste0("##**************** Two-sample inference for the mean of "),
+          ifelse(input$equal_var, "##**************Two Sample t-test with equal variance" ,"## Two Sample t-test with unequal variance"),
+          paste0("# two-sided"),
+          paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"two.sided\")"),
+          paste0("# one-sided (less)"),
+          paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"less\")"),
+          paste0("# one-sided (greater)"),
+          paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"greater\")"),
+          "",
+          "##********************** Wilcoxon Mann-Whitney test *****************",
+          paste0("# two-sided"),
+          paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"two.sided\", conf.int = TRUE)"),
+          paste0("# one-sided (less)"),
+          paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"less\", conf.int = TRUE)"),
+          paste0("# one-sided (greater)"),
+          paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"greater\", conf.int = TRUE)"),
+          "",
+          "## Variance F-test",
+          paste0("# two-sided"),
+          paste0("var.test(x = ", x ,", y = ", y, ", ratio = ", input$sigma0, ", conf.level = ", 1 - alpha, ", alternative = \"two.sided\")"),
+          paste0("# one-sided (less)"),
+          paste0("var.test(x = ", x ,", y = ", y, ", ratio = ", input$sigma0, ", conf.level = ", 1 - alpha,  ", alternative = \"less\")"),
+          paste0("# one-sided (greater)"),
+          paste0("var.test(x = ", x ,", y = ", y, ", ratio = ", input$sigma0, ", conf.level = ", 1 - alpha, ", alternative = \"greater\")"),
+          "",
+          "## Ansari-Bradley test",
+          paste0("# two-sided"),
+          paste0("ansari.test(x = ", x ,", y = ", y, ", conf.level = ", 1 - alpha, ",conf.int =", input$ciansari ,", alternative = \"two.sided\")"),
+          paste0("# one-sided (less)"),
+          paste0("ansari.test(x = ", x ,", y = ", y, ", conf.level = ", 1 - alpha, ",conf.int =", input$ciansari ,  ", alternative = \"less\")"),
+          paste0("# one-sided (greater)"),
+          paste0("ansari.test(x = ", x ,", y = ", y, ", conf.level = ", 1 - alpha, ",conf.int =", input$ciansari , ", alternative = \"greater\")")
+          
+        )
+      }
+    }
+    
+    
     if (length(code_lines) == 0) {
       "No valid null hypotheses provided."
     } else {
