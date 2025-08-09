@@ -433,7 +433,7 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                 checkboxInput("equal_var", "Only for \\(t\\)-test: Equal variance \\( (\\sigma^2_1 = \\sigma^2_2) \\)", value = FALSE),
                                                 sliderInput("alpha", "Significance level \\(\\alpha\\)",
                                                             min = 0, max = 1, value = 0.05, step = 0.001),
-                                                actionButton("run_two", "Run Analysis")
+                                                actionButton("run_two", "Submit")
                                             ),
                                             mainPanel(
                                               withMathJax(),
@@ -529,42 +529,44 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                           tabPanel("Location Inference",
                                                                    withMathJax(),
                                                                    fluidRow(
-                                                                     column(6,
+                                                                     #column(6,
                                                                             h4('ANOVA Table'),
-                                                                            tableOutput('aovSummary')
-                                                                     ),
-                                                                     column(6,
+                                                                            uiOutput('aovSummary'),
+                                                                     #),
+                                                                     #column(6,
                                                                             withMathJax(),
                                                                             h4('Kruskal-Wallis Rank Sum Test'),
                                                                             tableOutput('KWSummary')
-                                                                     )
+                                                                     #)
                                                                    ),
                                                                    fluidRow(
                                                                      column(6,
                                                                             withMathJax(),
-                                                                            h4('Tukey HSD'),
+                                                                            h4('Tukey Honest Significant Differences'),
                                                                             tableOutput('tukeySummary')
                                                                      ),
                                                                      column(6,
-                                                                            h4('Tukey HSD Plot'),
+                                                                            #h4('Tukey HSD Plot'),
                                                                             plotlyOutput('tukeyPlot', height = "600px")
                                                                      )
                                                                    )
                                                           ),
                                                           tabPanel("Dispersion Inference",
                                                                    fluidRow(
-                                                                     column(6,
+                                                                   #  column(6,
                                                                             withMathJax(),
-                                                                            h4("Bartlett test"),
-                                                                            tableOutput("BartlettSummary")
-                                                                     ),
-                                                                     column(6,
+                                                                            h4("Bartlett Test of Homogeneity of Variances"),
+                                                                            tableOutput("BartlettSummary"),
+                                                                  #   ),
+                                                                   #  column(6,
                                                                             withMathJax(),
-                                                                            h4("Fligner-Killeen test"),
+                                                                            h4("Fligner-Killeen Test of Homogeneity of Variances"),
                                                                             tableOutput("FlignerSummary")
-                                                                     )
+                                                                    # )
                                                                    )
-                                                          )
+                                                          ),
+                                                          tabPanel("R code", 
+                                                                   verbatimTextOutput("three_or_more_sample_code"))
                                               )
                                             )
                                           )
@@ -914,6 +916,7 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
   })
   
   
+  ## -----
   ##*********
   ##* Three samples or more analysis
   ##********
@@ -930,20 +933,42 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     )
   })
   
-  output$aovSummary <- renderTable({
+  output$aovSummary <- renderUI({
     req(input$dvar, input$ivar)
     df <- firstkit.data()
     df[[input$ivar]] <- as.factor(df[[input$ivar]])
     fit <- lm(as.formula(paste(input$dvar, "~", input$ivar)), data = df)
     
-    if (input$type == "type1") {
+    tbl <- if (input$type == "type1") {
       anova(fit)
     } else if (input$type == "type2") {
       Anova(fit, type = 2)
     } else {
       Anova(fit, type = 3)
     }
-  }, rownames = TRUE, digits = 4)
+    
+    tbl$`Pr(>F)` <- ifelse(tbl$`Pr(>F)` < 0.001, "<0.001", round(tbl$`Pr(>F)`, 3))
+    
+    if(input$type=="type1"){
+    colnames(tbl)[4] <- "\\( F \\)-value"
+    colnames(tbl)[5] <- "\\(p \\)-value"
+    tbl[,1:4] <- round(tbl[,1:4],digits=3)
+    } else{
+      colnames(tbl)[3] <- "\\( F \\)-value"
+      colnames(tbl)[4] <- "\\(p \\)-value"
+      tbl[,1:3] <- round(tbl[,1:3],digits=3)
+      
+    }
+
+    HTML(
+      htmlTable(
+        tbl,
+        rownames = TRUE,escape = FALSE,
+        align = "lccccc",
+        css.cell = "padding: 5px 10px;"
+      )
+    )
+  })
   
   output$tukeySummary <- renderTable({
     req(input$dvar, input$ivar)
@@ -1317,5 +1342,38 @@ one.sample.var.test <- function(x,sigma0=1,conf.level=0.95,alternative="two.side
       paste(code_lines, collapse = "\n")
     }
   })
+  output$three_or_more_sample_code <- renderText({
+    code_lines <- c("library(\"car\")\nattach(mydata)")
+    
+    vars <- input$num.vars
+    alpha <- as.numeric(input$alpha)
+    
+    code_lines <- c(code_lines,
+                    paste0("fit <- lm(",input$dvar,"~",input$ivar,")"),"")
+    
+    anova.type <- ifelse(input$type=="type1","anova(fit)",
+                         ifelse(input$type=="type2","Anova(fit, type = 2)","Anova(fit, type = 3)"))
+    
+    code_lines <- c(code_lines, 
+                    "## ANOVA Table",
+                    anova.type,
+                    "## Multiple Comparions using Tukey Honest Significant Differences",
+                    paste0("TukeyHSD(aov(",input$dvar, "~",input$ivar,"))"),
+                    "## Kruskal-Wallis Rank Sum Test",
+                    paste0("kruskal.wallis(",input$dvar, "~",input$ivar,")"),
+                    "## Bartlett Test of Homogeneity of Variances",
+                    paste0("bartlett.test(",input$dvar, "~",input$ivar,")"),
+                    "## Fligner-Killeen Test of Homogeneity of Variances",
+                    paste0("fligner.test(",input$dvar, "~",input$ivar,")")
+                    )  
+    
+    if (length(code_lines) == 0) {
+      "No valid null hypotheses provided."
+    } else {
+      paste(code_lines, collapse = "\n")
+    }
+  })
+  
+  
   
 }
