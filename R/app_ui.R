@@ -13,7 +13,7 @@
 ##*********************************************
 
 
-logo <- dataURI(file = "inst/app/www/firstkit-logo.png", mime = "image/png")
+logo <- dataURI(file = "inst/app/www/firstkit-logo-final.png", mime = "image/png")
 
 app_ui <- function() {
   navbarPage(

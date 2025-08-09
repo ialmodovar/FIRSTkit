@@ -14,12 +14,13 @@ importFrom("shinythemes","shinytheme")
 importFrom("base64enc", "dataURI")
 importFrom("MASS", "studres")
 importFrom("car","Anova")
+importFrom("htmlTable","htmlTable")
 importFrom("plotly","ggplotly","plotlyOutput","renderPlotly")
 importFrom("DT","datatable","dataTableOutput","renderDT")
 importFrom("graphics", "stem")
 importFrom("stats", "na.omit", "quantile")
-importFrom("utils", "capture.output")
-
+importFrom("utils", "capture.output","combn")
+importFrom("stats", "df")
 
 importFrom("stats", "AIC", "BIC", "IQR", "TukeyHSD", "anova",
              "ansari.test", "aov", "as.formula", "bartlett.test",

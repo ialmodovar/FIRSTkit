@@ -10,6 +10,7 @@ Encoding: UTF-8
 Imports:
     shiny,
     DT,
+    htmlTable,
     readxl,
     readODS,
     googlesheets4,

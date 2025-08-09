@@ -36,8 +36,8 @@ all.t.one.sample.test <- function(x, mu0 = 0, alpha = 0.05,...){
           paste("(",paste(round(onegreater$conf.int[1],digits=4),", ",
                           "\\(\\infty\\)",sep=""),")",sep=""))
   
-  res <- data.frame(Test = tt, CI =ci,Pval = pval)
-  names(res) <- c("statistic",paste(as.character((1-alpha)*100),"% CI",sep=""),"\\(p\\)-value")
+  res <- data.frame(Estimate = c(round(twosided$estimate,digits=5),"",""),Test = tt, CI =ci,Pval = pval)
+  names(res) <- c("Estimate (\\( \\bar{x} \\))","statistic",paste(as.character((1-alpha)*100),"% CI",sep=""),"\\(p\\)-value")
   rownames(res) <- c(paste("\\( H_{1}: \\mu \\neq \\:  \\)",mu0,sep=""),
                      paste("\\( H_{1}: \\mu < \\: \\)",mu0,sep=""),
                      paste("\\( H_{1}: \\mu > \\: \\)",mu0,sep=""))
@@ -87,11 +87,11 @@ one.sample.var.test <- function(x,sigma0=1,alpha=0.05,...){
   c1 <- qchisq(p=1-alpha/2,df = df)
   c2 <- qchisq(p=alpha/2,df = df)
   ci <- c(paste("(",round(sqrt(df*vv/c1),digits=4),",  ",round(sqrt(df*vv/c2),digits=3),")",sep=""),paste("(",0,",",round(sqrt(df*vv/qchisq(p=alpha,df = df)),digits=4),")",sep=""),
-          paste("(",round(sqrt(df*vv/qchisq(p=alpha,df = df)),digits=4),", ","\\( \\infty \\)",")",sep=""))
+          paste("(",round(sqrt(df*vv/qchisq(p=1-alpha,df = df)),digits=4),", ","\\( \\infty \\)",")",sep=""))
   pval <- ifelse(pval < 0.001, "<0.001",as.character(pval))
   
-  res <- data.frame(Test = X2,CI =ci,Pval = pval)
-  names(res) <- c("statistic",paste(as.character((1-alpha)*100),"% CI",sep=""),"\\(p \\)-value")
+  res <- data.frame(Estimate = c(round(sqrt(vv),digits=4),"",""), Test = X2,CI =ci,Pval = pval)
+  names(res) <- c("Estimate (\\( s\\))","statistic",paste(as.character((1-alpha)*100),"% CI",sep=""),"\\(p \\)-value")
   
   rownames(res) <- c(paste("\\( H_{1}: \\sigma \\neq \\: \\)",sigma0,sep=""),
                      paste("\\( H_{1}: \\sigma < \\: \\)",sigma0,sep=""),
@@ -137,8 +137,8 @@ all.proportion.one.sample.test <- function(x = NULL,n, p = NULL, p0 = 0.5, alpha
                           round(oneless$conf.int[2],digits=4),sep=""),")",sep=""),
           paste("(",paste(round(onegreater$conf.int[1],digits=4),", ",
                           "1",sep=""),")",sep=""))
-  res <- data.frame(Test = tt, CI =ci,Pval = pval)
-  names(res) <- c("statistic",paste(as.character((1-alpha)*100),"% CI",sep=""),"\\(p\\)-value")
+  res <- data.frame(Estimate = c(twosided$estimate,"",""), Test = tt, CI =ci,Pval = pval)
+  names(res) <- c("Probability of success","statistic",paste(as.character((1-alpha)*100),"% CI",sep=""),"\\(p\\)-value")
   
   rownames(res) <- c(paste("\\( H_{1}: p \\neq \\: \\)",p0,sep=""),
                      paste("\\( H_{1}: p < \\: \\)",p0,sep=""),
@@ -148,129 +148,154 @@ all.proportion.one.sample.test <- function(x = NULL,n, p = NULL, p0 = 0.5, alpha
   
 }
 
-all.t.two.sample.test <- function(x, y, delta0 = 0,paired = FALSE, var.equal = FALSE, alpha = 0.05,...){
-  twosided <- t.test(x = x, y = y,mu = delta0, paired=paired,
-                     alternative = "two.sided", var.equal = var.equal,
-                     conf.level = 1-alpha)
-  oneless <- t.test(x = x, y = y,mu = delta0, paired=paired,
-                    alternative = "less", var.equal = var.equal,
-                    conf.level = 1-alpha)
-  onegreater <- t.test(x = x, y = y,mu = delta0, paired=paired,
-                       alternative = "greater",var.equal = var.equal,
-                       conf.level = 1-alpha)
+all.t.two.sample.test <- function(x, y, delta0 = 0, paired = FALSE, var.equal = FALSE, alpha = 0.05, ...) {
+  conf.level <- 1 - alpha
   
-  tt <- round(c(twosided$statistic, oneless$statistic, onegreater$statistic),digits=4)
-  pval <- round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits = 4) 
-  dfs <- c(twosided$parameter, oneless$parameter, onegreater$parameter)
+  twosided <- t.test(x, y, mu = delta0, paired = paired, alternative = "two.sided", var.equal = var.equal, conf.level = conf.level)
+  oneless <- t.test(x, y, mu = delta0, paired = paired, alternative = "less", var.equal = var.equal, conf.level = conf.level)
+  onegreater <- t.test(x, y, mu = delta0, paired = paired, alternative = "greater", var.equal = var.equal, conf.level = conf.level)
   
-  ci <- c(paste("(",paste(round(twosided$conf.int[1],digits=4),",",
-                          round(twosided$conf.int[2],digits=4),sep=""),")",sep=""),
-          paste("(",paste("\\( -\\infty\\),",
-                          round(oneless$conf.int[2],digits=4),sep=""),")",sep=""),
-          paste("(",paste(round(onegreater$conf.int[1],digits=4),",",
-                          round(onegreater$conf.int[2],digits=4),sep=""),")",sep=""))
+  format_ci <- function(ci_low, ci_high) {
+    paste0("(", formatC(ci_low, digits = 4, format = "f"), ", ", formatC(ci_high, digits = 4, format = "f"), ")")
+  }
   
-  res <- data.frame(Test = tt, df = dfs, CI =ci,Pvalue = pval)
-  names(res) <- c("statistic","DF",paste(as.character((1-alpha)*100),"% CI",sep=""),"p-value")
   
-  rownames(res) <- c(paste("\\(H_{1}: \\mu_{1}-\\mu_{2} \\neq \\) ",delta0,sep=""),
-                     paste("\\(H_{1}: \\mu_{1}-\\mu_{2} <\\) ",delta0,sep=""),
-                     paste("\\(H_{1}: \\mu_{1}-\\mu_{2} >\\) ",delta0,sep=""))
-  res
+  # Compute mean difference
+  if (paired) {
+    estimate <- formatC(mean(x - y,na.rm=TRUE),digits=4,format="f")
+  } else {
+    estimate <- formatC(twosided$estimate[1] - twosided$estimate[2],digits=4,format="f")
+  }
+
+  res <- data.frame(
+    Alternative = c(
+      paste0("\\( H_1: \\mu_1 - \\mu_2 \\neq ", delta0, " \\)"),
+      paste0("\\( H_1: \\mu_1 - \\mu_2 < ", delta0, " \\)"),
+      paste0("\\( H_1: \\mu_1 - \\mu_2 > ", delta0, " \\)")
+    ),
+   Estimate = c(estimate," "," "),
+    Statistic = formatC(c(twosided$statistic, oneless$statistic, onegreater$statistic), digits = 4, format = "f"),
+    DF = formatC(c(twosided$parameter, oneless$parameter, onegreater$parameter), digits = 2, format = "f"),
+    CI = c(
+      format_ci(twosided$conf.int[1], twosided$conf.int[2]),
+      paste0("(", "\\( -\\infty \\), ", formatC(oneless$conf.int[2], digits = 4, format = "f"), ")"),
+      paste0("(", formatC(onegreater$conf.int[1], digits = 4, format = "f"), ", \\( \\infty \\) )")
+    ),
+    `\\(p\\)-value` = formatC(ifelse(round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits=4)<0.001,"<0.001",round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits=4)), digits = 4, format = "f"),
+    check.names = FALSE,
+    stringsAsFactors = FALSE)
   
+  colnames(res)[1] <- " "
+  colnames(res)[2] <- "Estimate (\\( \\bar{x} - \\bar{y} \\))"
+  colnames(res)[5] <- paste0(formatC(conf.level * 100, digits = 1, format = "f"), "% CI")
+  
+  return(res)
 }
 
-all.wilcoxon.two.sample.test <- function(x,  y, delta0 = 0, paired = FALSE,alpha = 0.05,...){
-  twosided <- wilcox.test(x = x, y= y, mu = delta0, paired=paired,
-                          alternative = "two.sided",
-                          conf.level = 1-alpha,conf.int = TRUE)
-  oneless <- wilcox.test(x = x, y = y,mu = delta0, paired = paired,
-                         alternative = "less",
-                         conf.level = 1-alpha,conf.int = TRUE)
-  onegreater <- wilcox.test(x = x, y= y, mu = delta0, paired = paired,
-                            alternative = "greater",
-                            conf.level = 1-alpha,conf.int = TRUE)
+
+all.wilcoxon.two.sample.test <- function(x, y, delta0 = 0, paired = FALSE, alpha = 0.05, ...) {
+  conf.level <- 1 - alpha
   
-  tt <- round(c(twosided$statistic, oneless$statistic, onegreater$statistic),digits=4)
-  pval <- round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits = 4) 
+  twosided <- wilcox.test(x, y, mu = delta0, paired = paired, alternative = "two.sided", var.equal = var.equal, conf.level = conf.level,conf.int = TRUE)
+  oneless <- wilcox.test(x, y, mu = delta0, paired = paired, alternative = "less", var.equal = var.equal, conf.level = conf.level,conf.int = TRUE)
+  onegreater <- wilcox.test(x, y, mu = delta0, paired = paired, alternative = "greater", var.equal = var.equal, conf.level = conf.level,conf.int = TRUE)
   
-  ci <- c(paste("(",paste(round(twosided$conf.int[1],digits=4),",",
-                          round(twosided$conf.int[2],digits=4),sep=""),")",sep=""),
-          paste("(",paste(round(oneless$conf.int[1],digits=4),",",
-                          round(oneless$conf.int[2],digits=4),sep=""),")",sep=""),
-          paste("(",paste(round(onegreater$conf.int[1],digits=4),",",
-                          round(onegreater$conf.int[2],digits=4),sep=""),")",sep=""))
+  format_ci <- function(ci_low, ci_high) {
+    paste0("(", formatC(ci_low, digits = 4, format = "f"), ", ", formatC(ci_high, digits = 4, format = "f"), ")")
+  }
   
-  res <- data.frame(Test = tt,CI =ci,Pval=pval)
-  names(res) <- c("statistic",paste(as.character((1-alpha)*100),"% CI",sep=""),"p-value")
+  res <- data.frame(
+    Alternative = c(
+      paste0("\\( H_1: M_1 - M_2 \\neq ", delta0, " \\)"),
+      paste0("\\( H_1: M_1 - M_2 < ", delta0, " \\)"),
+      paste0("\\( H_1: M_1 - M_2 > ", delta0, " \\)")
+    ),
+    Statistic = formatC(c(twosided$statistic, oneless$statistic, onegreater$statistic), digits = 4, format = "f"),
+    CI = c(
+      format_ci(twosided$conf.int[1], twosided$conf.int[2]),
+      paste0("(", "\\( -\\infty \\), ", formatC(oneless$conf.int[2], digits = 4, format = "f"), ")"),
+      paste0("(", formatC(onegreater$conf.int[1], digits = 4, format = "f"), ", \\( \\infty \\) )")),
+    `\\(p\\)-value` = formatC(ifelse(round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits=4)<0.001,"<0.001",round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits=4)), digits = 4, format = "f"),
+    check.names = FALSE,
+    stringsAsFactors = FALSE)
   
-  rownames(res) <- c(paste("\\(H_{1}: \\mu_{1}-\\mu_{2} \\neq \\) ",delta0,sep=""),
-                     paste("\\(H_{1}: \\mu_{1}-\\mu_{2} <\\) ",delta0,sep=""),
-                     paste("\\(H_{1}: \\mu_{1}-\\mu_{2} >\\) ",delta0,sep=""))
-  res
+  colnames(res)[1] <- " "
+  colnames(res)[3] <- paste0(formatC(conf.level * 100, digits = 1, format = "f"), "% CI")
+  
+  return(res)
 }
 
-all.var.two.sample.test <- function(x, y, ratio = 1,alpha = 0.05,...){
-  twosided <- var.test(x = x, y = y,ratio=ratio, 
-                       alternative = "two.sided",
-                       conf.level = 1-alpha)
-  oneless <- var.test(x = x, y = y,ratio=ratio, 
-                      alternative = "less",
-                      conf.level = 1-alpha)
-  onegreater <- var.test(x = x, y = y,ratio=ratio, 
-                         alternative = "greater",
-                         conf.level = 1-alpha)
+all.var.two.sample.test <- function(x, y, R = 0, paired = FALSE, alpha = 0.05, ...) {
+  conf.level <- 1 - alpha
   
-  tt <- round(c(twosided$statistic, oneless$statistic, onegreater$statistic),digits=3)
-  pval <- round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits = 3) 
+  twosided <- var.test(x = x, y = y,ratio=R,alternative = "two.sided",conf.level = conf.level)
+  oneless <- var.test(x = x, y = y,ratio=R,alternative = "less",conf.level = conf.level)
+  onegreater <- var.test(x = x, y = y,ratio=R,alternative = "greater",conf.level = conf.level)
   
-  ci <- c(paste("(",paste(round(twosided$conf.int[1],digits=3),",",
-                          round(twosided$conf.int[2],digits=3),sep=""),")",sep=""),
-          paste("(",paste(round(oneless$conf.int[1],digits=3),",",
-                          round(oneless$conf.int[2],digits=3),sep=""),")",sep=""),
-          paste("(",paste(round(onegreater$conf.int[1],digits=3),",",
-                          round(onegreater$conf.int[2],digits=3),sep=""),")",sep=""))
+  format_ci <- function(ci_low, ci_high) {
+    paste0("(", formatC(ci_low, digits = 4, format = "f"), ", ", formatC(ci_high, digits = 4, format = "f"), ")")
+  }
   
-  res <- data.frame(Test = tt,Pval = pval, CI =ci)
-  names(res) <- c("statistic","p-value",paste(as.character((1-alpha)*100),"% CI",sep=""))
+  res <- data.frame(
+    Alternative = c(
+      paste0("\\(H_{1}: \\sigma^{2}_{1}/\\sigma^{2}_{2} \\neq ",R, " \\)"),
+      paste0("\\(H_{1}: \\sigma^{2}_{1}/\\sigma^{2}_{2} < ", R, " \\)"),
+      paste0("\\(H_{1}: \\sigma^{2}_{1}/\\sigma^{2}_{2} >", R, " \\)")
+    ),
+    Statistic = formatC(c(formatC(twosided$statistic,digits=4,format="f"), "", ""), digits = 4, format = "f"),
+    DF = c(paste0("(",twosided$parameter[1],",",twosided$parameter[2] ,")"),"",""),
+    CI = c(
+      format_ci(twosided$conf.int[1], twosided$conf.int[2]),
+      paste0("(", "\\( 0 \\), ", formatC(oneless$conf.int[2], digits = 4, format = "f"), ")"),
+      paste0("(", formatC(onegreater$conf.int[1], digits = 4, format = "f"), ", \\( \\infty \\) )")),
+    `\\(p\\)-value` = formatC(ifelse(round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits=4)<0.001,"<0.001",round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits=4)), digits = 4, format = "f"),
+    check.names = FALSE,
+    stringsAsFactors = FALSE)
   
+  colnames(res)[1] <- " "
+  colnames(res)[4] <- paste0(formatC(conf.level * 100, digits = 1, format = "f"), "% CI")
   
-  rownames(res) <- c(paste("\\(H_{1}: \\sigma^{2}_{1}/\\sigma^{2}_{2} \\neq \\)",ratio,sep=""),
-                     paste("\\(H_{1}: \\sigma^{2}_{1}/\\sigma^{2}_{2} <\\)",ratio,sep=""),
-                     paste("\\(H_{1}: \\sigma^{2}_{1}/\\sigma^{2}_{2} >\\)",ratio,sep=""))
-  res
-  
+  return(res)
 }
 
-all.ansari.two.sample.test <- function(x, y, ratio = 1,alpha = 0.05,...){
-  twosided <- ansari.test(x = x, y = y, conf.int=TRUE, 
-                          alternative = "two.sided",
-                          conf.level = 1-alpha)
-  oneless <- ansari.test(x = x, y = y,conf.int=TRUE,
-                         alternative = "less",
-                         conf.level = 1-alpha)
-  onegreater <- ansari.test(x = x, y = y,conf.int=TRUE,
-                            alternative = "greater",
-                            conf.level = 1-alpha)
+
+all.ansari.two.sample.test <- function(x, y, conf.int = FALSE, alpha = 0.05, ...) {
+  conf.level <- 1 - alpha
   
-  tt <- round(c(twosided$statistic, oneless$statistic, onegreater$statistic),digits=4)
-  pval <- round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits = 4) 
+  twosided <- ansari.test(x = x, y = y, alternative = "two.sided",conf.level = conf.level,conf.int = conf.int)
+  oneless <- ansari.test(x = x, y = y, alternative = "less",conf.level = conf.level,conf.int = conf.int)
+  onegreater <- ansari.test(x = x, y = y,alternative = "greater",conf.level = conf.level,conf.int = conf.int)
   
-  ci <- c(paste("(",paste(round(twosided$conf.int[1],digits=4),",",
-                          round(twosided$conf.int[2],digits=4),sep=""),")",sep=""),
-          paste("(",paste(round(oneless$conf.int[1],digits=4),",",
-                          round(oneless$conf.int[2],digits=4),sep=""),")",sep=""),
-          paste("(",paste(round(onegreater$conf.int[1],digits=4),",",
-                          round(onegreater$conf.int[2],digits=4),sep=""),")",sep=""))
+  format_ci <- function(ci_low, ci_high) {
+    paste0("(", formatC(ci_low, digits = 4, format = "f"), ", ", formatC(ci_high, digits = 4, format = "f"), ")")
+  }
   
-  res <- data.frame(Test = tt,CI =ci,Pval = pval)
-  names(res) <- c("statistic",paste(as.character((1-alpha)*100),"% CI",sep=""),Pval = pval )
+  res <- data.frame(
+    Alternative = c(
+      paste0("\\(H_{1}: \\sigma_{1}/\\sigma_{2} \\neq  1 \\)"),
+      paste0("\\(H_{1}: \\sigma_{1}/\\sigma_{2} < 1 \\)"),
+      paste0("\\(H_{1}: \\sigma^{2}/\\sigma_{2} > 1 \\)")),
+    Statistic = c(formatC(twosided$statistic, digits = 4, format = "f"), "", ""),
+    `\\(p\\)-value` = formatC(ifelse(round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits=4)<0.001,"<0.001",round(c(twosided$p.value, oneless$p.value, onegreater$p.value),digits=4)), digits = 4, format = "f"),
+    check.names = FALSE,
+    stringsAsFactors = FALSE)
   
-  rownames(res) <- c(paste("\\(H_{1}: \\sigma_{1}/\\sigma_{2} \\neq \\)",1,sep=""),
-                     paste("\\(H_{1}: \\sigma_{1}/\\sigma_{2} <\\)",1,sep=""),
-                     paste("\\(H_{1}: \\sigma_{1}/\\sigma_{2} >\\)",1,sep=""))
-  res
+  if(conf.int){
+    res$CI <- c(
+      format_ci(twosided$conf.int[1], twosided$conf.int[2]),
+      paste0("(", "\\( 0 \\), ", formatC(oneless$conf.int[2], digits = 4, format = "f"), ")"),
+      paste0("(", formatC(onegreater$conf.int[1], digits = 4, format = "f"), ", \\( \\infty \\) )"))
+    
+    colnames(res)[4] <- paste0(formatC(conf.level * 100, digits = 1, format = "f"), "% CI")
+  } else
+  {
+    res$CI <- c("","","")
+    colnames(res)[4] <- ""
+  }
   
+  colnames(res)[1] <- " "
+  
+  return(res)
 }
 
 all.proportion.two.sample.test <- function(x = NULL,n, p = NULL, p0 = 0.5, alpha = 0.05){
@@ -381,8 +406,9 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                          ),
                                                          hr(),
                                                          uiOutput("tableUIprop_all"),
-                                                          textInput("p0", label = withMathJax("\\( H_0: p = p_0 \\)"), value = "0.5",
-                                                                    placeholder = "Indicate the null value for the proportion")),
+                                                        #  textInput("p0", label = withMathJax("\\( H_0: p = p_0 \\)"), value = "0.5",
+                                                         #           placeholder = "Indicate the null value for the proportion")
+                                                         ),
                                                 tabPanel("R code", verbatimTextOutput("one_sample_code"))
                                               
                                             )
@@ -394,8 +420,9 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                               sidebarPanel(
                                                 withMathJax(),
                                                 uiOutput("var_select_two_sample_ui"),
+                                                h4("Two sample details"),
                                                 checkboxInput("paired", "Paired samples", value = FALSE),
-                                                checkboxInput("equal_var", "Equal variance \\( (\\sigma^2_1 = \\sigma^2_2) \\)", value = FALSE),
+                                                checkboxInput("equal_var", "Only for \\(t\\)-test: Equal variance \\( (\\sigma^2_1 = \\sigma^2_2) \\)", value = FALSE),
                                                 sliderInput("alpha", "Significance level \\(\\alpha\\)",
                                                             min = 0, max = 1, value = 0.05, step = 0.001),
                                                 actionButton("run_two", "Run Analysis")
@@ -409,8 +436,16 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                                              value = "0", placeholder = "Enter null difference"),
                                                                    fluidRow(
                                                                      withMathJax(),
-                                                                     column(6, tags$b("Two-Samples \\( t \\) test"), tableOutput("twomean")),
-                                                                     column(6, tags$b("Mann-Whitney-Wilcoxon test"), tableOutput("twoloc"))
+                                                                     #column(6, 
+                                                                            tags$b("Two-Samples \\( t \\) test"), 
+                                                                            withMathJax(),
+                                                                            uiOutput("twomean"),
+                                                                     #),
+                                                                     #column(6, 
+                                                                            tags$b("Mann-Whitney-Wilcoxon test"), 
+                                                                            withMathJax(),
+                                                                            uiOutput("twoloc")
+                                                                            #)
                                                                    ),
                                                           ),
                                                           tabPanel("Dispersion Inference",
@@ -418,8 +453,17 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                                    textInput("sigma0", label = withMathJax("\\( H_0: \\sigma_1^2 / \\sigma_2^2 = R \\)"),
                                                                              value = "1", placeholder = "Enter variance ratio"),
                                                                    fluidRow(
-                                                                     column(6, tags$b("Two-Sample Variance test"), tableOutput("variance")),
-                                                                     column(6, tags$b("Ansari-Bradley test"), tableOutput("ansari"))
+                                                                     #column(6, 
+                                                                            tags$b("Two sample variance \\(F\\)-test"), 
+                                                                            uiOutput("variance"),
+                                                                          #  ),
+                                                                     #column(6, 
+                                                                     tags$b("Ansari-Bradley test"),
+                                                                     checkboxInput("ciansari",
+                                                                       label = "Show confidence interval",
+                                                                       value = FALSE),
+                                                                     uiOutput("ansari")
+                                                                     #)
                                                                    ),
                                                           ),
                                                           tabPanel("Proportion Inference",
@@ -450,9 +494,14 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                                    textInput("p0", label = withMathJax("\\( H_0: p_1 - p_2 = p_0 \\)"),
                                                                              value = "0", placeholder = "Enter null difference in proportions"),
                                                                    fluidRow(
-                                                                     column(6, tags$b("Two-Samples Proportion test"), tableOutput("proportion")),
+                                                                     #column(6, 
+                                                                            tags$b("Two-Samples Proportion test"), 
+                                                                            tableOutput("proportion")
+                                                                          #  ),
                                                                    ),
-                                                          )
+                                                          ),
+                                                          tabPanel("R code", 
+                                                                   verbatimTextOutput("two_sample_code"))
                                               )
                                             )
                                           )
@@ -516,6 +565,8 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
 )
 stats_inference_server <- function(input, output, session, firstkit.data) {
   
+  ## ---- one sample inference ----
+  
   output$var_select_one_sample_ui <- renderUI({
     df <- firstkit.data()
     if (is.null(df)) return(NULL)
@@ -539,7 +590,7 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     tagList(inputs)
   })
   
-  ## ---- one sample proportion inference ----
+
   output$proportion <- renderTable({
     alpha <- as.numeric(input$alpha)
     p0 <- as.numeric(input$p0)
@@ -595,16 +646,16 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
                   value = "0"),
         tags$hr(),
         fluidRow(
-          column(
-            width = 6,
+#          column(
+ #           width = 6,
             tags$b("One-Sample \\( t\\) test"),
-            tableOutput(t_output_id)
-          ),
-          column(
-            width = 6,
+            tableOutput(t_output_id),
+  #        ),
+#          column(
+#            width = 6,
             tags$b("Wilcoxon-signed rank test"),
             tableOutput(w_output_id)
-          )
+ #         )
         ),
       )
     })
@@ -629,7 +680,7 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
         sigma0 <- as.numeric(input[[sigma_input_id]])
         x <- df[[varname]]
         one.sample.var.test(x = x, sigma0 = sigma0, alpha = alpha)
-      }, rownames = TRUE)
+      }, rownames = TRUE,digits=5)
       
       
       tagList(
@@ -648,21 +699,23 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     tagList(output_ui_list)
   })
   
+  
   output$tableUIprop_all <- renderUI({
     req(input$nprop)
     alpha <- as.numeric(input$alpha)
-    p0 <- as.numeric(input$p0)
     
     test_output_id <- "prop_test"
-
-    # One-sample test output
+    
     output[[test_output_id]] <- renderTable({
+      req(input$p0)  # wait for user input
+      p0 <- as.numeric(input$p0)
+      
       if (input$propsuccess == "pr") {
         phat <- as.numeric(input$p_prop)
         x <- round(phat * input$nprop)
       } else {
         x <- input$x_prop
-        phat <- x/input$nprop
+        phat <- x / input$nprop
       }
       
       all.proportion.one.sample.test(
@@ -676,15 +729,22 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     
     tagList(
       fluidRow(
-        column(6,
-               tags$b("One-Sample Proportion Test"),
-               tableOutput(test_output_id))
+        tags$b("One-Sample Proportion Test"),
+        withMathJax(),
+        textInput(
+          "p0",
+          label = withMathJax("\\( H_0: p = p_0 \\)"),
+          value = "0.5",
+          placeholder = "Indicate the null value for the proportion"
+        ),
+        tableOutput(test_output_id)
       ),
       tags$hr()
     )
   })
   
-  ## ---- two sample
+  
+  ## ---- two sample inference ----
   
   output$var_select_two_sample_ui <- renderUI({
     df <- firstkit.data()
@@ -694,10 +754,8 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     
     tagList(
       radioButtons("two_sample_mode", "Select input mode:",
-                   choices = c(
-                     "Two separate numeric variables" = "vars",
-                     "One numeric variable + grouping variable" = "group"
-                   ),
+                   choices = c( "Two separate numeric variables" = "vars",
+                     "One numeric variable + grouping variable" = "group"),
                    selected = "vars"),
       conditionalPanel(
         condition = "input.two_sample_mode == 'vars'",
@@ -707,81 +765,128 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
       conditionalPanel(
         condition = "input.two_sample_mode == 'group'",
         selectInput("numvar_grouped", "Select Numeric Variable:", choices = num.vars),
-        selectInput("groupvar", "Select Grouping Variable (must have 2 levels):", choices = group_vars)
+        selectInput("groupvar", "Select Grouping Variable (must have 2 levels):", choices = group_vars),
+        uiOutput("group_levels_ui") 
       )
     )
   })
   
-  df <- reactive({ req(firstkit.data()); firstkit.data() })
+  output$group_levels_ui <- renderUI({
+    req(input$two_sample_mode == "group", input$groupvar)
+    df <- firstkit.data()
+    req(df[[input$groupvar]])
+    
+    lvls <- unique(as.character(df[[input$groupvar]]))
+    checkboxGroupInput( "selected_groups","Select two groups:", choices = lvls,
+      selected = if (length(lvls) >= 2) lvls[1:2] else lvls)
+  })
   
+  df <- reactive({ req(firstkit.data()); firstkit.data() })
+
   two.vars <- eventReactive(input$run_two, {
-    data <- df()
+    data <- firstkit.data()
     mode <- req(input$two_sample_mode)
-
+    
     if (mode == "group") {
-      req(input$numvar_grouped, input$groupvar)
+      req(input$numvar_grouped, input$groupvar, input$selected_groups)
+      
       data <- data[!is.na(data[[input$numvar_grouped]]) & !is.na(data[[input$groupvar]]), ]
-      groups <- unique(data[[input$groupvar]])
-
-      if (length(groups) > 2) {
-        groups <- groups[1:2]
-        data <- data[data[[input$groupvar]] %in% groups, ]
-      }
-
-      validate(need(length(groups) == 2, "Grouping variable must have exactly 2 levels"))
-
-      x <- data[data[[input$groupvar]] == groups[1], input$numvar_grouped]
-      y <- data[data[[input$groupvar]] == groups[2], input$numvar_grouped]
-
-      x <- as.numeric(as.character(x))
-      y <- as.numeric(as.character(y))
-
-      cat("Using groups:", groups[1], "and", groups[2], "\n")
+      data[[input$groupvar]] <- as.character(data[[input$groupvar]])
+      
+      validate(need(length(input$selected_groups) == 2, "Please select exactly two groups."))
+      
+      groups <- input$selected_groups
+      data <- data[data[[input$groupvar]] %in% groups, ]
+      
+      x <- unlist(data[data[[input$groupvar]] == groups[1], input$numvar_grouped])
+      y <- unlist(data[data[[input$groupvar]] == groups[2], input$numvar_grouped])
+      
+      x <- as.numeric(x)
+      y <- as.numeric(y)
+      levels_group <- groups
+      
     } else {
       req(input$var1, input$var2)
-      x <- data[[input$var1]]
-      y <- data[[input$var2]]
-
-      x <- as.numeric(as.character(x))
-      y <- as.numeric(as.character(y))
+      
+      x <- as.numeric(unlist(data[[input$var1]]))
+      y <- as.numeric(unlist(data[[input$var2]]))
+      levels_group <- c(input$var1, input$var2)
     }
-
-    list(x = x, y = y)
+    
+    
+    list(x = x, y = y, group_labels = levels_group)
+  })
+  output$twomean <- renderUI({
+    data <- two.vars()
+    req(data$x, data$y)
+    
+    tbl <- all.t.two.sample.test(x = data$x, y = data$y, delta0 = as.numeric(input$delta0), alpha = as.numeric(input$alpha), paired = input$paired, var.equal = input$equal_var)
+    
+    withMathJax(
+      HTML(
+        htmlTable(tbl, rnames = FALSE, escape = FALSE,
+                             align = "lccccc",
+                             css.cell = "padding: 5px 10px;")
+      )
+    )
   })
 
-  output$twomean <- renderTable({
+  output$twoloc <- renderUI({
     data <- two.vars()
     req(data$x, data$y)
-    all.t.two.sample.test(data$x, data$y,
-                          delta0 = as.numeric(input$delta0),
-                          alpha = as.numeric(input$alpha),
-                          paired=input$paired,
-                          var.equal = input$equal_var)
     
-  },rownames=TRUE)
+    tbl <- all.wilcoxon.two.sample.test(
+      x = data$x,
+      y = data$y,
+      delta0 = as.numeric(input$delta0),
+      alpha = as.numeric(input$alpha),
+      paired = input$paired)
+    
+    withMathJax(
+      HTML(
+        htmlTable(tbl, rnames = FALSE, escape = FALSE,
+                             align = "lccc",
+                             css.cell = "padding: 5px 10px;")
+      )
+    )
+  })
   
-  output$twoloc <- renderTable({
+  output$variance <- renderUI({
     data <- two.vars()
     req(data$x, data$y)
-    all.wilcoxon.two.sample.test(data$x, data$y,
-                                 delta0 = as.numeric(input$delta0),
-                                 alpha = as.numeric(input$alpha),
-                                 paired=input$paired)
-  }, rownames = TRUE)
+    
+    tbl <- all.var.two.sample.test(
+      x = data$x,
+      y = data$y,
+      R = as.numeric(input$sigma0),
+      alpha = as.numeric(input$alpha))
+    
+    withMathJax(
+      HTML(
+        htmlTable(tbl, rnames = FALSE, escape = FALSE,
+                  align = "lcccc",
+                  css.cell = "padding: 5px 10px;")
+      )
+    )
+  })
   
-  output$variance <- renderTable({
+  output$ansari <- renderUI({
     data <- two.vars()
     req(data$x, data$y)
-    all.var.two.sample.test(data$x, data$y,
-                            ratio = as.numeric(input$sigma0),
-                            alpha = as.numeric(input$alpha))
-  }, rownames = TRUE)
-  
-  output$ansari <- renderTable({
-    data <- two.vars()
-    req(data$x, data$y)
-    all.ansari.two.sample.test(data$x, data$y,alpha = as.numeric(input$alpha))
-  }, rownames = TRUE)
+    
+    tbl <- all.ansari.two.sample.test(
+      x = data$x,
+      y = data$y, conf.int= input$ciansari,
+      alpha = as.numeric(input$alpha))
+    
+    withMathJax(
+      HTML(
+        htmlTable(tbl, rnames = FALSE, escape = FALSE,
+                  align = "lccc",
+                  css.cell = "padding: 5px 10px;")
+      )
+    )
+  })
   
   output$proportion <- renderTable({
     p0 <- as.numeric(input$p0)
@@ -952,10 +1057,34 @@ one.sample.var.test <- function(x,sigma0=1,conf.level=0.95,alternative="two.side
     
     vars <- input$num.vars
     alpha <- as.numeric(input$alpha)
-    if (is.null(vars) || length(vars) == 0) {
-      return("No numeric variables selected for one-sample inference.")
-    }
     
+    
+    if (is.null(vars) || length(vars) == 0) {
+      p <- as.numeric(input$p_prop)
+      x <- round(p * input$nprop)
+      p0 <- as.numeric(input$p0)
+      n <- input$nprop
+      if(!is.null(x) & is.null(p)){
+        p <- x/n
+      } 
+      if(is.null(x) & !is.null(p)){
+        p <- p
+        x <- round(p*n,digits = 0)
+      }
+      if(!is.null(x) & !is.null(p)){
+        p <- x/n
+      }
+      
+      code_lines <- c(code_lines, 
+                      "##***************** One-sample Proportion test",
+                      paste0("binom.test(x = ", x,", n = ", n, ", p = ", p0,", conf.level = ",1-alpha ,", alternative = \"two.sided\")"),
+                      paste0("binom.test(x = ", x,", n = ", n, ", p = ", p0,", conf.level = ",1-alpha ,", alternative = \"less\")"),
+                      paste0("binom.test(x = ", x,", n = ", n, ", p = ", p0,", conf.level = ",1-alpha ,", alternative = \"greater\")"),
+                      "No numeric variables selected for one-sample inference.")
+      
+      paste(code_lines, collapse = "\n")
+      
+    } else{
     
     for (v in vars) {
       mu_input_id <- paste0("mu0_", v)
@@ -966,7 +1095,7 @@ one.sample.var.test <- function(x,sigma0=1,conf.level=0.95,alternative="two.side
       
       code_lines <- c(
         code_lines,
-        paste0("## One-sample inference for ", v),
+        paste0("##**************** One-sample inference for the mean of ", v),
         "## One Sample t-test",
         paste0("# two-sided"),
         paste0("t.test(x = ", v, ", mu = ", mu0_val, ", conf.level = ", 1 - alpha, ", alternative = \"two.sided\")"),
@@ -984,6 +1113,43 @@ one.sample.var.test <- function(x,sigma0=1,conf.level=0.95,alternative="two.side
         paste0("wilcox.test(x = ", v, ", mu = ", mu0_val, ", conf.level = ", 1 - alpha, ", alternative = \"greater\", conf.int = TRUE)"),
         ""
       )
+      
+      sigma_input_id <- paste0("sigma0_", v)
+      sigma0_raw <- input[[sigma_input_id]]
+      if (is.null(sigma0_raw) || sigma0_raw == "") next
+      sigma0_val <- as.numeric(sigma0_raw)
+      if (is.na(sigma0_val)) next
+      code_lines <- c(
+        code_lines,
+        paste0("##***************** One-sample Variance inference for ", v),
+      paste0("one.sample.var.test(x = ", v, ",sigma0 = ",sigma0_val ,", conf.level = ",1-alpha,",alternative=\"two.sided\")"),
+      paste0("one.sample.var.test(x = ", v, ",sigma0 = ",sigma0_val ,", conf.level = ",1-alpha,",alternative=\"less\")"),
+      paste0("one.sample.var.test(x = ", v, ",sigma0 = ",sigma0_val ,", conf.level = ",1-alpha,",alternative=\"greater\")"),
+      "")
+      
+    }
+    
+    p <- as.numeric(input$p_prop)
+    x <- round(p * input$nprop)
+    p0 <- as.numeric(input$p0)
+    n <- input$nprop
+    if(!is.null(x) & is.null(p)){
+      p <- x/n
+    } 
+    if(is.null(x) & !is.null(p)){
+      p <- p
+      x <- round(p*n,digits = 0)
+    }
+    if(!is.null(x) & !is.null(p)){
+      p <- x/n
+    }
+    
+    code_lines <- c(code_lines, 
+                    "##***************** One-sample Proportion test ",
+                    paste0("binom.test(x = ", x,", n = ", n, ", p = ", p0,", conf.level = ",1-alpha ,", alternative = \"two.sided\")"),
+                    paste0("binom.test(x = ", x,", n = ", n, ", p = ", p0,", conf.level = ",1-alpha ,", alternative = \"less\")"),
+                    paste0("binom.test(x = ", x,", n = ", n, ", p = ", p0,", conf.level = ",1-alpha ,", alternative = \"greater\")"))
+    
     }
     
     if (length(code_lines) == 0) {
@@ -993,5 +1159,117 @@ one.sample.var.test <- function(x,sigma0=1,conf.level=0.95,alternative="two.side
     }
   })
   
-   
+  output$two_sample_code <- renderText({
+    code_lines <- c("attach(mydata)")
+    
+    data <- two.vars()
+    x <- data$group_labels[1]
+    y <- data$group_labels[2]
+    alpha <- as.numeric(input$alpha)
+    
+    mode <- req(input$two_sample_mode)
+    
+    
+    # p <- as.numeric(input$p_prop)
+    # x <- round(p * input$nprop)
+    # p0 <- as.numeric(input$p0)
+    # n <- input$nprop
+    # if(!is.null(x) & is.null(p)){
+    #   p <- x/n
+    # } 
+    # if(is.null(x) & !is.null(p)){
+    #   p <- p
+    #   x <- round(p*n,digits = 0)
+    # }
+    # if(!is.null(x) & !is.null(p)){
+    #   p <- x/n
+    # }
+    # 
+    # code_lines <- c(code_lines, 
+    #                 "##***************** Two-sample Proportion test",
+    #                 paste0("binom.test(x = ", x,", n = ", n, ", p = ", p0,", conf.level = ",1-alpha ,", alternative = \"two.sided\")"),
+    #                 paste0("binom.test(x = ", x,", n = ", n, ", p = ", p0,", conf.level = ",1-alpha ,", alternative = \"less\")"),
+    #                 paste0("binom.test(x = ", x,", n = ", n, ", p = ", p0,", conf.level = ",1-alpha ,", alternative = \"greater\")"),
+    #                 "No numeric variables selected for one-sample inference.")
+    # 
+    # paste(code_lines, collapse = "\n")
+    # 
+    
+     if(input$paired){
+    code_lines <- c(
+      code_lines,
+      paste0("##**************** Paired samples"),
+     "## Paired t-test ",
+      paste0("# two-sided"),
+      paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", alternative = \"two.sided\")"),
+      paste0("# one-sided (less)"),
+      paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired, ", alternative = \"less\")"),
+      paste0("# one-sided (greater)"),
+      paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired, ", alternative = \"greater\")"),
+      "",
+      "## Wilcoxon Rank signed test",
+      paste0("# two-sided"),
+      paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"two.sided\", conf.int = TRUE)"),
+      paste0("# one-sided (less)"),
+      paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"less\", conf.int = TRUE)"),
+      paste0("# one-sided (greater)"),
+      paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"greater\", conf.int = TRUE)"),
+      ""
+    )
+     } else{
+       
+       if (mode == "group") {
+       code_lines <- c(
+         code_lines,
+         paste0("##**************** Two-sample inference "),
+         paste0("x <- ", input$numvar_grouped,"[",input$groupvar," == ", input$selected_groups[1],"]"),
+         paste0("y <- ", input$numvar_grouped,"[",input$groupvar," == ", input$selected_groups[2],"]"),
+         ifelse(input$equal_var, "## Two Sample t-test with equal variance" ,"## Two Sample t-test with unequal variance"),
+         paste0("# two-sided"),
+         paste0("t.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"two.sided\")"),
+         paste0("# one-sided (less)"),
+         paste0("t.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"less\")"),
+         paste0("# one-sided (greater)"),
+         paste0("t.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"greater\")"),
+        "",
+        "## Wilcoxon Mann-Whitney test",
+        paste0("# two-sided"),
+        paste0("wilcox.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"two.sided\", conf.int = TRUE)"),
+        paste0("# one-sided (less)"),
+        paste0("wilcox.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"less\", conf.int = TRUE)"),
+        paste0("# one-sided (greater)"),
+        paste0("wilcox.test(x = x ,y = y, mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"greater\", conf.int = TRUE)"),
+        "")
+       
+       } else{
+    code_lines <- c(
+      code_lines,
+      paste0("##**************** Two-sample inference for the mean of "),
+      ifelse(input$equal_var, "## Two Sample t-test with equal variance" ,"## Two Sample t-test with unequal variance"),
+      paste0("# two-sided"),
+      paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"two.sided\")"),
+      paste0("# one-sided (less)"),
+      paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"less\")"),
+      paste0("# one-sided (greater)"),
+      paste0("t.test(x = ", x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ", paired = ",input$paired,", var.equal = ", input$equal_var, ", alternative = \"greater\")"),
+      "",
+      "## Wilcoxon Mann-Whitney test",
+      paste0("# two-sided"),
+      paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"two.sided\", conf.int = TRUE)"),
+      paste0("# one-sided (less)"),
+      paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"less\", conf.int = TRUE)"),
+      paste0("# one-sided (greater)"),
+      paste0("wilcox.test(x = ",  x, ",y = ", y , ", mu = ", input$delta0, ", conf.level = ", 1 - alpha, ",paired = ",input$paired, ", alternative = \"greater\", conf.int = TRUE)"),
+      ""
+    )
+       }
+    
+  }
+    if (length(code_lines) == 0) {
+      "No valid null hypotheses provided."
+    } else {
+      paste(code_lines, collapse = "\n")
+    }
+  })
+  
 }

@@ -7,10 +7,11 @@ intro_ui <- tabPanel("Welcome",
                        h4("Introduction"),
                        p("FIRSTkit is a companion for introductory statistics courses requiring no prior R knowledge."), 
                        p("It enables statistical analysis with minimal programming and helps students grasp fundamental concepts interactively."),
-
+                       p(HTML("FIRSTkit is licensed under the <a href='https://www.gnu.org/licenses/gpl-3.0.txt'>GNU General Public License v3.0</a>.")),
+                       
                        HTML(paste0(
                          '<div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.05; z-index: 0; pointer-events: none;">',
-                         '<img src="', logo2, '" style="height: 300px;">',
+                         '<img src="', logo2, '" style="height: 200px;">',
                          '</div>'
                        )),
                        
@@ -67,7 +68,7 @@ intro_ui <- tabPanel("Welcome",
                        h4("Linear Regression"),
                        p("Fit a linear regression models. The model assumes normally distributed residuals with constant variance:"),
                        uiOutput("regression_equation"),
-                       
+                      
                        h4("Authors:"),
                        p("Israel A. Almodóvar-Rivera, PhD"),
                        p("email: ", tags$a(href = "mailto:israel.almodovar@upr.edu", "israel.almodovar@upr.edu")),
