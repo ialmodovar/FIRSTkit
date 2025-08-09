@@ -18,7 +18,7 @@ linear_regression_ui <- tabPanel("Linear Regression",
                                    sidebarPanel(
                                      uiOutput("response_ui"),
                                      uiOutput("predictors_ui"),
-                                     actionButton("run", "Run Analysis")
+                                     actionButton("run", "Submit")
                                    ),
                                    
                                    mainPanel(
@@ -30,11 +30,10 @@ linear_regression_ui <- tabPanel("Linear Regression",
                                                           h4("Pearson Correlation Matrix"),
                                                           tableOutput("cor_matrix"),
                                                           br(),
-                                                          p("* indicates statistically significant correlation (p-value < \\( \\alpha \\))",
-                                                            style = "color:gray; font-style:italic;")
+                                                          uiOutput("corr_pvalue")
                                                  ),
                                                  
-                                                 tabPanel("Model Summary",
+                                                 tabPanel("Regression Model Summary",
                                                           withMathJax(),
                                                           h4("Fitted Line Equation"),
                                                           uiOutput("model_eq"),
@@ -55,13 +54,13 @@ linear_regression_ui <- tabPanel("Linear Regression",
                                                  ),
                                                  
                                                  tabPanel("Diagnostic Plots",
-                                                          h4("Studentized Residuals vs Fitted"),
+                                                          checkboxInput("typeofresiduals",label = "Use studentized residuals",value = TRUE),
+                                                          #h4("Studentized Residuals vs Fitted Values"),
                                                           plotlyOutput("resid_plot"),
-                                                          h4("QQ Plot"),
+                                                          h4("Quantile-Quantile Plot"),
                                                           sliderInput("qq_alpha", "Significance Level (\\( \\alpha \\))",
                                                                       value = 0.05, min = 0, max = 1, step = 0.001),
                                                           plotlyOutput("qq_plot"),
-                                                          h4("Histogram of the Studentized Residuals"),
                                                           plotlyOutput("residual_hist")
                                                  ),
                                                  
@@ -75,7 +74,9 @@ linear_regression_ui <- tabPanel("Linear Regression",
                                                           plotlyOutput("cook_plot"),
                                                           h4("Flagged Observations"),
                                                           tableOutput("cook_flagged")
-                                                 )
+                                                 ),
+                                                 tabPanel("R code",
+                                                          verbatimTextOutput("regression_code"))
                                      )
                                    )
                                  )
@@ -84,10 +85,10 @@ linear_regression_ui <- tabPanel("Linear Regression",
 
 linear_regression_server <- function(input, output, session,firstkit.data) {
   
-  observe({
-    print("Data loaded:")
-    print(str(firstkit.data()))
-  })
+  # observe({
+  #   print("Data loaded:")
+  #   print(str(firstkit.data()))
+  # })
   
   output$response_ui <- renderUI({
     req(firstkit.data())
@@ -143,15 +144,20 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     
     for (i in 1:nrow(cor.mat)) {
       for (j in 1:ncol(cor.mat)) {
-        r_val <- round(cor.mat[i, j], 4)
-        p_val <- p_mat[i, j]
-        sig <- if (!is.na(p_val) && i != j && p_val < alpha) " *" else ""
-        formatted_mat[i, j] <- paste0(r_val, sig)
+        rval <- round(cor.mat[i, j], 4)
+        pval <- p_mat[i, j]
+        sig <- if (!is.na(pval) && i != j && pval < alpha) " *" else ""
+        formatted_mat[i, j] <- paste0(rval, sig)
       }
     }
     
     as.data.frame(formatted_mat)
   },   rownames = TRUE,digits = 3)
+  
+  output$corr_pvalue <- renderUI({
+    withMathJax( HTML(paste0("* indicates statistically significant correlation \\(p \\)-value <", input$corr_alpha)))
+  })
+  
   
   model.fit <- eventReactive(input$run, {
     df <- firstkit.data()
@@ -177,7 +183,7 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     mse <- round(deviance(model) / df.residual(model), 5)
     
     data.frame(
-      Statistic = c("R-squared", "Adjusted R-squared", "AIC","BIC","$\\sigma^2$"),
+      Statistic = c("R-squared", "Adjusted R-squared", "AIC","BIC","Mean Sq"),
       Value = c(rsq, adj_rsq,AIC(model),BIC(model), mse),check.names = FALSE)
   },digits=4)
   
@@ -233,7 +239,7 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     }, beta = betas, var = terms, SIMPLIFY = TRUE)
     
     eq.rhs <- paste0(term.parts, collapse = "")
-    equation <- paste0("$$\\hat{", input$response, "} = ", intercept, eq.rhs, "$$")
+    equation <- paste0("\\(\\hat{", input$response, "} = ", intercept, eq.rhs, "\\)")
     
     withMathJax(HTML(equation))
   })
@@ -247,10 +253,10 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     anova.tbl <- data.frame(anova.tbl)
     
     if ("F.value" %in% names(anova.tbl)) {
-      names(anova.tbl)[names(anova.tbl) == "F.value"] <- "F-statistic"
+      names(anova.tbl)[names(anova.tbl) == "F.value"] <- "\\(F\\)-statistic"
     }
     if ("Pr..F." %in% names(anova.tbl)) {
-      names(anova.tbl)[names(anova.tbl) == "Pr..F."] <- "$p$-value"
+      names(anova.tbl)[names(anova.tbl) == "Pr..F."] <- "\\(p\\)-value"
     }
     
     anova.tbl$Df <- as.integer(anova.tbl$Df)
@@ -272,10 +278,8 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
           anova.tbl[[col]] <- paste0(anova.tbl[[col]], sig.marker)
 
           anova.tbl[[col]] <- ifelse(
-            grepl("< 0.001", anova.tbl[[col]]) & (0.001 < alpha),
-            "< 0.001 *",
-            anova.tbl[[col]]
-          )
+            grepl("< 0.001", anova.tbl[[col]]) & (0.001 < alpha),"< 0.001 *",
+            anova.tbl[[col]])
         } else {
           anova.tbl[[col]] <- round(anova.tbl[[col]], 4)
         }
@@ -286,17 +290,21 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
   }, rownames = TRUE,digits=3,na="")
   
   
-  # Residuals vs Fitted
   output$resid_plot <- renderPlotly({
     req(model.fit())
     model <- model.fit()
-    df <- data.frame(Fitted = fitted(model), Residuals = studres(model))
+    if(input$typeofresiduals){
+      rr <- studres(model)
+    } else{
+      rr <- model$residuals
+    }
+    df <- data.frame(Fitted = fitted(model), Residuals = rr)
     
     p <- ggplot(df, aes(x = Fitted, y = Residuals)) +
       geom_point(color = "black", alpha = 0.7) +
       geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
-      labs(title = "Studentized Residuals vs Fitted Values",
-           x = "Fitted Values", y = "Studentized Residuals") +
+      labs(title = ifelse(input$typeofresiduals,"Studentized Residuals vs Fitted Values","Residuals vs Fitted Values"),
+           x = "Fitted Values", y = ifelse(input$typeofresiduals,"Studentized Residuals","Residuals")) +
       theme_bw()
     
     ggplotly(p)
@@ -306,30 +314,40 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     req(model.fit())
     model <- model.fit()
     
-    res <- studres(model)
-    n <- length(res)
-    validate(need(n > 0, "No residuals available for QQ plot."))
+    # Choose residual type
+    if (input$typeofresiduals) {
+      res <- studres(model)
+    } else {
+      res <- residuals(model)
+    }
     
-    sres <- sort(res)
+    n <- length(res)
+    validate(need(n > 0, "No residuals available for the quantile-quantile plot."))
+    
+    sres <- sort((res - mean(res, na.rm = TRUE)) / sd(res, na.rm = TRUE))
     tq <- qnorm(ppoints(n))
     
     alpha <- input$qq_alpha
-    se <- (1/dnorm(tq)) * sqrt(ppoints(n) * (1-ppoints(n))/n)
+    se <- (1 / dnorm(tq)) * sqrt(ppoints(n) * (1 - ppoints(n))/n)
     zcrit <- qnorm(1 - alpha/2)
-    upper <- tq + zcrit*se
-    lower <- tq - zcrit*se
+    upper <- tq + zcrit * se
+    lower <- tq - zcrit * se
     
-    df <- data.frame( Theoretical = tq, Observed = sres, Upper = upper, Lower = lower,Label = "")
+    df <- data.frame(Theoretical = tq,Observed = sres,Upper = upper,Lower = lower,Label = "")
     
-    outlier_idx <- order(abs(res - tq), decreasing = TRUE)[1:3]
+    outlier_idx <- order(abs(sres - tq), decreasing = TRUE)[1:3]
     df$Label[outlier_idx] <- outlier_idx
     
     p <- ggplot(df, aes(x = Theoretical, y = Observed)) +
-      geom_ribbon(aes(ymin = Lower, ymax = Upper), fill = "gray90", alpha = 0.5) +
+      geom_ribbon(aes(ymin = Lower, ymax = Upper), fill = "gray40", alpha = 0.5) +
       geom_point(color = "black") +
       geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
       geom_text(aes(label = Label), vjust = -1, color = "darkred") +
-      labs(title = "",x = "Theoretical Quantiles", y = "Studentized Residuals") +
+      labs(
+        title = "",
+        x = "Theoretical Quantiles",
+        y = ifelse(input$typeofresiduals, "Studentized Residuals", "Residuals")
+      ) +
       theme_bw()
     
     ggplotly(p)
@@ -339,7 +357,13 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     req(model.fit())
     model <- model.fit()
     
-    res <- studres(model)
+    #res <- studres(model)
+    if(input$typeofresiduals){
+      res <- studres(model)
+    } else{
+      res <- model$residuals
+    }
+    
     n <- length(res)
     validate(need(n > 0, "No residuals available for histogram."))
     
@@ -351,7 +375,7 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
                      alpha = 0.6) +
       geom_density(color = "black", linewidth = 1.2) +
       geom_vline(xintercept = 0, color = "red", linetype = "dashed", linewidth = 1) +
-      labs( title = "", x = "Studentized Residual", y = "Density") + theme_bw()
+      labs( title = "", x = ifelse(input$typeofresiduals,"Studentized Residuals","Residuals"), y = "Density") + theme_bw()
     
     ggplotly(p)
   })
@@ -363,11 +387,7 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     cooks <- cooks.distance(model)
     threshold <- input$cook_thresh %||% (4/length(cooks))
     
-    df <- data.frame(
-      Observation = seq_along(cooks),
-      Cook = cooks,
-      Flagged = cooks > threshold
-    )
+    df <- data.frame(Observation = seq_along(cooks),Cook = cooks,Flagged = cooks > threshold)
     
     p <- ggplot(df, aes(x = Observation, y = Cook, color = Flagged)) +
       geom_point(size = 2) +
@@ -390,5 +410,42 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     
     data.frame( Observation = flagged,`Cook's Distance` = round(cooks[flagged], 5))
   },digits=4)
+  
+  output$regression_code <- renderText({
+    code_lines <- c("library(\"car\")\nattach(mydata)\n## Correlation Matrix")
+    df <- firstkit.data()
+    selected.vars <- c(input$response, input$predictors)
+    df.subset <- df[, selected.vars, drop = FALSE]
+    num.df <- df.subset[sapply(df.subset, is.numeric)]
+    
+    code_lines <- c(
+      code_lines,
+      paste0(
+        "mydata.red <- mydata[, c(",
+        paste0("\"", names(num.df), "\"", collapse = ", "),
+        ")]"),
+        "cor(mydata.red,use=\"pairwise.complete.obs\",method=\"pearson\")",
+      "## Linear Regression model",
+      paste0("m1 <- lm(",paste(input$response, "~", paste(input$predictors, collapse = " + ")),",data=mydata.red)"),
+      "summary(m1) ## summary",
+      "AIC(m1) ## Akaike's Information Criterion",
+      "BIC(m1) ## Bayesian Information Criterion",
+      "anova(m1) ## ANOVA Table",
+      "summary(m1$residuals) ## summary residuals",
+      "summary(studres(m1)) ## summary of studentized residuals using car package",
+      ifelse(input$typeofresiduals,"res <- studres(m1)","res <- m1$residuals"),
+      "cooks.distance(m1) ## Cook's distance"
+    )
+    
+    # cor.mat <- cor(num_df, use = "pairwise.complete.obs", method = "pearson")
+    # p_mat <- cor.pmat(num_df)
+    
+    
+    if (length(code_lines) == 0) {
+      "No valid null hypotheses provided."
+    } else {
+      paste(code_lines, collapse = "\n")
+    }
+  })
   
 }

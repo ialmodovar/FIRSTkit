@@ -467,9 +467,7 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                                                           #  ),
                                                                      #column(6, 
                                                                      tags$b("Ansari-Bradley test"),
-                                                                     checkboxInput("ciansari",
-                                                                       label = "Show confidence interval",
-                                                                       value = FALSE),
+                                                                     checkboxInput("ciansari",label = "Show confidence interval",value = FALSE),
                                                                      uiOutput("ansari")
                                                                      #)
                                                                    ),
