@@ -94,5 +94,5 @@ library("FIRSTkit")
 FIRSTkit()
 ```
 
-If you have any questions or comment we prefer that you open an [issue](https://github.com/ialmodovar/FIRSTkit/issues). You can also send and email to *israel.almodovar@upr.edu* or *maitra@iastate.edu*.
+If you have any questions or comment we prefer that you open an [issue](https://github.com/ialmodovar/FIRSTkit/issues). You can also send email to *israel.almodovar@upr.edu* or *maitra@iastate.edu*.
 
