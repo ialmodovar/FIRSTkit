@@ -4,9 +4,9 @@ intro_ui <- tabPanel("Welcome",
                      fluidPage(
                        titlePanel(HTML(paste0(
                          '<div style="display: flex; align-items: center; justify-content: center; margin-top: 20px;">',
-                         '<img src="', logo2, '" height="150" style="margin-top: 20px; margin-bottom: 20px;">',
+                         '<img src="', logo2, '" style="max-width: 75%; height: auto; margin-top: 20px; margin-bottom: 20px;">',
                          '</div>'
-                       ))),#"FIRST Impressions R-based Statistics Toolkit (FIRSTkit)"),
+                       ))),
                        withMathJax(),
                        tags$h4(tags$strong("Introduction")),
                        p("FIRSTkit is a companion for introductory statistics courses requiring no knowledge of coding."), 
@@ -75,7 +75,7 @@ intro_ui <- tabPanel("Welcome",
                        uiOutput("regression_equation"),
                        p("Model summary, diagnostics of assumptions and outlier detection."),
                        
-                       tags$h4(tags$strong("Author")),
+                       tags$h4(tags$strong("Authors:")),
                        p("Israel A. Almodóvar-Rivera, PhD"),
                        p("email: ", tags$a(href = "mailto:israel.almodovar@upr.edu", "israel.almodovar@upr.edu")),
                        p("Ranjan Maitra, PhD"),

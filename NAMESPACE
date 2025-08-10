@@ -18,18 +18,9 @@ importFrom("htmlTable","htmlTable")
 importFrom("plotly","ggplotly","plotlyOutput","renderPlotly")
 importFrom("DT","datatable","dataTableOutput","renderDT")
 importFrom("graphics", "stem")
-importFrom("stats", "na.omit", "quantile")
 importFrom("utils", "capture.output","combn")
-importFrom("stats", "df")
 
-importFrom("stats", "AIC", "BIC", "IQR", "TukeyHSD", "anova",
-             "ansari.test", "aov", "as.formula", "bartlett.test",
-             "binom.test", "coef", "confint", "cooks.distance", "cor",
-             "cor.test", "dbinom", "dchisq", "density", "deviance",
-             "df.residual", "dgeom", "dhyper", "dnorm", "dpois", "dt",
-             "fitted", "fligner.test", "kruskal.test", "lm", "mad",
-             "median", "pchisq", "pnorm", "ppoints", "qbinom", "qchisq",
-             "qf", "qhyper", "qnorm", "qpois", "qt", "sd", "t.test",
-             "var", "var.test", "wilcox.test")
+importFrom("stats", "na.omit", "quantile", "AIC", "BIC", "IQR", "TukeyHSD", "anova", "ansari.test", "aov", "as.formula", "bartlett.test", "binom.test", "coef", "confint", "cooks.distance", "cor", "cor.test", "dbinom", "dchisq", "density", "deviance", "df.residual", "dgeom", "dhyper", "dnorm", "dpois", "dt", "fitted", "fligner.test", "kruskal.test", "lm", "mad", "median", "pchisq", "pnorm", "ppoints", "qbinom", "qchisq", "qf", "qhyper", "qnorm", "qpois", "qt", "sd", "t.test", "var", "var.test", "wilcox.test", "df" ,"prop.test", "residuals")
+  
 importFrom("utils", "head", "read.csv", "str", "write.csv")
 

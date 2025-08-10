@@ -12,9 +12,8 @@
 ##* Copyright June 2025
 ##*********************************************
 
-manual_code <- function(text_input) {
-  # Try to read the text input as a CSV
-  df <- tryCatch(read.csv(text = text_input, header = TRUE), error = function(e) NULL)
+mcode <- function(tinput) {
+  df <- tryCatch(read.csv(text = tinput, header = TRUE), error = function(e) NULL)
   if (is.null(df)) return("Invalid manual input.")
   
   code_parts <- lapply(names(df), function(col) {
@@ -144,17 +143,17 @@ data_server <- function(input, output, session) {
   output$code <- renderText({
     req(input$upload_method)
     
-    mcode <- function(tinput) {
-      df <- tryCatch(read.csv(text = tinput, header = TRUE), error = function(e) NULL)
-      if (is.null(df)) return("Invalid manual input.")
-      
-      cparts <- lapply(names(df), function(col) {
-        values <- paste(df[[col]], collapse = ", ")
-        paste0(col, " = c(", values, ")")
-      })
-      
-      paste0("mydata <- data.frame(", paste(cparts, collapse = ", "), ")")
-    }
+    # mcode <- function(tinput) {
+    #   df <- tryCatch(read.csv(text = tinput, header = TRUE), error = function(e) NULL)
+    #   if (is.null(df)) return("Invalid manual input.")
+    #   
+    #   cparts <- lapply(names(df), function(col) {
+    #     values <- paste(df[[col]], collapse = ", ")
+    #     paste0(col, " = c(", values, ")")
+    #   })
+    #   
+    #   paste0("mydata <- data.frame(", paste(cparts, collapse = ", "), ")")
+    # }
     
     code <- switch(input$upload_method,
                    file = {

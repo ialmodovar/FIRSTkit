@@ -50,7 +50,7 @@ linear_regression_ui <- tabPanel("Linear Regression",
                                                  tabPanel("ANOVA",
                                                           h4("Analysis of Variance (ANOVA) Table"),
                                                           withMathJax(),
-                                                          tableOutput("anova_table")
+                                                          uiOutput("anova_table")
                                                  ),
                                                  
                                                  tabPanel("Diagnostic Plots",
@@ -84,11 +84,6 @@ linear_regression_ui <- tabPanel("Linear Regression",
 
 
 linear_regression_server <- function(input, output, session,firstkit.data) {
-  
-  # observe({
-  #   print("Data loaded:")
-  #   print(str(firstkit.data()))
-  # })
   
   output$response_ui <- renderUI({
     req(firstkit.data())
@@ -180,11 +175,13 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     
     rsq <- round(s$r.squared, 5)
     adj_rsq <- round(s$adj.r.squared, 5)
-    mse <- round(deviance(model) / df.residual(model), 5)
+    mse <- round(deviance(model)/df.residual(model), 5)
     
-    data.frame(
+    df <- data.frame(
       Statistic = c("R-squared", "Adjusted R-squared", "AIC","BIC","Mean Sq"),
       Value = c(rsq, adj_rsq,AIC(model),BIC(model), mse),check.names = FALSE)
+    colnames(df)[2] <- ""
+    
   },digits=4)
   
   
@@ -244,52 +241,29 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     withMathJax(HTML(equation))
   })
   
-  output$anova_table <- renderTable({
-    req(model.fit(), input$conf_level)
-    model <- model.fit()
-    alpha <- 1 - (input$conf_level/100)
-    
-    anova.tbl <- anova(model)
-    anova.tbl <- data.frame(anova.tbl)
-    
-    if ("F.value" %in% names(anova.tbl)) {
-      names(anova.tbl)[names(anova.tbl) == "F.value"] <- "\\(F\\)-statistic"
-    }
-    if ("Pr..F." %in% names(anova.tbl)) {
-      names(anova.tbl)[names(anova.tbl) == "Pr..F."] <- "\\(p\\)-value"
-    }
-    
-    anova.tbl$Df <- as.integer(anova.tbl$Df)
-    
-    if ("Df" %in% names(anova.tbl)) {
-      names(anova.tbl)[names(anova.tbl) == "Df"] <- "df"
-    }
-    
-    for (col in names(anova.tbl)) {
-      if (col != "df" && is.numeric(anova.tbl[[col]])) {
-        if (col == "$p$-value") {
-          anova.tbl[[col]] <- ifelse(
-            anova.tbl[[col]] < 0.001,
-            "< 0.001",
-            signif(anova.tbl[[col]], 4)
-          )
-          np <- suppressWarnings(as.numeric(anova.tbl[[col]]))
-          sig.marker <- ifelse(!is.na(np) & np < alpha, " *", "")
-          anova.tbl[[col]] <- paste0(anova.tbl[[col]], sig.marker)
+ 
+  output$anova_table <- renderUI({
+      req(model.fit(), input$conf_level)
+      model <- model.fit()
 
-          anova.tbl[[col]] <- ifelse(
-            grepl("< 0.001", anova.tbl[[col]]) & (0.001 < alpha),"< 0.001 *",
-            anova.tbl[[col]])
-        } else {
-          anova.tbl[[col]] <- round(anova.tbl[[col]], 4)
-        }
-      }
-    }
+    tbl <- anova(model)
     
-    anova.tbl
-  }, rownames = TRUE,digits=3,na="")
-  
-  
+    tbl$`Pr(>F)` <- ifelse(tbl$`Pr(>F)` < 0.001, "<0.001", round(tbl$`Pr(>F)`, 3))
+    
+    colnames(tbl)[4] <- "\\( F \\)-value"
+    colnames(tbl)[5] <- "\\(p \\)-value"
+    tbl[,1:4] <- round(tbl[,1:4],digits=3)
+
+    HTML(
+      htmlTable(
+        tbl,
+        rownames = TRUE,escape = FALSE,
+        align = "lccccc",
+        css.cell = "padding: 5px 10px;"
+      )
+    )
+  })
+    
   output$resid_plot <- renderPlotly({
     req(model.fit())
     model <- model.fit()
@@ -328,7 +302,7 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     tq <- qnorm(ppoints(n))
     
     alpha <- input$qq_alpha
-    se <- (1 / dnorm(tq)) * sqrt(ppoints(n) * (1 - ppoints(n))/n)
+    se <- (1/dnorm(tq)) * sqrt(ppoints(n) * (1 - ppoints(n))/n)
     zcrit <- qnorm(1 - alpha/2)
     upper <- tq + zcrit * se
     lower <- tq - zcrit * se
