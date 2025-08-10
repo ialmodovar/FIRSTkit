@@ -2,9 +2,13 @@ logo2 <- dataURI(file = "inst/app/www/firstkit-logo-final.png", mime = "image/pn
 
 intro_ui <- tabPanel("Welcome",
                      fluidPage(
-                       titlePanel("FIRST Impressions R-based Statistics Toolkit (FIRSTkit)"),
+                       titlePanel(HTML(paste0(
+                         '<div style="display: flex; align-items: center; justify-content: center; margin-top: 20px;">',
+                         '<img src="', logo2, '" height="150" style="margin-top: 20px; margin-bottom: 20px;">',
+                         '</div>'
+                       ))),#"FIRST Impressions R-based Statistics Toolkit (FIRSTkit)"),
                        withMathJax(),
-                       h4("Introduction"),
+                       tags$h4(tags$strong("Introduction")),
                        p("FIRSTkit is a companion for introductory statistics courses requiring no prior R knowledge."), 
                        p("It enables statistical analysis with minimal programming and helps students grasp fundamental concepts interactively."),
                        p(HTML("FIRSTkit is licensed under the <a href='https://www.gnu.org/licenses/gpl-3.0.txt'>GNU General Public License v3.0</a>.")),
@@ -14,8 +18,7 @@ intro_ui <- tabPanel("Welcome",
                          '<img src="', logo2, '" style="height: 200px;">',
                          '</div>'
                        )),
-                       
-                       h4("Modules Covered"),
+                       tags$h4(tags$strong("Topics")),
                        tags$ul(
                          tags$li("Descriptive Statistics"),
                          tags$li("Probability Theory"),
@@ -24,23 +27,23 @@ intro_ui <- tabPanel("Welcome",
                          tags$li("Linear Regression")
                        ),
 
-                       h4("Data Input/Upload"),
+                       tags$h4(tags$strong("Data Input/Upload")),
                        p("User can input their own datasets. Supports .csv, .txt, .xls, .xlsx, .ods, and Google Sheets. Missing values are removed from the calculations."),
 
-                       h4("Descriptive Statistics"),
+                       tags$h4(tags$strong("Descriptive Statistics")),
                        tags$ul(
                          tags$li("Location Measurements: Mean, Trimmed Mean, Median, Geometric Mean"),
                          tags$li("Dispersion Measures: Standard Deviation, Variance, IQR, MAD, Range"),
                          tags$li("Visualizations: Boxplot, Histograms, Density plots and Bar Graph")
                        ),
 
-                       h4("Probability Theory and Distribution Functions"),
+                       tags$h4(tags$strong("Probability Theory and Distributions Functions")),
                        tags$ul(
                          tags$li("Displaying Venn Diagram"),
                          tags$li("Conditional Probability with Bayes Tree")
                        ),
 
-                       h4("Discrete Distributions"),
+                       tags$h4(tags$strong("Discrete Distributions")),
                        tags$ul(
                          tags$li("Binomial Distribution"),
                          tags$li("Poisson Distribution"),
@@ -48,7 +51,7 @@ intro_ui <- tabPanel("Welcome",
                          tags$li("Hypergeometric Distribution")
                        ),
 
-                       h4("Continuous Distributions"),
+                       tags$h4(tags$strong("Continuous Distributions")),
                        tags$ul(
                          withMathJax(),
                          tags$li("Normal Distribution"),
@@ -57,7 +60,7 @@ intro_ui <- tabPanel("Welcome",
                          tags$li("Snedecor's \\(F\\) Distribution")
                        ),
 
-                       h4("Inferential Statistics"),
+                       tags$h4(tags$strong("Inferential Statistics")),
                        tags$ul(
                          withMathJax(),
                          tags$li("One-Sample Tests: \\(t\\)-test, Wilcoxon, Chi-squared test for variance, Proportion test"),
@@ -65,11 +68,12 @@ intro_ui <- tabPanel("Welcome",
                          tags$li("Three or More Samples: ANOVA, Kruskal-Wallis, Multiple Comparison")
                        ),
 
-                       h4("Linear Regression"),
+                       tags$h4(tags$strong("Linear Regression")),
                        p("Fit a linear regression models. The model assumes normally distributed residuals with constant variance:"),
                        uiOutput("regression_equation"),
+                       p("Model summary, diagnostics of assumptions and outlier detection."),
                       
-                       h4("Authors:"),
+                       tags$h4(tags$strong("Author")),
                        p("Israel A. Almodóvar-Rivera, PhD"),
                        p("email: ", tags$a(href = "mailto:israel.almodovar@upr.edu", "israel.almodovar@upr.edu")),
                        p("Ranjan Maitra, PhD"),

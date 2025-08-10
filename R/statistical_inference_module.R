@@ -428,7 +428,7 @@ stats_inference_ui <- navbarMenu("Statistical Inference",
                                               sidebarPanel(
                                                 withMathJax(),
                                                 uiOutput("var_select_two_sample_ui"),
-                                                h4("Two sample details"),
+                                                h4("Two sample settings"),
                                                 checkboxInput("paired", "Paired samples", value = FALSE),
                                                 checkboxInput("equal_var", "Only for \\(t\\)-test: Equal variance \\( (\\sigma^2_1 = \\sigma^2_2) \\)", value = FALSE),
                                                 sliderInput("alpha", "Significance level \\(\\alpha\\)",
