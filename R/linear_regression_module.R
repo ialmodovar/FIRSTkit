@@ -180,7 +180,10 @@ linear_regression_server <- function(input, output, session,firstkit.data) {
     df <- data.frame(
       Statistic = c("R-squared", "Adjusted R-squared", "AIC","BIC","Mean Sq"),
       Value = c(rsq, adj_rsq,AIC(model),BIC(model), mse),check.names = FALSE)
+    
     colnames(df)[2] <- ""
+    
+    df
     
   },digits=4)
   
