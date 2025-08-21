@@ -124,6 +124,7 @@ FIRSTkit()
 
 ## Authors:
 Israel Almodóvar-Rivera and Ranjan Maitra
+
 University of Puerto Rico and Iowa State University
 
 If you have any questions or comments, we prefer that you open an [issue](https://github.com/ialmodovar/FIRSTkit/issues). 
