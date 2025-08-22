@@ -16,20 +16,27 @@ mcode <- function(tinput) {
   df <- tryCatch(read.csv(text = tinput, header = TRUE), error = function(e) NULL)
   if (is.null(df)) return("Invalid manual input.")
   
-  code_parts <- lapply(names(df), function(col) {
+  code.lines <- lapply(names(df), function(col) {
     values <- paste(df[[col]], collapse = ", ")
     paste0(col, " = c(", values, ")")
   })
   
-  paste0("mydata <- data.frame(", paste(code_parts, collapse = ", "), ")")
+  paste0("mydata <- data.frame(", paste(code.lines, collapse = ", "), ")")
 }
 
+dd <- data(package = "datasets")
+dnames <- dd$results[,"Item"]
+dnames <- sub(" \\(.*", "", dnames)
 
 data_ui <- tabPanel("Data",
          sidebarLayout(
            sidebarPanel(
-             radioButtons("upload_method", "Select Data Input Method:",
-                          choices = c("Upload File" = "file", "Google Sheets" = "gsheet", "Manual Entry" = "manual")),
+              radioButtons("upload_method", "Select Data Input Method:",
+                           choices = c("R datasets" = "rdata","Upload File" = "file", "Google Sheets" = "gsheet", "Manual Entry" = "manual")),
+              conditionalPanel(
+              condition="input.upload_method =='rdata'",
+               selectInput("rdatasets", "Choose Dataset:", choices = dnames),
+             ),
              conditionalPanel(
                condition = "input.upload_method == 'file'",
                fileInput("file1", "Choose file", accept = c(".csv", ".xlsx", ".xls", ".ods"))
@@ -100,7 +107,25 @@ data_server <- function(input, output, session) {
       }, error = function(e) {
         showNotification("Error reading manual input.", type = "error")
       })
-    }
+    } 
+    
+  })
+  
+  observeEvent(input$rdatasets, {
+    req(input$upload_method == "rdata", input$rdatasets)
+    tryCatch({
+      df <- get(input$rdatasets, "package:datasets")
+      
+      if (is.vector(df) || is.ts(df)) {
+        df <- data.frame(x = as.numeric(df))
+      } else if (is.matrix(df) || is.table(df)) {
+        df <- as.data.frame(df)
+      }
+      
+      firstkit.data(df)
+    }, error = function(e) {
+      showNotification("Error loading R dataset.", type = "error")
+    })
   })
   
   
@@ -143,18 +168,6 @@ data_server <- function(input, output, session) {
   output$code <- renderText({
     req(input$upload_method)
     
-    # mcode <- function(tinput) {
-    #   df <- tryCatch(read.csv(text = tinput, header = TRUE), error = function(e) NULL)
-    #   if (is.null(df)) return("Invalid manual input.")
-    #   
-    #   cparts <- lapply(names(df), function(col) {
-    #     values <- paste(df[[col]], collapse = ", ")
-    #     paste0(col, " = c(", values, ")")
-    #   })
-    #   
-    #   paste0("mydata <- data.frame(", paste(cparts, collapse = ", "), ")")
-    # }
-    
     code <- switch(input$upload_method,
                    file = {
                      if (!is.null(input$file1)) {
@@ -183,12 +196,14 @@ data_server <- function(input, output, session) {
                      } else {
                        "No manual text provided."
                      }
+                   },
+                   rdata = {
+                     paste0("mydata <- ",input$rdatasets)
                    }
     )
     
-    return(code)
+    code
   })
-  
   
   return(firstkit.data)  
 }
