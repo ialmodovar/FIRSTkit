@@ -20,7 +20,7 @@
 --->
 ## Introduction 
 
-We have all seen the increasing importance of statistical literacy in almost all disciplines. Consequently, there is need for teaching statistics as an introductory core course. Modern statistics is best learnt and done with the aid of computational devices, so an essential part of any statistics course is the use of statistical software. Perhaps the most popular open source statistical software is the   [**R**](https://www.r-project.org/) project. However, **R** is challenging, especially for individuals who do not have experience or just do not have the time or need to learn coding or a programming language. An example of such users is provided by students in an introductory statistics class. [**FIRSTkit**](https://github.com/ialmodovar/FIRSTkit) was created with this user in mind. Under the hood, **FIRSTkit** is a Shiny app created to serve as a free companion to the teaching of introductory courses, requiring no programming knowledge. An added benefit is that students and users in the applied disciplines can utilize the software as needed, later on. **FIRSTkit** is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.txt).
+We have all seen the increasing importance of statistical literacy in almost all disciplines. Consequently, there is a need for teaching statistics as an introductory core course. Modern statistics is best learned and done with the aid of computational devices, so an essential part of any statistics course is the use of statistical software. Perhaps the most popular open-source statistical software is the   [**R**](https://www.r-project.org/) project. However, **R** is challenging, especially for individuals who do not have experience or just do not have the time or need to learn coding or a programming language. An example of such users is provided by students in an introductory statistics class. [**FIRSTkit**](https://github.com/ialmodovar/FIRSTkit) was created with this user in mind. Under the hood, **FIRSTkit** is a Shiny app created to serve as a free companion to the teaching of introductory courses, requiring no programming knowledge. An added benefit is that students and users in the applied disciplines can utilize the software as needed, later on. **FIRSTkit** is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.txt).
 <!---
 <div class="watermark">![](inst/app/www/firstkit-logo-final.png)</div>
 --->
@@ -63,7 +63,7 @@ We have all seen the increasing importance of statistical literacy in almost all
 
   + One-Sample Inference 
     + One-Sample $t$-test for a population mean
-    + Wilcoxon signed-rank test an location parameter
+    + Wilcoxon signed-rank test for a location parameter
     + One-Sample $\chi^2$ Test for the Population Variance 
     + One-Sample proportion test
   + Two-Sample Inference
@@ -96,7 +96,7 @@ You can access **FIRSTkit** on the shinyapps.io, [https://ialmodovar.shinyapps.i
 
 ## Installation as an R package
 
-**FIRSTkit** is designed to be run from the browser and hosted on an institutional Shiny server, so that students and users do not need any form of installation. 
+**FIRSTkit** is designed to run in the browser and be hosted on an institutional Shiny server, so that students and users do not need any installation. 
 
 However, the software can also be installed as an R package. You can install it directly from GitHub via the *devtools* package:
 
@@ -111,6 +111,14 @@ If you download the source code, you can install it
 library("devtools")
 install_local("/path/to/FIRSTkit")
 ```
+
+Note: The install_github() was deprecated in devtools 2.5.0.  You can install it directly from GitHub via the *devtools* package:
+
+```R
+library("pak")
+pak("ialmodovar/FIRSTkit")
+```
+
 
 Once the package is installed, you can open *FIRSTkit*
 
