@@ -824,6 +824,7 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
     
     list(x = x, y = y, group_labels = levels_group)
   })
+  
   output$twomean <- renderUI({
     data <- two.vars()
     req(data$x, data$y)
@@ -912,7 +913,6 @@ stats_inference_server <- function(input, output, session, firstkit.data) {
       )
     )
   })
-  
   
   ## -----
   ##*********
@@ -1076,7 +1076,6 @@ one.sample.var.test <- function(x,sigma0=1,conf.level=0.95,alternative="two.side
     
     vars <- input$num.vars
     alpha <- as.numeric(input$alpha)
-    
     
     if (is.null(vars) || length(vars) == 0) {
       p <- as.numeric(input$p_prop)

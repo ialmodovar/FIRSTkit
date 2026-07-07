@@ -23,7 +23,7 @@ descriptive_stats_ui <- tabPanel("Descriptive Statistics",
                           sidebarLayout(
                             sidebarPanel(
                               withMathJax(),
-                              uiOutput("var_select_ui"),
+                              uiOutput("var_ui"),
                               checkboxGroupInput("location_stats", "Location Statistics:",
                                                  choices = c("Sample mean (\\(\\bar{x}\\))" = "mean", "Sample median (\\( M \\))" = "median", "Sample geometric mean  (\\(g \\))" = "geo.mean","Truncated sample mean ( \\( \\tilde{x} \\))" = "tmean")),
                               conditionalPanel("input.location_stats.indexOf('tmean') >= 0",
@@ -61,7 +61,7 @@ descriptive_stats_ui <- tabPanel("Descriptive Statistics",
 descriptive_stats_server <- function(input, output, session,firstkit.data) {
   
   
-  output$var_select_ui <- renderUI({
+  output$var_ui <- renderUI({
     df <- firstkit.data()
     if (is.null(df)) return(NULL)
     varnames <- names(df)
