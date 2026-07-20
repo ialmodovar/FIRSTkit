@@ -40,7 +40,7 @@ intro_ui <- tabPanel("Welcome",
                        
                        tags$h4(tags$strong("Probability Theory")),
                        tags$ul(
-                         tags$li("Displaying Venn Diagram"),
+                         tags$li("Venn Diagrams"),
                          tags$li("Conditional Probability with Bayes Tree"),
                          tags$li("Probability Distributions Functions"),
                        ),
@@ -66,7 +66,7 @@ intro_ui <- tabPanel("Welcome",
                        tags$ul(
                          withMathJax(),
                          tags$li("One-Sample Inference: \\(t\\)-test, Wilcoxon, Chi-squared test for variance, Proportion test"),
-                         tags$li("Two-Sample Inference: Independent & Paired \\(t\\)-tests, Wilcoxon-Mann-Whitney, \\(F\\)-test, Proportion test"),
+                         tags$li("Two-Sample Inference: Independent and Paired \\(t\\)-tests, Wilcoxon-Mann-Whitney, \\(F\\)-test, Proportion test"),
                          tags$li("Three or More Inference: ANOVA, Kruskal-Wallis, Multiple Comparison")
                        ),
                        

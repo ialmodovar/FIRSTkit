@@ -142,6 +142,28 @@ probability_ui <- navbarMenu("Probability Theory",
                       sidebarPanel(
                         numericInput("sets", "Number of Sets", value = 1, min = 1, max = 7),
                         textInput("notation", "Insert Case", value = "A"),
+                        checkboxInput("addProb","Add probabilities?",value=FALSE),
+                        
+                        conditionalPanel(
+                          condition="input.addProb == true",
+                          numericInput("pA",HTML("\\(P(A)\\)"),0.35,min=0,max=1,step=0.01),
+                          
+                          conditionalPanel(
+                            condition="input.sets == 2",
+                            numericInput("pB",HTML("\\(P(B)\\)"),0.45,min=0,max=1,step=0.01),
+                            numericInput("pAB2",HTML("\\(P(A\\cap B)\\)"),0.15,min=0,max=1,step=0.01)
+                          ),
+                          
+                          conditionalPanel(
+                            condition="input.sets == 3",
+                            numericInput("pB",HTML("\\(P(B)\\)"),0.45,min=0,max=1,step=0.01),
+                            numericInput("pC",HTML("\\(P(C)\\)"),0.30,min=0,max=1,step=0.01),
+                            numericInput("pAB",HTML("\\(P(A\\cap B)\\)"),0.15,min=0,max=1,step=0.01),
+                            numericInput("pAC",HTML("\\(P(A\\cap C)\\)"),0.10,min=0,max=1,step=0.01),
+                            numericInput("pBC",HTML("\\(P(B\\cap C)\\)"),0.05,min=0,max=1,step=0.01),
+                            numericInput("pABC",HTML("\\(P(A\\cap B\\cap C)\\)"),0.05,min=0,max=1,step=0.01)
+                          )
+                        ),
                         actionButton("venn_submit", "Submit")
                       ),
                       mainPanel(plotOutput("vennPlot", height = "500px", width = "500px"))
@@ -611,12 +633,77 @@ probability_ui <- navbarMenu("Probability Theory",
 probability_server <- function(input, output, session) {
 
 
-output$vennPlot <- renderPlot({
-  req(input$notation)
-  nsets <- max(1, input$sets)
-  venn(input$notation, snames = LETTERS[1:nsets], sncs = 2)
-})
+# output$vennPlot <- renderPlot({
+#   req(input$notation)
+#   nsets <- max(1, input$sets)
+#   venn(input$notation, snames = LETTERS[1:nsets], sncs = 2)
+# })
 
+  output$vennPlot <- renderPlot({
+    
+    req(input$venn_submit)
+    nsets <- max(1,input$sets)
+    
+    if(!input$addProb){
+      venn(input$notation,snames=LETTERS[1:nsets],sncs=2,cex=1.2)
+    } else {
+      venn(input$notation,snames=LETTERS[1:nsets],sncs=2,zcolor="white",cex=1.2)  
+    }
+    
+    if(input$addProb){
+      if(nsets==1){
+        pA <- input$pA
+        pS <- 1-pA
+        text(500,500,round(pA,3),cex = 1.5)
+        text(800,800,round(pS,3),cex = 1.5)
+        
+      }
+      if(nsets==2){
+        
+        pAB <- input$pAB2
+        pA <- input$pA-pAB
+        pB <- input$pB-pAB
+        pS <- 1-(pA+pB+pAB)
+        
+        text(200,500,round(pA,3),cex = 1.5)
+        text(500,500,round(pAB,3),cex = 1.5)
+        text(800,500,round(pB,3),cex = 1.5)
+        text(900,850,round(pS,3),cex = 1.5)
+        
+      }
+      
+      if(nsets==3){
+        
+        pA <- input$pA
+        pB <- input$pB
+        pC <- input$pC
+        
+        pAB <- input$pAB
+        pAC <- input$pAC
+        pBC <- input$pBC
+        pABC <- input$pABC
+        
+        pArc <- pA-pAB-pAC+pABC
+        pBrc <- pB-pAB-pBC+pABC
+        pCrc <- pC-pAC-pBC+pABC
+        
+        pS <- 1-(pArc+pBrc+pCrc+(pAB-pABC)+(pAC-pABC)+(pBC-pABC)+pABC)
+        
+        text(200,400,round(pArc,3),cex = 1.5)
+        text(500,750,round(pBrc,3),cex = 1.5)
+        text(800,400,round(pCrc,3),cex = 1.5)
+        text(325,550,round(pAB-pABC,3),cex = 1.5)
+        text(500,300,round(pAC-pABC,3),cex = 1.5)
+        text(650,550,round(pBC-pABC,3),cex = 1.5)
+        text(500,475,round(pABC,3),cex=1.5)
+        text(800,870,round(pS,3),cex = 1.5)
+        
+      }
+    }
+    
+  })
+  
+  
 output$diagram <- renderUI({
   graph <- bayes_probability_tree(prior = input$prior, sensitivity = input$tp, specificity = input$tn)
   print(render_graph(graph))
